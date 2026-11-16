@@ -1,0 +1,3419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hidayat Project — Sistem Pelaporan Perbaikan & Instalasi Refractory</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    .report-sheet {
+      background: #ffffff;
+      color: #000000;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+    }
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .pdf-table th, .pdf-table td {
+      border: 1px solid #000000;
+      padding: 4px 6px;
+    }
+    .pdf-table th {
+      background-color: #f8fafc;
+      font-weight: 700;
+      text-align: center;
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+      }
+      .report-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .page-break-before {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER BAR -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 no-print shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-inner font-extrabold text-lg tracking-wider">
+          HP
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">HIDAYAT PROJECT</h1>
+            <span class="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">Refractory Pro v2.5</span>
+          </div>
+          <p class="text-xs text-slate-400">Aplikasi Pelaporan Jasa Perbaikan &amp; Instalasi Refractory — PT. RGD &amp; PT. Valmet</p>
+        </div>
+      </div>
+
+      <!-- ACTION TOOLBAR -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" onclick="openOcrModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span>Scan OCR Kamera</span>
+        </button>
+
+        <button type="button" onclick="switchTab('preview')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Pratinjau &amp; Cetak PDF</span>
+        </button>
+
+        <button type="button" onclick="saveAllToStorage(true)" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="save" class="w-4 h-4 text-orange-400"></i>
+          <span>Simpan Data</span>
+        </button>
+
+        <div class="relative">
+          <button type="button" onclick="toggleDataMenu()" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Backup / Reset</span>
+          </button>
+          <div id="dataDropdownMenu" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 text-slate-700 z-50 text-xs">
+            <button type="button" onclick="exportJsonBackup()" class="w-full px-3.5 py-2 text-left hover:bg-slate-100 flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4 text-blue-600"></i>
+              <span>Export Backup (.json)</span>
+            </button>
+            <label class="w-full px-3.5 py-2 text-left hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4 text-emerald-600"></i>
+              <span>Import Backup (.json)</span>
+              <input type="file" id="importJsonInput" accept=".json" class="hidden" onchange="importJsonBackup(event)" />
+            </label>
+            <div class="my-1 border-t border-slate-200"></div>
+            <button type="button" onclick="openResetConfirmModal()" class="w-full px-3.5 py-2 text-left hover:bg-red-50 text-red-600 flex items-center gap-2 font-medium">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              <span>Reset ke Data Contoh PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="bg-slate-800/90 border-t border-slate-700/80">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-1 overflow-x-auto custom-scrollbar py-1.5">
+        <button type="button" id="tabBtn-daily" onclick="switchTab('daily')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>1. Daily Report Harian</span>
+        </button>
+        <button type="button" id="tabBtn-material" onclick="switchTab('material')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="package-check" class="w-4 h-4"></i>
+          <span>2. Daily Report Material</span>
+        </button>
+        <button type="button" id="tabBtn-castable" onclick="switchTab('castable')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>3. Report Installed Castable</span>
+        </button>
+        <button type="button" id="tabBtn-mixing" onclick="switchTab('mixing')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          <span>4. Mixing Report</span>
+        </button>
+        <button type="button" id="tabBtn-preview" onclick="switchTab('preview')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>5. Dokumen PDF Akhir (4 Format)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5">
+
+    <!-- SUMMARY KPI BANNER (NO-PRINT) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5 no-print">
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase text-slate-400">Total Personil (Daily)</p>
+          <p id="kpiTotalMp" class="text-xl font-extrabold text-slate-800 mt-0.5">49 Persons</p>
+          <p id="kpiDailyProgress" class="text-[11px] text-emerald-600 font-medium">2 Aktivitas Tercatat</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase text-slate-400">Item Material Gudang</p>
+          <p id="kpiTotalMaterial" class="text-xl font-extrabold text-slate-800 mt-0.5">15 Material</p>
+          <p id="kpiMaterialUsed" class="text-[11px] text-blue-600 font-medium">Terpantau Harian (Day 1-8)</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <i data-lucide="boxes" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase text-slate-400">Batch Installed Castable</p>
+          <p id="kpiCastableBatches" class="text-xl font-extrabold text-slate-800 mt-0.5">14 Batch</p>
+          <p id="kpiCastableMethod" class="text-[11px] text-purple-600 font-medium">Metode: VibraCasting</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+          <i data-lucide="hammer" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase text-slate-400">Log Mixing &amp; Rasio Air</p>
+          <p id="kpiMixingCount" class="text-xl font-extrabold text-slate-800 mt-0.5">5 Log Mixing</p>
+          <p id="kpiAvgWaterRatio" class="text-[11px] text-emerald-600 font-medium">Rata-rata Air: 11.2%</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <i data-lucide="droplets" class="w-5 h-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 1: DAILY REPORT HARIAN                              -->
+    <!-- ========================================================== -->
+    <section id="section-daily" class="space-y-5 no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="text-base font-bold">1. Form Daily Report Harian</h2>
+              <p class="text-xs text-slate-300">Aktivitas Pekerjaan, Personil &amp; Jabatan, Persentase Aktivitas, Foto &amp; Otorisasi TTD</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openOcrModal('daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+              <span>Scan OCR ke Daily Report</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Lihat Hasil PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-6">
+          <!-- Informasi Umum Project -->
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
+              <i data-lucide="info" class="w-4 h-4 text-orange-500"></i>
+              <span>Informasi Dokumen &amp; Project</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">No. Report</label>
+                <input type="text" id="dr_no" oninput="updateDailyField('no', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Project</label>
+                <input type="text" id="dr_projectName" oninput="updateDailyField('projectName', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Customer</label>
+                <input type="text" id="dr_customer" oninput="updateDailyField('customer', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Sub. Cont (Kontraktor Pelaksana)</label>
+                <input type="text" id="dr_subCont" oninput="updateDailyField('subCont', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Report Dibuat</label>
+                <input type="date" id="dr_date" onchange="updateDailyField('date', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Tampilan Hari/Tanggal (Cetak)</label>
+                <input type="text" id="dr_dateFormatted" oninput="updateDailyField('dateFormatted', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Shift Kerja</label>
+                <select id="dr_shift" onchange="updateDailyField('shift', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500">
+                  <option value="1">Shift 1 (Pagi/Siang)</option>
+                  <option value="2">Shift 2 (Malam)</option>
+                  <option value="1 & 2">Shift 1 &amp; 2 (24 Jam)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Kerja (TIME)</label>
+                <input type="text" id="dr_timeRange" oninput="updateDailyField('timeRange', this.value)" placeholder="07.00 - 19.00" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid 2 Kolom: Personil/Jabatan & Aktivitas Pekerjaan -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2 border-t border-slate-200">
+            <!-- Rincian Personil & Jabatan (5 Kolom) -->
+            <div class="lg:col-span-5 bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="users" class="w-4 h-4 text-orange-600"></i>
+                    <span>Jumlah &amp; Jabatan Personil (Manpower)</span>
+                  </h3>
+                  <p class="text-[11px] text-slate-500">Otomatis menjumlahkan Total MP</p>
+                </div>
+                <button type="button" onclick="addPersonnelRole()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-orange-600 hover:bg-orange-500 text-white transition">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Jabatan</span>
+                </button>
+              </div>
+
+              <div class="space-y-2" id="dr_personnelList"></div>
+
+              <div class="mt-4 pt-3 border-t border-slate-300 flex items-center justify-between bg-slate-900 text-white px-3.5 py-2.5 rounded-lg">
+                <span class="text-xs font-bold uppercase tracking-wider">Total Manpower (Total MP)</span>
+                <span id="dr_totalMpBadge" class="text-base font-extrabold text-orange-400">49 Persons</span>
+              </div>
+            </div>
+
+            <!-- Aktivitas Pekerjaan & Persentase (7 Kolom) -->
+            <div class="lg:col-span-7 bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                      <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
+                      <span>Daftar Aktivitas Pekerjaan &amp; Persentase (%)</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Work Description / Material-Product Installed &amp; Capaian</p>
+                  </div>
+                  <button type="button" onclick="addDailyActivity()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah Aktivitas</span>
+                  </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs border-collapse">
+                    <thead>
+                      <tr class="bg-slate-200/80 text-slate-700">
+                        <th class="py-2 px-2 text-center w-10 rounded-tl-lg">No</th>
+                        <th class="py-2 px-2 text-left">Aktivitas Pekerjaan (Work Description)</th>
+                        <th class="py-2 px-2 text-center w-28">Persentase</th>
+                        <th class="py-2 px-2 text-center w-16">Unit</th>
+                        <th class="py-2 px-2 text-center w-10 rounded-tr-lg">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dr_activitiesBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Dokumentasi Photo Aktivitas -->
+              <div class="mt-4 pt-4 border-t border-slate-200">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="image" class="w-4 h-4 text-blue-600"></i>
+                    <span>Photo Aktivitas Harian (Ditampilkan di Kolom Photo Aktivitas)</span>
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <label class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition">
+                      <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                      <span>Upload / Kamera Foto</span>
+                      <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadDailyPhoto(event)" />
+                    </label>
+                    <button type="button" onclick="generateSampleDailyPhoto()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                      <span>+ Foto Contoh Lapangan</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="dr_photosGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tanda Tangan & Verifikasi Daily Report -->
+          <div class="pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Di Check / Review Oleh -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Di-Check / Review Oleh (Checked by)</span>
+                <button type="button" onclick="openSignatureModal('daily_checked')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <input type="text" id="dr_checkedBy" oninput="updateDailyField('checkedBy', this.value)" placeholder="Nama Pemeriksa / Supervisor" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 mb-3 bg-white" />
+              <div onclick="openSignatureModal('daily_checked')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_daily_checked" src="" alt="TTD Checked By" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_daily_checked" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk menandatangani (Checked by)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dibuat / Dilaporkan Oleh -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Dibuat / Dilaporkan Oleh (Reported by)</span>
+                <button type="button" onclick="openSignatureModal('daily_reported')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <input type="text" id="dr_reportedBy" oninput="updateDailyField('reportedBy', this.value)" placeholder="Nama Pelapor" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 mb-3 bg-white" />
+              <div onclick="openSignatureModal('daily_reported')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_daily_reported" src="" alt="TTD Reported By" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_daily_reported" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk menandatangani (Reported by)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 2: DAILY REPORT MATERIAL (RESUME MATERIAL)          -->
+    <!-- ========================================================== -->
+    <section id="section-material" class="space-y-5 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              <i data-lucide="package-check" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="text-base font-bold">2. Form Daily Report Material (Resume Material)</h2>
+              <p class="text-xs text-slate-300">Stok Awal Gudang, Log Pemakaian Harian (Day 1–Day 8), Total Terinstal, Sisa Stok Akhir &amp; Verifikasi TTD User</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openOcrModal('material')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+              <span>Scan OCR Material</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('material')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Lihat Hasil PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-6">
+          <!-- Metadata Material Report -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Pekerjaan / Project</label>
+              <input type="text" id="mr_projectTitle" oninput="updateMaterialMeta('projectTitle', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Unit &amp; Nama Customer</label>
+              <input type="text" id="mr_customerTitle" oninput="updateMaterialMeta('customerTitle', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Lokasi &amp; Tgl Verifikasi User</label>
+              <div class="flex gap-2">
+                <input type="text" id="mr_verifyPlace" oninput="updateMaterialMeta('verifyPlace', this.value)" placeholder="Babelan" class="w-1/2 px-3 py-2 text-sm rounded-lg border border-slate-300" />
+                <input type="date" id="mr_verifyDate" onchange="updateMaterialMeta('verifyDate', this.value)" class="w-1/2 px-2.5 py-2 text-sm rounded-lg border border-slate-300" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Diverifikasi Oleh (User / Client)</label>
+              <input type="text" id="mr_verifiedByUser" oninput="updateMaterialMeta('verifiedByUser', this.value)" placeholder="PT. VALMET" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+          </div>
+
+          <!-- Pengaturan Tanggal Pemakaian Harian (Day 1 - Day 8) -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase text-slate-600 flex items-center gap-1.5">
+                <i data-lucide="calendar-days" class="w-4 h-4 text-blue-600"></i>
+                <span>Tanggal Pemakaian Harian (Day 1 s/d Day 8)</span>
+              </span>
+              <span class="text-[11px] text-slate-500">Total Pemakaian &amp; Sisa Stok Akhir dihitung otomatis dari input harian</span>
+            </div>
+            <div id="mr_dayDatesRow" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2"></div>
+          </div>
+
+          <!-- Tabel Material -->
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Daftar Material Refractory &amp; Pemakaian</h3>
+                <input type="text" id="mr_searchInput" oninput="renderMaterialTable()" placeholder="Cari nama material..." class="px-3 py-1.5 text-xs rounded-lg border border-slate-300 w-48 sm:w-64" />
+              </div>
+              <button type="button" onclick="addMaterialRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah Baris Material</span>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
+              <table class="w-full text-xs border-collapse min-w-[1050px]">
+                <thead>
+                  <tr class="bg-slate-800 text-white">
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-9 text-center">No</th>
+                    <th rowspan="2" class="py-2 px-3 border border-slate-700 text-left min-w-[210px]">Nama Material Yang Digunakan</th>
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-20 text-center">Satuan</th>
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-24 text-center bg-slate-900">Stock Awal Gudang</th>
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-24 text-center bg-blue-950 text-blue-200">Total Pemakaian</th>
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-24 text-center bg-emerald-950 text-emerald-200">Sisa / Stok Akhir</th>
+                    <th colspan="8" class="py-1.5 px-2 border border-slate-700 text-center bg-slate-700">Log Tanggal Pemakaian Harian</th>
+                    <th rowspan="2" class="py-2 px-2 border border-slate-700 w-10 text-center">Hapus</th>
+                  </tr>
+                  <tr id="mr_tableHeaderDays" class="bg-slate-700 text-slate-200 text-[11px]"></tr>
+                </thead>
+                <tbody id="mr_tableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TTD Verifikasi User -->
+          <div class="pt-4 border-t border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border">
+            <div class="space-y-1 max-w-lg">
+              <h4 class="text-xs font-bold uppercase text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+                <span>Verifikasi &amp; Tanda Tangan User (Mengetahui Customer)</span>
+              </h4>
+              <p class="text-xs text-slate-500">Sesuai format laporan Resume Material, dokumen ini diverifikasi dan ditandatangani oleh perwakilan User (<span id="mr_verifyLabelUser" class="font-semibold text-slate-700">PT. VALMET</span>) pada tanggal yang ditetapkan.</p>
+            </div>
+            <div class="w-full md:w-80">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-semibold text-slate-700">TTD Digital User / Customer</span>
+                <button type="button" onclick="openSignatureModal('material_user')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>TTD User</span>
+                </button>
+              </div>
+              <div onclick="openSignatureModal('material_user')" class="h-24 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_material_user" src="" alt="TTD User Material" class="max-h-20 object-contain hidden" />
+                <div id="sigEmpty_material_user" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-5 h-5 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk TTD User (<span id="mr_verifySubLabel">PT. VALMET</span>)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 3: REPORT INSTALLED CASTABLE                        -->
+    <!-- ========================================================== -->
+    <section id="section-castable" class="space-y-5 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <i data-lucide="layers" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="text-base font-bold">3. Report Installed Castable (Record of Refractory Installation by Casting)</h2>
+              <p class="text-xs text-slate-300">Sketch Area Kerja, Parameter Batch Castable, Metode Instalasi (VibraCasting, Handpack, Ramming, Gunning) &amp; Foto Before/Process/After</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openOcrModal('castable')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+              <span>Scan OCR Batch Castable</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('castable')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Lihat Hasil PDF (2 Hal)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-6">
+          <!-- Metadata Header Installed Castable -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">No. Report (Report No.)</label>
+              <input type="text" id="ic_reportNo" oninput="updateCastableMeta('reportNo', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Page Report</label>
+                <input type="text" id="ic_pageNo" oninput="updateCastableMeta('pageNo', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Rev No.</label>
+                <input type="text" id="ic_revNo" oninput="updateCastableMeta('revNo', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Tgl Report Dibuat (Date)</label>
+              <input type="date" id="ic_date" onchange="updateCastableMeta('date', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Shift (Isi I &amp; II)</label>
+              <select id="ic_shift" onchange="updateCastableMeta('shift', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                <option value="Shift I">Shift I</option>
+                <option value="Shift II">Shift II</option>
+                <option value="Shift I & II">Shift I &amp; II</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Project Description</label>
+              <input type="text" id="ic_projectDesc" oninput="updateCastableMeta('projectDesc', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Customer (Client Details)</label>
+              <input type="text" id="ic_customer" oninput="updateCastableMeta('customer', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Location Kerja</label>
+              <input type="text" id="ic_location" oninput="updateCastableMeta('location', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Metode Isi (Application Method)</label>
+              <select id="ic_method" onchange="updateCastableMeta('applicationMethod', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border-2 border-purple-500 bg-purple-50/40 font-semibold text-purple-900">
+                <option value="VibraCasting">VibraCasting</option>
+                <option value="Handpack">Handpack</option>
+                <option value="Ramming">Ramming</option>
+                <option value="Gunning">Gunning</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Type of Mixer</label>
+              <input type="text" id="ic_mixerType" oninput="updateCastableMeta('mixerType', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Job No.</label>
+              <input type="text" id="ic_jobNo" oninput="updateCastableMeta('jobNo', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Drawing No. / Line No.</label>
+              <input type="text" id="ic_drawingNo" oninput="updateCastableMeta('drawingNo', this.value)" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300" />
+            </div>
+          </div>
+
+          <!-- SKETCH / DRAWING AREA KERJA + BATCH TABLE -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-3 border-t border-slate-200">
+            <!-- Sketch / Drawing Area Kerja (4 Kolom) -->
+            <div class="lg:col-span-4 bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xs font-bold uppercase text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="compass" class="w-4 h-4 text-purple-600"></i>
+                    <span>Sketch / Drawing Area Kerja</span>
+                  </h3>
+                  <span class="text-[11px] px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">Interaktif</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mb-2">Gambar sketsa lokasi pengecoran, tandai titik Feedtube, atau muat gambar teknis Boiler 2.</p>
+
+                <!-- Canvas Toolbar -->
+                <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                  <button type="button" onclick="setSketchTool('pen')" id="sketchBtn_pen" class="px-2 py-1 rounded text-[11px] font-semibold bg-purple-600 text-white">Pena</button>
+                  <button type="button" onclick="setSketchTool('rect')" id="sketchBtn_rect" class="px-2 py-1 rounded text-[11px] font-semibold bg-white border border-slate-300 text-slate-700">Kotak Area</button>
+                  <button type="button" onclick="setSketchTool('mark')" id="sketchBtn_mark" class="px-2 py-1 rounded text-[11px] font-semibold bg-white border border-slate-300 text-slate-700">Pin Batch</button>
+                  <input type="color" id="sketchColorPicker" value="#16a34a" class="w-6 h-6 rounded cursor-pointer border border-slate-300" title="Warna Sketsa" />
+                  <button type="button" onclick="drawBoilerFloorSketch()" class="px-2 py-1 rounded text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-500" title="Muat Sketsa Boiler 2 Floor Furnace">Template Boiler 2</button>
+                  <button type="button" onclick="clearSketchCanvas()" class="px-2 py-1 rounded text-[11px] font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100">Bersihkan</button>
+                </div>
+
+                <div class="bg-white border-2 border-slate-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center">
+                  <canvas id="sketchCanvas" width="340" height="320" class="w-full h-auto cursor-crosshair touch-none"></canvas>
+                </div>
+              </div>
+
+              <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                <label class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer transition">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-purple-600"></i>
+                  <span>Upload Gambar Drawing / CAD</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="uploadSketchImage(event)" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Tabel Batch Instalasi Castable (8 Kolom) -->
+            <div class="lg:col-span-8 flex flex-col">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <div>
+                  <h3 class="text-xs font-bold uppercase text-slate-700">Tabel Parameter Batch Instalasi Castable</h3>
+                  <p class="text-[11px] text-slate-500">Item Number Art Drawing, Material, Batch Manufactured, Berat Kering, Waktu Mix, Air, Suhu, pH, Ketebalan &amp; Hasil</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="syncCastableToMixing()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white transition" title="Salin baris batch ke Mixing Report">
+                    <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                    <span>Kirim ke Mixing Report</span>
+                  </button>
+                  <button type="button" onclick="addCastableBatchRow()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tambah Batch</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl flex-1">
+                <table class="w-full text-[11px] border-collapse min-w-[1020px]">
+                  <thead>
+                    <tr class="bg-slate-800 text-white">
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-10 text-center">Batch</th>
+                      <th rowspan="2" class="py-2 px-2 border border-slate-700 w-24 text-left">Item No. Art Drawing</th>
+                      <th rowspan="2" class="py-2 px-2 border border-slate-700 min-w-[130px] text-left">Material Yang Digunakan</th>
+                      <th rowspan="2" class="py-2 px-2 border border-slate-700 w-28 text-left">Batch No. Manufactured</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-20 text-center">Dry Weight (Kg)</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-16 text-center">Dry Mix (Min)</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-16 text-center">Wet Mix (Min)</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-20 text-center">Add Water (Ltr)</th>
+                      <th colspan="2" class="py-1 px-1.5 border border-slate-700 text-center bg-slate-700">Temperature (°C)</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-16 text-center">PH Water</th>
+                      <th rowspan="2" class="py-2 px-1.5 border border-slate-700 w-20 text-center">Thickness (mm)</th>
+                      <th colspan="2" class="py-1 px-1.5 border border-slate-700 text-center bg-slate-700">Result</th>
+                      <th rowspan="2" class="py-2 px-2 border border-slate-700 min-w-[120px] text-left">Comment / Part No.</th>
+                      <th rowspan="2" class="py-2 px-1 border border-slate-700 w-8 text-center">X</th>
+                    </tr>
+                    <tr class="bg-slate-700 text-slate-200">
+                      <th class="py-1 px-1 border border-slate-600 text-center w-16">Mat (°C)</th>
+                      <th class="py-1 px-1 border border-slate-600 text-center w-16">Water (°C)</th>
+                      <th class="py-1 px-1 border border-slate-600 text-center w-16">Dimensi</th>
+                      <th class="py-1 px-1 border border-slate-600 text-center w-16">Visual</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ic_batchesBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOKUMENTASI FOTO INSTALASI (HALAMAN 2 PDF: BEFORE, PROCESS, AFTER) -->
+          <div class="pt-4 border-t border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <i data-lucide="camera" class="w-4 h-4 text-purple-600"></i>
+                  <span>Dokumentasi Foto Instalasi Refractory (Halaman 2 PDF — Before, Process, After)</span>
+                </h3>
+                <p class="text-[11px] text-slate-500">Unggah foto dari kamera perangkat atau gunakan generator dokumentasi berstempel koordinat &amp; tanggal</p>
+              </div>
+              <button type="button" onclick="populateDefaultCastablePhotos()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Muat 6 Foto Contoh Feedtube</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- BEFORE -->
+              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-slate-700">1. BEFORE INSTALL REFRACTORY</span>
+                  <label class="inline-flex items-center gap-1 px-2 py-1 rounded bg-purple-600 text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500">
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    <span>Foto</span>
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadCastableStagePhoto('before', event)" />
+                  </label>
+                </div>
+                <div id="ic_photos_before" class="grid grid-cols-2 gap-2"></div>
+              </div>
+
+              <!-- PROCESS -->
+              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-slate-700">2. PROCESS INSTALL REFRACTORY</span>
+                  <label class="inline-flex items-center gap-1 px-2 py-1 rounded bg-purple-600 text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500">
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    <span>Foto</span>
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadCastableStagePhoto('process', event)" />
+                  </label>
+                </div>
+                <div id="ic_photos_process" class="grid grid-cols-2 gap-2"></div>
+              </div>
+
+              <!-- AFTER -->
+              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-slate-700">3. AFTER INSTALL REFRACTORY</span>
+                  <label class="inline-flex items-center gap-1 px-2 py-1 rounded bg-purple-600 text-white text-[11px] font-semibold cursor-pointer hover:bg-purple-500">
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    <span>Foto</span>
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadCastableStagePhoto('after', event)" />
+                  </label>
+                </div>
+                <div id="ic_photos_after" class="grid grid-cols-2 gap-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tanda Tangan Prepared By & Reviewed By -->
+          <div class="pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Prepared By -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Prepared By (PT. RGD)</span>
+                <button type="button" onclick="openSignatureModal('castable_prepared')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <div class="grid grid-cols-3 gap-2 mb-3">
+                <input type="text" id="ic_preparedBy" oninput="updateCastableMeta('preparedBy', this.value)" placeholder="Nama Prepared By" class="col-span-2 px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white" />
+                <input type="text" id="ic_preparedCompany" oninput="updateCastableMeta('preparedCompany', this.value)" placeholder="RGD" class="px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white" />
+              </div>
+              <div onclick="openSignatureModal('castable_prepared')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_castable_prepared" src="" alt="TTD Prepared By" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_castable_prepared" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk TTD Prepared By</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviewed / Witnessed By -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Reviewed / Witnessed By (Client)</span>
+                <button type="button" onclick="openSignatureModal('castable_reviewed')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <div class="grid grid-cols-3 gap-2 mb-3">
+                <input type="text" id="ic_reviewedBy" oninput="updateCastableMeta('reviewedBy', this.value)" placeholder="Nama Reviewer / Client" class="col-span-2 px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white" />
+                <input type="text" id="ic_reviewedCompany" oninput="updateCastableMeta('reviewedCompany', this.value)" placeholder="PT. VALMET" class="px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white" />
+              </div>
+              <div onclick="openSignatureModal('castable_reviewed')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_castable_reviewed" src="" alt="TTD Reviewed By" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_castable_reviewed" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk TTD Reviewed By</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 4: MIXING REPORT (MIXING PROCESS)                   -->
+    <!-- ========================================================== -->
+    <section id="section-mixing" class="space-y-5 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="text-base font-bold">4. Form Mixing Report (Mixing Process)</h2>
+              <p class="text-xs text-slate-300">Tanggal, Jam, Material, Waktu Dry/Wet Mix, Qty Castable (Kg), Air (Liter &amp; % otomatis terhadap Castable), pH, Suhu Air &amp; Suhu Ruangan (Ambient)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openOcrModal('mixing')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+              <span>Scan OCR Mixing</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('mixing')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Lihat Hasil PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/70 border border-emerald-200 px-4 py-3 rounded-xl">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="calculator" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+              <p class="text-xs text-emerald-900">
+                <strong>Kalkulator Rasio Air Otomatis:</strong> Kolom <strong>Water (%)</strong> dihitung otomatis dengan rumus <code>(Air Liter / Qty Castable Kg) × 100%</code> setiap kali Anda mengubah jumlah Castable atau Liter Air.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="addMixingRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah Baris Mixing</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabel Mixing Process -->
+          <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
+            <table class="w-full text-xs border-collapse min-w-[980px]">
+              <thead>
+                <tr class="bg-slate-800 text-white">
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-10 text-center">No</th>
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-32 text-center">Tgl Dibuat (Date)</th>
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-24 text-center">Time (Jam)</th>
+                  <th rowspan="2" class="py-2 px-3 border border-slate-700 min-w-[160px] text-left">Nama Material</th>
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-20 text-center">Dry Mix Time (Min)</th>
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-20 text-center">Wet Mix Time (Min)</th>
+                  <th colspan="2" class="py-1.5 px-2 border border-slate-700 text-center bg-slate-700">Castable / Material</th>
+                  <th colspan="3" class="py-1.5 px-2 border border-slate-700 text-center bg-blue-900">Water (Air Pencampur)</th>
+                  <th colspan="2" class="py-1.5 px-2 border border-slate-700 text-center bg-amber-900">Temperature (°C)</th>
+                  <th rowspan="2" class="py-2 px-2 border border-slate-700 w-10 text-center">Hapus</th>
+                </tr>
+                <tr class="bg-slate-700 text-slate-200 text-[11px]">
+                  <th class="py-1 px-2 border border-slate-600 text-center w-24">Qty</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-16">Satuan</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-20 bg-blue-950">Litre (L)</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-24 bg-blue-950 text-blue-200">% thd Qty</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-16 bg-blue-950">PH</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-20 bg-amber-950">Water (°C)</th>
+                  <th class="py-1 px-2 border border-slate-600 text-center w-24 bg-amber-950">Ambient / Ruang (°C)</th>
+                </tr>
+              </thead>
+              <tbody id="mx_tableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+            </table>
+          </div>
+
+          <!-- Tanda Tangan Prepared By & Reviewed By Mixing Report -->
+          <div class="pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Prepared by (Operator / Pelaksana Mixing)</span>
+                <button type="button" onclick="openSignatureModal('mixing_prepared')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <input type="text" id="mx_preparedBy" oninput="updateMixingMeta('preparedBy', this.value)" placeholder="Nama Prepared By" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 mb-3 bg-white" />
+              <div onclick="openSignatureModal('mixing_prepared')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_mixing_prepared" src="" alt="TTD Mixing Prepared" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_mixing_prepared" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk TTD Prepared by</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-600">Review by (QC / Supervisor / Client)</span>
+                <button type="button" onclick="openSignatureModal('mixing_reviewed')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+                  <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                  <span>Gambar TTD Digital</span>
+                </button>
+              </div>
+              <input type="text" id="mx_reviewedBy" oninput="updateMixingMeta('reviewedBy', this.value)" placeholder="Nama Review By" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 mb-3 bg-white" />
+              <div onclick="openSignatureModal('mixing_reviewed')" class="h-28 rounded-lg border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition relative overflow-hidden">
+                <img id="sigPreview_mixing_reviewed" src="" alt="TTD Mixing Reviewed" class="max-h-24 object-contain hidden" />
+                <div id="sigEmpty_mixing_reviewed" class="text-center text-slate-400 text-xs">
+                  <i data-lucide="signature" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+                  <span>Klik untuk TTD Review by</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 5: PRATINJAU & CETAK DOKUMEN PDF AKHIR              -->
+    <!-- ========================================================== -->
+    <section id="section-preview" class="space-y-5 hidden print-only-wrapper">
+      <!-- Kontrol Pilih Dokumen Pratinjau (Disembunyikan saat Print) -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-bold uppercase text-slate-500 mr-2">Pilih Dokumen:</span>
+          <button type="button" id="prevBtn-daily" onclick="setPreviewDoc('daily')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">1. Daily Report.pdf</button>
+          <button type="button" id="prevBtn-material" onclick="setPreviewDoc('material')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">2. Daily Report Material.pdf</button>
+          <button type="button" id="prevBtn-castable" onclick="setPreviewDoc('castable')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">3. Report Installed Castable.pdf</button>
+          <button type="button" id="prevBtn-mixing" onclick="setPreviewDoc('mixing')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">4. Mixing Report.pdf</button>
+          <button type="button" id="prevBtn-all" onclick="setPreviewDoc('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-100 text-orange-800 hover:bg-orange-200">Tampilkan Semua (4 PDF)</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="downloadActivePdf()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow transition">
+            <i data-lucide="file-down" class="w-4 h-4"></i>
+            <span>Download File PDF</span>
+          </button>
+          <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Cetak / Print Langsung</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- AREA RENDER DOKUMEN RESMI (MIRIP PERSIS DENGAN PDF TERLAMPIR) -->
+      <div id="pdfRenderContainer" class="space-y-8 overflow-x-auto pb-8"></div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 1: TANDA TANGAN DIGITAL (DIGITAL SIGNATURE PAD)        -->
+  <!-- ============================================================ -->
+  <div id="signatureModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="pen-tool" class="w-4 h-4 text-orange-400"></i>
+          <h3 id="sigModalTitle" class="text-sm font-bold">Tanda Tangan Digital</h3>
+        </div>
+        <button type="button" onclick="closeSignatureModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-600">Warna Tinta:</span>
+            <button type="button" onclick="setSigPenColor('#0f172a')" class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white ring-2 ring-slate-400"></button>
+            <button type="button" onclick="setSigPenColor('#1d4ed8')" class="w-6 h-6 rounded-full bg-blue-700 border-2 border-white ring-1 ring-slate-300"></button>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Upload Gambar TTD</span>
+              <input type="file" accept="image/*" class="hidden" onchange="uploadSignatureImage(event)" />
+            </label>
+            <button type="button" onclick="generateAutoStampSignature()" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold">
+              TTD Cepat
+            </button>
+          </div>
+        </div>
+
+        <div class="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden relative">
+          <canvas id="signaturePadCanvas" width="460" height="200" class="w-full h-48 cursor-crosshair touch-none bg-white"></canvas>
+          <div class="absolute bottom-2 inset-x-6 border-b border-slate-300 pointer-events-none text-center text-[10px] text-slate-400 pb-0.5">
+            Garis Tanda Tangan Resmi — Hidayat Project
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <button type="button" onclick="clearSignaturePad()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            <i data-lucide="eraser" class="w-4 h-4"></i>
+            <span>Hapus / Ulangi</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeSignatureModal()" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+            <button type="button" onclick="saveSignaturePad()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>Terapkan TTD</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 2: SCAN OCR TERINTEGRASI KAMERA PERANGKAT              -->
+  <!-- ============================================================ -->
+  <div id="ocrModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-3xl w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <h3 class="text-sm font-bold">Scan OCR Kamera Perangkat — Auto-Fill ke Semua Form</h3>
+            <p class="text-[11px] text-slate-400">Arahkan kamera ke label karung Castable, lembar cek lapangan, atau alat ukur pH/Suhu</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeOcrModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <!-- Pilih Target Form Tujuan Auto-Fill -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-700">Target Form Tujuan OCR:</label>
+            <select id="ocrTargetFormSelect" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-800">
+              <option value="daily">1. Daily Report Harian (Aktivitas &amp; Personil)</option>
+              <option value="material">2. Daily Report Material (Nama Material &amp; Pemakaian)</option>
+              <option value="castable">3. Report Installed Castable (Batch, Air, Suhu, pH)</option>
+              <option value="mixing">4. Mixing Report (Material, Waktu Mix, Qty, Air, pH, Suhu)</option>
+            </select>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="startDeviceCamera()" id="btnStartCam" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <i data-lucide="video" class="w-3.5 h-3.5"></i>
+              <span>Buka Kamera Perangkat</span>
+            </button>
+            <button type="button" onclick="stopDeviceCamera()" id="btnStopCam" class="hidden inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition">
+              <i data-lucide="video-off" class="w-3.5 h-3.5"></i>
+              <span>Matikan Kamera</span>
+            </button>
+            <label class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Foto / Galeri</span>
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleOcrFileUpload(event)" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Area Kamera & Hasil Tangkapan Gambar -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <div class="bg-slate-950 rounded-xl overflow-hidden aspect-video relative flex items-center justify-center border border-slate-800">
+              <video id="ocrVideoFeed" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+              <canvas id="ocrCaptureCanvas" width="640" height="400" class="w-full h-full object-contain"></canvas>
+              <div id="ocrCameraOverlayHint" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs p-4 text-center pointer-events-none">
+                <i data-lucide="scan" class="w-8 h-8 mb-1.5 text-emerald-400 opacity-80"></i>
+                <span>Klik "Buka Kamera Perangkat", "Foto / Galeri", atau gunakan tombol "Simulasi Label Lapangan" di bawah untuk menguji OCR</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button type="button" onclick="captureFrameAndRunOcr()" id="btnCaptureOcr" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                <i data-lucide="aperture" class="w-4 h-4"></i>
+                <span>Tangkap Gambar &amp; Jalankan OCR</span>
+              </button>
+              <button type="button" onclick="loadSimulatedFieldLabel()" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition" title="Buat gambar label karung/catatan lapangan otomatis lalu pindai dengan OCR">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5 text-purple-600"></i>
+                <span>Simulasi Label Lapangan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Area Teks Hasil OCR & Smart Parser -->
+          <div class="flex flex-col justify-between space-y-2">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold text-slate-700">Hasil Pembacaan Teks OCR (Dapat Diedit):</span>
+                <span id="ocrStatusBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">Siap Memindai</span>
+              </div>
+              <textarea id="ocrResultTextarea" rows="7" class="w-full p-3 text-xs font-mono rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500" placeholder="Hasil pemindaian kamera OCR akan muncul di sini... Contoh format yang dikenali otomatis:&#10;Material: SR FLO Type R&#10;Batch: RGD-2025-108&#10;Dry Weight: 1900 Kg&#10;Dry Mix: 3 Min&#10;Wet Mix: 5 Min&#10;Water: 209 Liter&#10;pH: 7.2&#10;Temp Water: 27 C&#10;Temp Material: 29 C&#10;Thickness: 230 mm"></textarea>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-[11px] text-emerald-900">
+              <p class="font-bold mb-1 flex items-center gap-1">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>Ekstraksi Cerdas (Smart Field Parser):</span>
+              </p>
+              <p>Mendeteksi otomatis Nama Material, Batch No, Berat Castable (Kg), Waktu Dry/Wet Mix (Menit), Air (Liter &amp; %), pH Air, Suhu Air/Ruangan (°C), Ketebalan (mm), hingga Aktivitas &amp; Personil.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+        <button type="button" onclick="closeOcrModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200">Tutup</button>
+        <button type="button" onclick="applyOcrToTargetForm()" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
+          <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+          <span>Isi Otomatis (Auto-Fill) ke Form Terpilih</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 3: KONFIRMASI RESET DATA                               -->
+  <!-- ============================================================ -->
+  <div id="resetConfirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 border border-slate-200 shadow-2xl space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Kembalikan ke Data Standar PDF?</h3>
+          <p class="text-xs text-slate-500">Seluruh 4 laporan akan diisi ulang dengan data asli dari 4 dokumen PDF PT. Refractorindo Graha Dinamika &amp; PT. Valmet.</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeResetConfirmModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+        <button type="button" onclick="confirmResetToDefault()" class="px-4 py-2 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-500 text-white">Ya, Reset Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 no-print pointer-events-none"></div>
+
+  <!-- ============================================================ -->
+  <!-- APPLICATION JAVASCRIPT                                       -->
+  <!-- ============================================================ -->
+  <script>
+    const STORAGE_KEY = 'HIDAYAT_PROJECT_REFRACTORY_V25';
+    let activeTab = 'daily';
+    let activePreviewDoc = 'daily';
+    let activeSignatureSlot = null;
+    let sigPenColor = '#0f172a';
+    let isDrawingSig = false;
+    let sketchTool = 'pen';
+    let isDrawingSketch = false;
+    let sketchStartPos = { x: 0, y: 0 };
+    let cameraStream = null;
+
+    // Generate clean default signatures as SVG data URLs so reports look immediately complete
+    function createDefaultSignatureDataUrl(nameText, colorHex) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="90" viewBox="0 0 260 90">
+        <path d="M25,62 C45,20 65,70 88,35 C105,12 115,65 140,42 C165,22 180,58 225,30" fill="none" stroke="${colorHex}" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M40,68 Q130,52 215,64" fill="none" stroke="${colorHex}" stroke-width="1.4" stroke-opacity="0.7" stroke-linecap="round"/>
+        <text x="130" y="83" font-family="Arial, sans-serif" font-size="9" fill="#475569" text-anchor="middle">${nameText}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    // Generate realistic field documentation SVG photo with coordinates & timestamp like Page 2 of Castable PDF
+    function createFieldPhotoSvg(title, subtitle, coordText, dateText, accentColor) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="280" viewBox="0 0 420 280">
+        <defs>
+          <linearGradient id="bg_${accentColor.replace('#','')}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#334155"/>
+          </linearGradient>
+        </defs>
+        <rect width="420" height="280" fill="url(#bg_${accentColor.replace('#','')})"/>
+        <circle cx="210" cy="125" r="68" fill="#475569" stroke="${accentColor}" stroke-width="4" stroke-dasharray="8 4"/>
+        <circle cx="210" cy="125" r="32" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+        <rect x="198" y="65" width="24" height="55" fill="#facc15" rx="2"/>
+        <text x="210" y="34" font-family="Arial, sans-serif" font-weight="bold" font-size="13" fill="#f8fafc" text-anchor="middle">${title}</text>
+        <text x="210" y="52" font-family="Arial, sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle">${subtitle}</text>
+        <rect x="0" y="226" width="420" height="54" fill="rgba(0,0,0,0.65)"/>
+        <text x="408" y="246" font-family="monospace" font-size="11" fill="#f8fafc" text-anchor="end">${coordText}</text>
+        <text x="408" y="264" font-family="monospace" font-size="11" fill="#fde047" text-anchor="end">${dateText}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function getDefaultState() {
+      return {
+        dailyReport: {
+          no: '01/RGD/10/2025',
+          projectName: 'PERBAIKAN REFRACTORY BOILER UNIT 2',
+          customer: 'PT. CIKARANG LISTRINDO TBK',
+          subCont: 'PT. REFRACTORINDO GRAHA DINAMIKA',
+          date: '2025-10-10',
+          dateFormatted: 'Friday, 10 October 2025',
+          shift: '1',
+          timeRange: '07.00 - 19.00',
+          personnel: [
+            { id: 'p1', role: 'Project Manajer', count: 1, unit: 'Person' },
+            { id: 'p2', role: 'Leader', count: 4, unit: 'Persons' },
+            { id: 'p3', role: 'Admin', count: 1, unit: 'Person' },
+            { id: 'p4', role: 'Safetyman', count: 4, unit: 'Persons' },
+            { id: 'p5', role: 'Skilled', count: 39, unit: 'Persons' }
+          ],
+          activities: [
+            { id: 'a1', description: 'Toolbox Meeting', percentage: 100, unit: '%' },
+            { id: 'a2', description: 'Dismantling Area Floor Furnace', percentage: 16, unit: '%' },
+            { id: 'a3', description: 'Preparation & Cleaning Feedtube Area', percentage: 0, unit: '%' },
+            { id: 'a4', description: 'mobilisasi Material Castable & Brick ke Boiler Unit 2', percentage: 0, unit: '%' },
+            { id: 'a5', description: 'Checking Mixer & Water Quality (pH & Temp)', percentage: 0, unit: '%' }
+          ],
+          photos: [
+            {
+              id: 'dp1',
+              caption: 'Toolbox Meeting & Safety Briefing Tim RGD',
+              dataUrl: createFieldPhotoSvg('TOOLBOX MEETING TIM RGD', 'Boiler Unit 2 - PT. Cikarang Listrindo Tbk', '-6.28450, 107.14820, 18m', '10 Okt 2025 07:15:10', '#f97316')
+            },
+            {
+              id: 'dp2',
+              caption: 'Dismantling Area Floor Furnace (Progress 16%)',
+              dataUrl: createFieldPhotoSvg('DISMANTLING FLOOR FURNACE', 'Area Boiler Unit 2 - Shift 1', '-6.28452, 107.14825, 22m', '10 Okt 2025 11:40:22', '#3b82f6')
+            }
+          ],
+          checkedBy: 'Ryan',
+          reportedBy: 'Ardenata Dwi Prakoso'
+        },
+
+        materialReport: {
+          projectTitle: 'PERBAIKAN REFRACTORY',
+          customerTitle: 'BOILER UNIT 2 - PT. CIKARANG LISTRINDO TBK',
+          verifyPlace: 'Babelan',
+          verifyDate: '2025-10-20',
+          verifiedByUser: 'PT. VALMET',
+          dayDates: [
+            '10/10/2025',
+            '11/10/2025',
+            '12/10/2025',
+            '13/10/2025',
+            '14/10/2025',
+            '17/10/2025',
+            '18/10/2025',
+            '19/10/2025'
+          ],
+          items: [
+            { id: 'm1', name: 'SR FLO Type R', unit: 'Kg', stock: 17000, days: [0, 0, 1900, 3850, 1150, 2675, 3200, 25] },
+            { id: 'm2', name: 'Plastic cell Sheet Strip', unit: 'Lbr', stock: 250, days: [0, 0, 38, 90, 15, 0, 0, 0] },
+            { id: 'm3', name: 'Plywood Strip 4x80x1200 mm', unit: 'Lbr', stock: 150, days: [0, 0, 28, 60, 10, 0, 0, 0] },
+            { id: 'm4', name: 'Hot Glue Gun', unit: 'Unit', stock: 2, days: [0, 0, 0, 2, 0, 0, 0, 0] },
+            { id: 'm5', name: 'Hot Glue', unit: 'Box/Dus', stock: 5, days: [0, 0, 1, 4, 0, 0, 0, 0] },
+            { id: 'm6', name: 'Duct Tape 50 mm x 50 mm', unit: 'PC', stock: 66, days: [0, 0, 0, 0, 0, 0, 0, 0] },
+            { id: 'm7', name: 'Salt Dilutre Cacl2', unit: 'Kg', stock: 5, days: [0, 0, 0, 0, 0, 1.34, 1.64, 0] },
+            { id: 'm8', name: 'Calsium ChlorideFlakes', unit: 'Kg', stock: 5, days: [0, 0, 0, 0, 0, 0, 0, 0] },
+            { id: 'm9', name: 'Blangket Rolls 128 Kgs/M3 1260c 13mm Felt', unit: 'Dus/Roll', stock: 2, days: [0, 0, 0.60, 0.30, 0, 0, 0, 0] },
+            { id: 'm10', name: 'SR Sett No 3 DV (Mortar)', unit: 'Kg', stock: 300, days: [0, 0, 0, 0, 50, 75, 73, 0] },
+            { id: 'm11', name: 'Brick Type No. 1 (1.00 kg)', unit: 'Pcs', stock: 621, days: [0, 0, 0, 0, 200, 121, 300, 0] },
+            { id: 'm12', name: 'Brick Type No. 2 (0.85 kg)', unit: 'Pcs', stock: 375, days: [0, 0, 0, 0, 172, 48, 155, 0] },
+            { id: 'm13', name: 'Brick Type No. 3 (0.95 kg)', unit: 'Pcs', stock: 135, days: [0, 0, 0, 0, 15, 61, 48, 0] },
+            { id: 'm14', name: 'Brick Type No. 4 (0.95 Kg)', unit: 'Pcs', stock: 126, days: [0, 0, 0, 0, 15, 39, 62, 0] },
+            { id: 'm15', name: 'Brick Type No. 5 (0.9 Kg)', unit: 'Pcs', stock: 245, days: [0, 0, 0, 0, 77, 84, 84, 0] }
+          ]
+        },
+
+        castableReport: {
+          reportNo: 'REF/L/2120/CAS/0001',
+          revNo: '-',
+          pageNo: '1',
+          date: '2025-10-12',
+          shift: 'Shift I',
+          jobNo: 'RGD-CL-BLR2',
+          drawingNo: 'VAL-BLR2-FF-001',
+          mixerType: 'Padle mixer',
+          projectDesc: 'Boiller 2- Installation of refractory floor furnace',
+          customer: 'Valmet',
+          location: 'Boiller 2',
+          applicationMethod: 'VibraCasting',
+          sketchDataUrl: '',
+          preparedBy: 'ARDENATA DWI PRAKOSO',
+          preparedCompany: 'RGD',
+          reviewedBy: 'RYAN / VALMET SITE ENG.',
+          reviewedCompany: 'PT. VALMET',
+          batches: [
+            { id: 'cb1', itemNo: 'FT-01', material: 'SR FLO Type R', batchNo: 'B2510-001', dryWeight: 1900, dryMix: 3, wetMix: 5, waterLiter: 209, tempMat: 29, tempWater: 26, phWater: 7.1, thickness: 230, resDim: 'OK', resVis: 'OK', comment: 'Area Feedtube #1' },
+            { id: 'cb2', itemNo: 'FT-02', material: 'SR FLO Type R', batchNo: 'B2510-002', dryWeight: 3850, dryMix: 3, wetMix: 5, waterLiter: 423.5, tempMat: 29, tempWater: 26, phWater: 7.2, thickness: 230, resDim: 'OK', resVis: 'OK', comment: 'Area Feedtube #2' },
+            { id: 'cb3', itemNo: 'FT-03', material: 'SR FLO Type R', batchNo: 'B2510-003', dryWeight: 1150, dryMix: 3, wetMix: 5, waterLiter: 126.5, tempMat: 30, tempWater: 27, phWater: 7.1, thickness: 230, resDim: 'OK', resVis: 'OK', comment: 'Area Feedtube #3' },
+            { id: 'cb4', itemNo: 'FT-04', material: 'SR FLO Type R', batchNo: 'B2510-004', dryWeight: 2675, dryMix: 3, wetMix: 5, waterLiter: 294.2, tempMat: 28, tempWater: 26, phWater: 7.0, thickness: 230, resDim: 'OK', resVis: 'OK', comment: 'Floor Furnace North' },
+            { id: 'cb5', itemNo: 'FT-05', material: 'SR FLO Type R', batchNo: 'B2510-005', dryWeight: 3200, dryMix: 3, wetMix: 5, waterLiter: 352.0, tempMat: 29, tempWater: 27, phWater: 7.1, thickness: 230, resDim: 'OK', resVis: 'OK', comment: 'Floor Furnace South' }
+          ],
+          photos: {
+            before: [
+              { id: 'pb1', dataUrl: createFieldPhotoSvg('BEFORE INSTALL — PH & WATER CHECK', 'Pengukuran pH Air 7.1 & Kebersihan Ring', '-2,57235, 121,38214, 651,0m', '5 Agu 2025 17.22.27', '#06b6d4') },
+              { id: 'pb2', dataUrl: createFieldPhotoSvg('BEFORE INSTALL — THICKNESS CHECK', 'Pemeriksaan Kedalaman Cetakan 230 mm', '-2,57236, 121,38222, 653,0m', '6 Agu 2025 14.31.44', '#f59e0b') }
+            ],
+            process: [
+              { id: 'pp1', dataUrl: createFieldPhotoSvg('PROCESS INSTALL — PADDLE MIXER', 'Pencampuran Castable SR FLO Type R', '-2,57237, 121,38214, 646,8m', '6 Agu 2025 16.04.44', '#eab308') },
+              { id: 'pp2', dataUrl: createFieldPhotoSvg('PROCESS INSTALL — VIBROCASTING', 'Penuangan & Vibrasi Area Feedtube', '-2,57235, 121,38217, 649,0m', '6 Agu 2025 15.51.34', '#f97316') }
+            ],
+            after: [
+              { id: 'pa1', dataUrl: createFieldPhotoSvg('AFTER INSTALL — FINISHING A1P3', 'Hasil Pengecoran Feedtube Unit A1P3', '-2,57234, 121,38227, 656,0m', '6 Agu 2025 16.56.25', '#10b981') },
+              { id: 'pa2', dataUrl: createFieldPhotoSvg('AFTER INSTALL — TOP SURFACE CHECK', 'Permukaan Castable Halus & Dimensi OK', '-2,57235, 121,3827, 652,0m', '6 Agu 2025 16.56.30', '#22c55e') }
+            ]
+          }
+        },
+
+        mixingReport: {
+          preparedBy: 'Ardenata Dwi Prakoso',
+          reviewedBy: 'Ryan',
+          rows: [
+            { id: 'mx1', date: '2025-10-12', time: '08:30', materialName: 'SR FLO Type R', dryMixTime: 3, wetMixTime: 5, castableQty: 1900, castableUnit: 'Kg', waterLitre: 209, waterPercent: 11.0, waterPh: 7.1, tempWater: 26, tempAmbient: 31 },
+            { id: 'mx2', date: '2025-10-13', time: '09:15', materialName: 'SR FLO Type R', dryMixTime: 3, wetMixTime: 5, castableQty: 3850, castableUnit: 'Kg', waterLitre: 423.5, waterPercent: 11.0, waterPh: 7.2, tempWater: 26, tempAmbient: 32 },
+            { id: 'mx3', date: '2025-10-14', time: '10:00', materialName: 'SR FLO Type R', dryMixTime: 3, wetMixTime: 5, castableQty: 1150, castableUnit: 'Kg', waterLitre: 126.5, waterPercent: 11.0, waterPh: 7.1, tempWater: 27, tempAmbient: 31 },
+            { id: 'mx4', date: '2025-10-17', time: '08:45', materialName: 'SR FLO Type R', dryMixTime: 3, wetMixTime: 5, castableQty: 2675, castableUnit: 'Kg', waterLitre: 294.25, waterPercent: 11.0, waterPh: 7.0, tempWater: 26, tempAmbient: 30 },
+            { id: 'mx5', date: '2025-10-18', time: '13:20', materialName: 'SR Sett No 3 DV (Mortar)', dryMixTime: 2, wetMixTime: 4, castableQty: 198, castableUnit: 'Kg', waterLitre: 23.76, waterPercent: 12.0, waterPh: 7.2, tempWater: 27, tempAmbient: 32 }
+          ]
+        },
+
+        signatures: {
+          daily_checked: createDefaultSignatureDataUrl('Ryan — Checked', '#1d4ed8'),
+          daily_reported: createDefaultSignatureDataUrl('Ardenata D.P.', '#0f172a'),
+          material_user: createDefaultSignatureDataUrl('PT. VALMET Verified', '#1d4ed8'),
+          castable_prepared: createDefaultSignatureDataUrl('Ardenata D.P. (RGD)', '#0f172a'),
+          castable_reviewed: createDefaultSignatureDataUrl('Valmet Witnessed', '#1d4ed8'),
+          mixing_prepared: createDefaultSignatureDataUrl('Ardenata D.P.', '#0f172a'),
+          mixing_reviewed: createDefaultSignatureDataUrl('Ryan — QC Review', '#1d4ed8')
+        }
+      };
+    }
+
+    let appState = getDefaultState();
+
+    // ============================================================
+    // STORAGE (LOCALSTORAGE + INDEXEDDB)
+    // ============================================================
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState = Object.assign(getDefaultState(), parsed);
+        }
+      } catch (err) {
+        console.warn('Storage read fallback:', err);
+      }
+    }
+
+    function saveAllToStorage(showNotification) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.warn('localStorage write fallback:', err);
+      }
+      updateKpiBanner();
+      if (showNotification) {
+        showToast('Seluruh perubahan pada 4 laporan berhasil disimpan!', 'success');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const el = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-slate-900';
+      el.className = `${bg} text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 pointer-events-auto border border-white/15`;
+      el.innerHTML = `<span>${message}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    // ============================================================
+    // NAVIGATION & KPI UPDATES
+    // ============================================================
+    function switchTab(tabId) {
+      activeTab = tabId;
+      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`section-${t}`);
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (sec) {
+          if (t === tabId) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        }
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow';
+          } else {
+            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60';
+          }
+        }
+      });
+
+      if (tabId === 'preview') {
+        renderPdfPreviewSheets();
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function openPreviewFor(docType) {
+      activePreviewDoc = docType;
+      switchTab('preview');
+      setPreviewDoc(docType);
+    }
+
+    function updateKpiBanner() {
+      const totalMp = appState.dailyReport.personnel.reduce((acc, p) => acc + (Number(p.count) || 0), 0);
+      const activeActs = appState.dailyReport.activities.filter(a => a.description && a.description.trim() !== '').length;
+      const elMp = document.getElementById('kpiTotalMp');
+      const elProg = document.getElementById('kpiDailyProgress');
+      if (elMp) elMp.textContent = `${totalMp} Persons`;
+      if (elProg) elProg.textContent = `${activeActs} Aktivitas Tercatat`;
+
+      const matCount = appState.materialReport.items.length;
+      const elMat = document.getElementById('kpiTotalMaterial');
+      if (elMat) elMat.textContent = `${matCount} Material`;
+
+      const batchCount = appState.castableReport.batches.length;
+      const elBatch = document.getElementById('kpiCastableBatches');
+      const elMeth = document.getElementById('kpiCastableMethod');
+      if (elBatch) elBatch.textContent = `${batchCount} Batch`;
+      if (elMeth) elMeth.textContent = `Metode: ${appState.castableReport.applicationMethod}`;
+
+      const mixCount = appState.mixingReport.rows.length;
+      const avgWater = mixCount > 0
+        ? (appState.mixingReport.rows.reduce((s, r) => s + (Number(r.waterPercent) || 0), 0) / mixCount).toFixed(1)
+        : '0.0';
+      const elMix = document.getElementById('kpiMixingCount');
+      const elRatio = document.getElementById('kpiAvgWaterRatio');
+      if (elMix) elMix.textContent = `${mixCount} Log Mixing`;
+      if (elRatio) elRatio.textContent = `Rata-rata Air: ${avgWater}%`;
+    }
+
+    // ============================================================
+    // MODULE 1: DAILY REPORT HARIAN LOGIC
+    // ============================================================
+    function formatEnglishDate(isoDate) {
+      if (!isoDate) return '';
+      const d = new Date(isoDate + 'T00:00:00');
+      if (isNaN(d.getTime())) return isoDate;
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function renderDailyReportForm() {
+      const dr = appState.dailyReport;
+      document.getElementById('dr_no').value = dr.no || '';
+      document.getElementById('dr_projectName').value = dr.projectName || '';
+      document.getElementById('dr_customer').value = dr.customer || '';
+      document.getElementById('dr_subCont').value = dr.subCont || '';
+      document.getElementById('dr_date').value = dr.date || '';
+      document.getElementById('dr_dateFormatted').value = dr.dateFormatted || '';
+      document.getElementById('dr_shift').value = dr.shift || '1';
+      document.getElementById('dr_timeRange').value = dr.timeRange || '';
+      document.getElementById('dr_checkedBy').value = dr.checkedBy || '';
+      document.getElementById('dr_reportedBy').value = dr.reportedBy || '';
+
+      renderPersonnelList();
+      renderDailyActivities();
+      renderDailyPhotos();
+      refreshSignaturePreviews();
+    }
+
+    function updateDailyField(field, value) {
+      appState.dailyReport[field] = value;
+      if (field === 'date') {
+        const formatted = formatEnglishDate(value);
+        appState.dailyReport.dateFormatted = formatted;
+        const fmtInput = document.getElementById('dr_dateFormatted');
+        if (fmtInput) fmtInput.value = formatted;
+      }
+      saveAllToStorage(false);
+    }
+
+    function renderPersonnelList() {
+      const container = document.getElementById('dr_personnelList');
+      if (!container) return;
+      container.innerHTML = '';
+      let totalMp = 0;
+
+      appState.dailyReport.personnel.forEach((p, idx) => {
+        totalMp += Number(p.count) || 0;
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200';
+        row.innerHTML = `
+          <input type="text" value="${escapeHtml(p.role)}" oninput="updatePersonnelItem(${idx}, 'role', this.value)" placeholder="Nama Jabatan" class="flex-1 px-2.5 py-1.5 text-xs font-medium rounded border border-slate-300" />
+          <input type="number" min="0" value="${Number(p.count) || 0}" oninput="updatePersonnelItem(${idx}, 'count', this.value)" class="w-20 px-2.5 py-1.5 text-xs font-bold text-center rounded border border-slate-300 bg-orange-50/40" />
+          <span class="text-xs text-slate-500 w-14">${Number(p.count) === 1 ? 'Person' : 'Persons'}</span>
+          <button type="button" onclick="removePersonnelRole(${idx})" class="p-1 text-slate-400 hover:text-red-600">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        container.appendChild(row);
+      });
+
+      const badge = document.getElementById('dr_totalMpBadge');
+      if (badge) badge.textContent = `${totalMp} Persons`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updatePersonnelItem(idx, key, val) {
+      if (!appState.dailyReport.personnel[idx]) return;
+      if (key === 'count') {
+        const num = Math.max(0, parseInt(val, 10) || 0);
+        appState.dailyReport.personnel[idx].count = num;
+        appState.dailyReport.personnel[idx].unit = num === 1 ? 'Person' : 'Persons';
+      } else {
+        appState.dailyReport.personnel[idx][key] = val;
+      }
+      const totalMp = appState.dailyReport.personnel.reduce((a, b) => a + (Number(b.count) || 0), 0);
+      const badge = document.getElementById('dr_totalMpBadge');
+      if (badge) badge.textContent = `${totalMp} Persons`;
+      saveAllToStorage(false);
+    }
+
+    function addPersonnelRole() {
+      appState.dailyReport.personnel.push({
+        id: 'p_' + Date.now(),
+        role: 'Helper / Bricklayer',
+        count: 2,
+        unit: 'Persons'
+      });
+      renderPersonnelList();
+      saveAllToStorage(false);
+    }
+
+    function removePersonnelRole(idx) {
+      appState.dailyReport.personnel.splice(idx, 1);
+      renderPersonnelList();
+      saveAllToStorage(false);
+    }
+
+    function renderDailyActivities() {
+      const tbody = document.getElementById('dr_activitiesBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      appState.dailyReport.activities.forEach((act, idx) => {
+        const pct = Math.min(100, Math.max(0, Number(act.percentage) || 0));
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-2 text-center font-bold text-slate-600">${idx + 1}</td>
+          <td class="py-2 px-2">
+            <input type="text" value="${escapeHtml(act.description)}" oninput="updateDailyActivity(${idx}, 'description', this.value)" placeholder="Nama Aktivitas / Material Installed..." class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300" />
+          </td>
+          <td class="py-2 px-2">
+            <div class="flex items-center gap-1.5">
+              <input type="number" min="0" max="100" value="${pct}" oninput="updateDailyActivity(${idx}, 'percentage', this.value)" class="w-16 px-2 py-1.5 text-xs font-bold text-center rounded border border-slate-300" />
+              <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
+                <div class="h-full bg-emerald-500" style="width:${pct}%"></div>
+              </div>
+            </div>
+          </td>
+          <td class="py-2 px-2 text-center">
+            <input type="text" value="${escapeHtml(act.unit || '%')}" oninput="updateDailyActivity(${idx}, 'unit', this.value)" class="w-12 px-1.5 py-1 text-xs text-center rounded border border-slate-300 bg-slate-50" />
+          </td>
+          <td class="py-2 px-2 text-center">
+            <button type="button" onclick="removeDailyActivity(${idx})" class="p-1 text-slate-400 hover:text-red-600">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateDailyActivity(idx, key, val) {
+      if (!appState.dailyReport.activities[idx]) return;
+      appState.dailyReport.activities[idx][key] = key === 'percentage' ? (parseFloat(val) || 0) : val;
+      saveAllToStorage(false);
+    }
+
+    function addDailyActivity() {
+      appState.dailyReport.activities.push({
+        id: 'act_' + Date.now(),
+        description: '',
+        percentage: 0,
+        unit: '%'
+      });
+      renderDailyActivities();
+      saveAllToStorage(false);
+    }
+
+    function removeDailyActivity(idx) {
+      appState.dailyReport.activities.splice(idx, 1);
+      renderDailyActivities();
+      saveAllToStorage(false);
+    }
+
+    function renderDailyPhotos() {
+      const grid = document.getElementById('dr_photosGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      appState.dailyReport.photos.forEach((ph, idx) => {
+        const card = document.createElement('div');
+        card.className = 'relative group rounded-lg overflow-hidden border border-slate-200 bg-white shadow-xs';
+        card.innerHTML = `
+          <img src="${ph.dataUrl}" alt="Foto Aktivitas" class="w-full h-24 object-cover" />
+          <input type="text" value="${escapeHtml(ph.caption || '')}" oninput="updateDailyPhotoCaption(${idx}, this.value)" placeholder="Keterangan foto..." class="w-full px-2 py-1 text-[11px] border-t border-slate-200 bg-slate-50" />
+          <button type="button" onclick="removeDailyPhoto(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-85 hover:opacity-100">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateDailyPhotoCaption(idx, val) {
+      if (appState.dailyReport.photos[idx]) {
+        appState.dailyReport.photos[idx].caption = val;
+        saveAllToStorage(false);
+      }
+    }
+
+    function removeDailyPhoto(idx) {
+      appState.dailyReport.photos.splice(idx, 1);
+      renderDailyPhotos();
+      saveAllToStorage(false);
+    }
+
+    function uploadDailyPhoto(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        appState.dailyReport.photos.push({
+          id: 'dp_' + Date.now(),
+          caption: file.name.replace(/\.[^/.]+$/, ''),
+          dataUrl: e.target.result
+        });
+        renderDailyPhotos();
+        saveAllToStorage(true);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function generateSampleDailyPhoto() {
+      const count = appState.dailyReport.photos.length + 1;
+      appState.dailyReport.photos.push({
+        id: 'dp_' + Date.now(),
+        caption: `Dokumentasi Progress Lapangan #${count}`,
+        dataUrl: createFieldPhotoSvg(`PROGRESS LAPANGAN #${count}`, appState.dailyReport.projectName, '-6.28455, 107.14830, 20m', new Date().toLocaleString('id-ID'), '#10b981')
+      });
+      renderDailyPhotos();
+      saveAllToStorage(true);
+    }
+
+    // ============================================================
+    // MODULE 2: DAILY REPORT MATERIAL LOGIC
+    // ============================================================
+    function renderMaterialReportForm() {
+      const mr = appState.materialReport;
+      document.getElementById('mr_projectTitle').value = mr.projectTitle || '';
+      document.getElementById('mr_customerTitle').value = mr.customerTitle || '';
+      document.getElementById('mr_verifyPlace').value = mr.verifyPlace || '';
+      document.getElementById('mr_verifyDate').value = mr.verifyDate || '';
+      document.getElementById('mr_verifiedByUser').value = mr.verifiedByUser || '';
+      document.getElementById('mr_verifyLabelUser').textContent = mr.verifiedByUser || 'PT. VALMET';
+      document.getElementById('mr_verifySubLabel').textContent = mr.verifiedByUser || 'PT. VALMET';
+
+      // Render Day 1 - Day 8 date inputs
+      const dayRow = document.getElementById('mr_dayDatesRow');
+      const headerDays = document.getElementById('mr_tableHeaderDays');
+      if (dayRow && headerDays) {
+        dayRow.innerHTML = '';
+        headerDays.innerHTML = '';
+        mr.dayDates.forEach((dStr, dIdx) => {
+          const wrap = document.createElement('div');
+          wrap.innerHTML = `
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Day ${dIdx + 1}</label>
+            <input type="text" value="${escapeHtml(dStr)}" oninput="updateMaterialDayDate(${dIdx}, this.value)" class="w-full px-2 py-1 text-xs rounded border border-slate-300 bg-white font-medium" />
+          `;
+          dayRow.appendChild(wrap);
+
+          const th = document.createElement('th');
+          th.className = 'py-1 px-1.5 border border-slate-600 text-center w-20';
+          th.innerHTML = `<div>Day ${dIdx + 1}</div><div class="text-[10px] text-orange-300 font-normal">${escapeHtml(dStr)}</div>`;
+          headerDays.appendChild(th);
+        });
+      }
+
+      renderMaterialTable();
+      refreshSignaturePreviews();
+    }
+
+    function updateMaterialMeta(key, val) {
+      appState.materialReport[key] = val;
+      if (key === 'verifiedByUser') {
+        document.getElementById('mr_verifyLabelUser').textContent = val || 'PT. VALMET';
+        document.getElementById('mr_verifySubLabel').textContent = val || 'PT. VALMET';
+      }
+      saveAllToStorage(false);
+    }
+
+    function updateMaterialDayDate(dayIdx, val) {
+      appState.materialReport.dayDates[dayIdx] = val;
+      const headerDays = document.getElementById('mr_tableHeaderDays');
+      if (headerDays && headerDays.children[dayIdx]) {
+        headerDays.children[dayIdx].innerHTML = `<div>Day ${dayIdx + 1}</div><div class="text-[10px] text-orange-300 font-normal">${escapeHtml(val)}</div>`;
+      }
+      saveAllToStorage(false);
+    }
+
+    function computeMaterialRowTotals(item) {
+      const totalUsedRaw = (item.days || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
+      // Match PDF rounding/display logic cleanly while preserving decimals if needed
+      const totalUsed = Number.isInteger(totalUsedRaw) ? totalUsedRaw : Number(totalUsedRaw.toFixed(2));
+      const sisaRaw = (parseFloat(item.stock) || 0) - totalUsed;
+      const sisa = Number.isInteger(sisaRaw) ? sisaRaw : Number(sisaRaw.toFixed(2));
+      return { totalUsed, sisa };
+    }
+
+    function renderMaterialTable() {
+      const tbody = document.getElementById('mr_tableBody');
+      if (!tbody) return;
+      const q = (document.getElementById('mr_searchInput')?.value || '').toLowerCase().trim();
+      tbody.innerHTML = '';
+
+      appState.materialReport.items.forEach((item, idx) => {
+        if (q && !item.name.toLowerCase().includes(q)) return;
+        const { totalUsed, sisa } = computeMaterialRowTotals(item);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+
+        let dayCells = '';
+        for (let d = 0; d < 8; d++) {
+          const val = item.days[d] || 0;
+          dayCells += `
+            <td class="p-1 border border-slate-200 text-center">
+              <input type="number" step="any" min="0" value="${val === 0 ? '' : val}" placeholder="-"
+                oninput="updateMaterialDayUsage(${idx}, ${d}, this.value)"
+                class="w-16 px-1.5 py-1 text-xs text-right rounded border border-slate-200 focus:border-blue-500 bg-slate-50/50" />
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-1.5 px-2 border border-slate-200 text-center font-bold text-slate-600">${idx + 1}</td>
+          <td class="p-1.5 border border-slate-200">
+            <input type="text" value="${escapeHtml(item.name)}" oninput="updateMaterialItemField(${idx}, 'name', this.value)" class="w-full px-2 py-1 text-xs font-medium rounded border border-slate-200" />
+          </td>
+          <td class="p-1.5 border border-slate-200 text-center">
+            <input type="text" value="${escapeHtml(item.unit)}" oninput="updateMaterialItemField(${idx}, 'unit', this.value)" class="w-16 px-1.5 py-1 text-xs text-center rounded border border-slate-200 bg-slate-50" />
+          </td>
+          <td class="p-1.5 border border-slate-200 text-center bg-slate-50">
+            <input type="number" step="any" min="0" value="${item.stock}" oninput="updateMaterialItemField(${idx}, 'stock', this.value)" class="w-20 px-2 py-1 text-xs font-bold text-right rounded border border-slate-300 bg-white" />
+          </td>
+          <td id="mr_usedCell_${idx}" class="py-1.5 px-2 border border-slate-200 text-right font-bold text-blue-700 bg-blue-50/40">
+            ${totalUsed} ${escapeHtml(item.unit)}
+          </td>
+          <td id="mr_sisaCell_${idx}" class="py-1.5 px-2 border border-slate-200 text-right font-bold ${sisa <= 0 ? 'text-amber-700 bg-amber-50/50' : 'text-emerald-700 bg-emerald-50/40'}">
+            ${sisa} ${escapeHtml(item.unit)}
+          </td>
+          ${dayCells}
+          <td class="p-1 border border-slate-200 text-center">
+            <button type="button" onclick="removeMaterialRow(${idx})" class="p-1 text-slate-400 hover:text-red-600">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateMaterialItemField(idx, key, val) {
+      const item = appState.materialReport.items[idx];
+      if (!item) return;
+      item[key] = key === 'stock' ? (parseFloat(val) || 0) : val;
+      refreshMaterialRowDisplay(idx);
+      saveAllToStorage(false);
+    }
+
+    function updateMaterialDayUsage(idx, dayIdx, val) {
+      const item = appState.materialReport.items[idx];
+      if (!item) return;
+      item.days[dayIdx] = parseFloat(val) || 0;
+      refreshMaterialRowDisplay(idx);
+      saveAllToStorage(false);
+    }
+
+    function refreshMaterialRowDisplay(idx) {
+      const item = appState.materialReport.items[idx];
+      if (!item) return;
+      const { totalUsed, sisa } = computeMaterialRowTotals(item);
+      const usedCell = document.getElementById(`mr_usedCell_${idx}`);
+      const sisaCell = document.getElementById(`mr_sisaCell_${idx}`);
+      if (usedCell) usedCell.textContent = `${totalUsed} ${item.unit}`;
+      if (sisaCell) {
+        sisaCell.textContent = `${sisa} ${item.unit}`;
+        sisaCell.className = `py-1.5 px-2 border border-slate-200 text-right font-bold ${sisa <= 0 ? 'text-amber-700 bg-amber-50/50' : 'text-emerald-700 bg-emerald-50/40'}`;
+      }
+    }
+
+    function addMaterialRow() {
+      appState.materialReport.items.push({
+        id: 'm_' + Date.now(),
+        name: 'Material Refractory Baru',
+        unit: 'Kg',
+        stock: 100,
+        days: [0, 0, 0, 0, 0, 0, 0, 0]
+      });
+      renderMaterialTable();
+      saveAllToStorage(false);
+    }
+
+    function removeMaterialRow(idx) {
+      appState.materialReport.items.splice(idx, 1);
+      renderMaterialTable();
+      saveAllToStorage(false);
+    }
+
+    // ============================================================
+    // MODULE 3: REPORT INSTALLED CASTABLE & SKETCH CANVAS
+    // ============================================================
+    function renderCastableReportForm() {
+      const ic = appState.castableReport;
+      document.getElementById('ic_reportNo').value = ic.reportNo || '';
+      document.getElementById('ic_pageNo').value = ic.pageNo || '1';
+      document.getElementById('ic_revNo').value = ic.revNo || '-';
+      document.getElementById('ic_date').value = ic.date || '';
+      document.getElementById('ic_shift').value = ic.shift || 'Shift I';
+      document.getElementById('ic_projectDesc').value = ic.projectDesc || '';
+      document.getElementById('ic_customer').value = ic.customer || '';
+      document.getElementById('ic_location').value = ic.location || '';
+      document.getElementById('ic_method').value = ic.applicationMethod || 'VibraCasting';
+      document.getElementById('ic_mixerType').value = ic.mixerType || '';
+      document.getElementById('ic_jobNo').value = ic.jobNo || '';
+      document.getElementById('ic_drawingNo').value = ic.drawingNo || '';
+      document.getElementById('ic_preparedBy').value = ic.preparedBy || '';
+      document.getElementById('ic_preparedCompany').value = ic.preparedCompany || '';
+      document.getElementById('ic_reviewedBy').value = ic.reviewedBy || '';
+      document.getElementById('ic_reviewedCompany').value = ic.reviewedCompany || '';
+
+      renderCastableBatchesTable();
+      renderCastableStagePhotos();
+      refreshSignaturePreviews();
+      initSketchCanvas();
+    }
+
+    function updateCastableMeta(key, val) {
+      appState.castableReport[key] = val;
+      saveAllToStorage(false);
+    }
+
+    function renderCastableBatchesTable() {
+      const tbody = document.getElementById('ic_batchesBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      appState.castableReport.batches.forEach((b, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-1 border border-slate-200 text-center font-bold text-slate-700">${idx + 1}</td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.itemNo)}" oninput="updateCastableBatch(${idx}, 'itemNo', this.value)" class="w-full px-1.5 py-1 rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.material)}" oninput="updateCastableBatch(${idx}, 'material', this.value)" class="w-full px-1.5 py-1 rounded border border-slate-200 font-medium" /></td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.batchNo)}" oninput="updateCastableBatch(${idx}, 'batchNo', this.value)" class="w-full px-1.5 py-1 rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.dryWeight}" oninput="updateCastableBatch(${idx}, 'dryWeight', this.value)" class="w-full px-1.5 py-1 text-center font-bold rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.dryMix}" oninput="updateCastableBatch(${idx}, 'dryMix', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.wetMix}" oninput="updateCastableBatch(${idx}, 'wetMix', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.waterLiter}" oninput="updateCastableBatch(${idx}, 'waterLiter', this.value)" class="w-full px-1.5 py-1 text-center font-semibold text-blue-700 rounded border border-slate-200 bg-blue-50/40" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.tempMat}" oninput="updateCastableBatch(${idx}, 'tempMat', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.tempWater}" oninput="updateCastableBatch(${idx}, 'tempWater', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="0.1" value="${b.phWater}" oninput="updateCastableBatch(${idx}, 'phWater', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="number" step="any" value="${b.thickness}" oninput="updateCastableBatch(${idx}, 'thickness', this.value)" class="w-full px-1.5 py-1 text-center font-semibold rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.resDim)}" oninput="updateCastableBatch(${idx}, 'resDim', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.resVis)}" oninput="updateCastableBatch(${idx}, 'resVis', this.value)" class="w-full px-1 py-1 text-center rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200"><input type="text" value="${escapeHtml(b.comment)}" oninput="updateCastableBatch(${idx}, 'comment', this.value)" class="w-full px-1.5 py-1 rounded border border-slate-200" /></td>
+          <td class="p-1 border border-slate-200 text-center">
+            <button type="button" onclick="removeCastableBatchRow(${idx})" class="text-slate-400 hover:text-red-600">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateCastableBatch(idx, key, val) {
+      const b = appState.castableReport.batches[idx];
+      if (!b) return;
+      const numericKeys = ['dryWeight', 'dryMix', 'wetMix', 'waterLiter', 'tempMat', 'tempWater', 'phWater', 'thickness'];
+      b[key] = numericKeys.includes(key) ? (parseFloat(val) || 0) : val;
+      saveAllToStorage(false);
+    }
+
+    function addCastableBatchRow() {
+      const nextNum = appState.castableReport.batches.length + 1;
+      appState.castableReport.batches.push({
+        id: 'cb_' + Date.now(),
+        itemNo: `FT-0${nextNum}`,
+        material: 'SR FLO Type R',
+        batchNo: `B2510-00${nextNum}`,
+        dryWeight: 1500,
+        dryMix: 3,
+        wetMix: 5,
+        waterLiter: 165,
+        tempMat: 29,
+        tempWater: 26,
+        phWater: 7.1,
+        thickness: 230,
+        resDim: 'OK',
+        resVis: 'OK',
+        comment: `Area Feedtube #${nextNum}`
+      });
+      renderCastableBatchesTable();
+      saveAllToStorage(false);
+    }
+
+    function removeCastableBatchRow(idx) {
+      appState.castableReport.batches.splice(idx, 1);
+      renderCastableBatchesTable();
+      saveAllToStorage(false);
+    }
+
+    function syncCastableToMixing() {
+      const dateStr = appState.castableReport.date || '2025-10-12';
+      appState.mixingReport.rows = appState.castableReport.batches.map((b, i) => {
+        const qty = Number(b.dryWeight) || 0;
+        const wtr = Number(b.waterLiter) || 0;
+        const pct = qty > 0 ? Number(((wtr / qty) * 100).toFixed(2)) : 0;
+        const hr = String(8 + (i % 9)).padStart(2, '0');
+        return {
+          id: 'mx_sync_' + i,
+          date: dateStr,
+          time: `${hr}:00`,
+          materialName: b.material || 'SR FLO Type R',
+          dryMixTime: b.dryMix || 3,
+          wetMixTime: b.wetMix || 5,
+          castableQty: qty,
+          castableUnit: 'Kg',
+          waterLitre: wtr,
+          waterPercent: pct,
+          waterPh: b.phWater || 7.1,
+          tempWater: b.tempWater || 26,
+          tempAmbient: (Number(b.tempMat) || 29) + 2
+        };
+      });
+      renderMixingReportForm();
+      saveAllToStorage(false);
+      showToast('Seluruh batch Castable berhasil disinkronkan ke Mixing Report!', 'success');
+    }
+
+    // SKETCH CANVAS LOGIC (BOILER 2 FLOOR FURNACE FEEDTUBE DRAWING)
+    function initSketchCanvas() {
+      const canvas = document.getElementById('sketchCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      if (appState.castableReport.sketchDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = appState.castableReport.sketchDataUrl;
+      } else {
+        drawBoilerFloorSketch();
+      }
+
+      canvas.onpointerdown = (e) => {
+        isDrawingSketch = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        sketchStartPos = { x, y };
+        const color = document.getElementById('sketchColorPicker')?.value || '#16a34a';
+
+        if (sketchTool === 'mark') {
+          const pinNum = appState.castableReport.batches.length;
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 10px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`B${pinNum}`, x, y);
+          isDrawingSketch = false;
+          appState.castableReport.sketchDataUrl = canvas.toDataURL('image/png');
+          saveAllToStorage(false);
+        } else if (sketchTool === 'pen') {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2.5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+        }
+      };
+
+      canvas.onpointermove = (e) => {
+        if (!isDrawingSketch || sketchTool !== 'pen') return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      };
+
+      canvas.onpointerup = (e) => {
+        if (!isDrawingSketch) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        const color = document.getElementById('sketchColorPicker')?.value || '#16a34a';
+
+        if (sketchTool === 'rect') {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sketchStartPos.x, sketchStartPos.y, x - sketchStartPos.x, y - sketchStartPos.y);
+          ctx.fillStyle = color + '33';
+          ctx.fillRect(sketchStartPos.x, sketchStartPos.y, x - sketchStartPos.x, y - sketchStartPos.y);
+        }
+        isDrawingSketch = false;
+        appState.castableReport.sketchDataUrl = canvas.toDataURL('image/png');
+        saveAllToStorage(false);
+      };
+    }
+
+    function setSketchTool(tool) {
+      sketchTool = tool;
+      ['pen', 'rect', 'mark'].forEach(t => {
+        const btn = document.getElementById(`sketchBtn_${t}`);
+        if (btn) {
+          btn.className = t === tool
+            ? 'px-2 py-1 rounded text-[11px] font-semibold bg-purple-600 text-white'
+            : 'px-2 py-1 rounded text-[11px] font-semibold bg-white border border-slate-300 text-slate-700';
+        }
+      });
+    }
+
+    // Replicates the Boiler 2 Floor Furnace Feedtube CAD drawing from Page 1 of Report Installed Castable.pdf
+    function drawBoilerFloorSketch() {
+      const canvas = document.getElementById('sketchCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+
+      // Outer furnace wall frame
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(14, 14, w - 28, h - 28);
+
+      // Top & bottom finned tube bands
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1;
+      for (let x = 18; x < w - 18; x += 4) {
+        ctx.beginPath();
+        ctx.moveTo(x, 18);
+        ctx.lineTo(x, 68);
+        ctx.moveTo(x, h - 68);
+        ctx.lineTo(x, h - 18);
+        ctx.stroke();
+      }
+
+      // Middle refractory floor area
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(18, 70, w - 36, h - 140);
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(22, 74, w - 44, h - 148);
+
+      // 6 Feedtube nozzle assemblies (like the green/red circles in the Valmet drawing)
+      const cols = [62, 118, 172, 226, 280];
+      const rows = [118, 200];
+      let ftIndex = 1;
+      rows.forEach((cy) => {
+        cols.forEach((cx) => {
+          // Green refractory castable ring
+          ctx.fillStyle = '#bbf7d0';
+          ctx.strokeStyle = '#16a34a';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Inner feedtube nozzle
+          ctx.fillStyle = '#fee2e2';
+          ctx.strokeStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 8px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText(`FT-${ftIndex}`, cx, cy + 3);
+          ftIndex++;
+        });
+      });
+
+      // Center line & title
+      ctx.strokeStyle = '#0284c7';
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(14, h / 2);
+      ctx.lineTo(w - 14, h / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      appState.castableReport.sketchDataUrl = canvas.toDataURL('image/png');
+      saveAllToStorage(false);
+    }
+
+    function clearSketchCanvas() {
+      const canvas = document.getElementById('sketchCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      appState.castableReport.sketchDataUrl = canvas.toDataURL('image/png');
+      saveAllToStorage(false);
+    }
+
+    function uploadSketchImage(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('sketchCanvas');
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          appState.castableReport.sketchDataUrl = canvas.toDataURL('image/png');
+          saveAllToStorage(true);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    // Castable Stage Photos (Before, Process, After)
+    function renderCastableStagePhotos() {
+      ['before', 'process', 'after'].forEach(stage => {
+        const container = document.getElementById(`ic_photos_${stage}`);
+        if (!container) return;
+        container.innerHTML = '';
+        const list = appState.castableReport.photos[stage] || [];
+        list.forEach((ph, idx) => {
+          const div = document.createElement('div');
+          div.className = 'relative rounded-lg overflow-hidden border border-slate-300 bg-white group';
+          div.innerHTML = `
+            <img src="${ph.dataUrl}" alt="${stage}" class="w-full h-24 object-cover" />
+            <button type="button" onclick="removeCastableStagePhoto('${stage}', ${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-80 hover:opacity-100">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function uploadCastableStagePhoto(stage, event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        appState.castableReport.photos[stage].push({
+          id: `ph_${stage}_${Date.now()}`,
+          dataUrl: e.target.result
+        });
+        renderCastableStagePhotos();
+        saveAllToStorage(true);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function removeCastableStagePhoto(stage, idx) {
+      appState.castableReport.photos[stage].splice(idx, 1);
+      renderCastableStagePhotos();
+      saveAllToStorage(false);
+    }
+
+    function populateDefaultCastablePhotos() {
+      const def = getDefaultState().castableReport.photos;
+      appState.castableReport.photos = JSON.parse(JSON.stringify(def));
+      renderCastableStagePhotos();
+      saveAllToStorage(true);
+    }
+
+    // ============================================================
+    // MODULE 4: MIXING REPORT LOGIC
+    // ============================================================
+    function renderMixingReportForm() {
+      const mx = appState.mixingReport;
+      document.getElementById('mx_preparedBy').value = mx.preparedBy || '';
+      document.getElementById('mx_reviewedBy').value = mx.reviewedBy || '';
+
+      const tbody = document.getElementById('mx_tableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      mx.rows.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-1.5 border border-slate-200 text-center font-bold text-slate-600">${idx + 1}</td>
+          <td class="p-1.5 border border-slate-200"><input type="date" value="${escapeHtml(r.date)}" onchange="updateMixingRow(${idx}, 'date', this.value)" class="w-full px-2 py-1 text-xs rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="time" value="${escapeHtml(r.time)}" onchange="updateMixingRow(${idx}, 'time', this.value)" class="w-full px-2 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="text" value="${escapeHtml(r.materialName)}" oninput="updateMixingRow(${idx}, 'materialName', this.value)" class="w-full px-2 py-1 text-xs font-medium rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="any" value="${r.dryMixTime}" oninput="updateMixingRow(${idx}, 'dryMixTime', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="any" value="${r.wetMixTime}" oninput="updateMixingRow(${idx}, 'wetMixTime', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="any" value="${r.castableQty}" oninput="updateMixingRow(${idx}, 'castableQty', this.value)" class="w-full px-2 py-1 text-xs font-bold text-right rounded border border-slate-300 bg-slate-50" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="text" value="${escapeHtml(r.castableUnit || 'Kg')}" oninput="updateMixingRow(${idx}, 'castableUnit', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200 bg-blue-50/30"><input type="number" step="any" value="${r.waterLitre}" oninput="updateMixingRow(${idx}, 'waterLitre', this.value)" class="w-full px-2 py-1 text-xs font-bold text-right text-blue-700 rounded border border-blue-200 bg-white" /></td>
+          <td id="mx_pctCell_${idx}" class="p-1.5 border border-slate-200 text-center font-extrabold text-blue-800 bg-blue-50/70">${Number(r.waterPercent || 0).toFixed(2)}%</td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="0.1" value="${r.waterPh}" oninput="updateMixingRow(${idx}, 'waterPh', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="any" value="${r.tempWater}" oninput="updateMixingRow(${idx}, 'tempWater', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200"><input type="number" step="any" value="${r.tempAmbient}" oninput="updateMixingRow(${idx}, 'tempAmbient', this.value)" class="w-full px-1.5 py-1 text-xs text-center rounded border border-slate-200" /></td>
+          <td class="p-1.5 border border-slate-200 text-center">
+            <button type="button" onclick="removeMixingRow(${idx})" class="text-slate-400 hover:text-red-600">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      refreshSignaturePreviews();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateMixingMeta(key, val) {
+      appState.mixingReport[key] = val;
+      saveAllToStorage(false);
+    }
+
+    function updateMixingRow(idx, key, val) {
+      const row = appState.mixingReport.rows[idx];
+      if (!row) return;
+      const numFields = ['dryMixTime', 'wetMixTime', 'castableQty', 'waterLitre', 'waterPh', 'tempWater', 'tempAmbient'];
+      row[key] = numFields.includes(key) ? (parseFloat(val) || 0) : val;
+
+      if (key === 'castableQty' || key === 'waterLitre') {
+        const qty = Number(row.castableQty) || 0;
+        const lit = Number(row.waterLitre) || 0;
+        row.waterPercent = qty > 0 ? Number(((lit / qty) * 100).toFixed(2)) : 0;
+        const pctCell = document.getElementById(`mx_pctCell_${idx}`);
+        if (pctCell) pctCell.textContent = `${row.waterPercent.toFixed(2)}%`;
+      }
+      saveAllToStorage(false);
+    }
+
+    function addMixingRow() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      appState.mixingReport.rows.push({
+        id: 'mx_' + Date.now(),
+        date: '2025-10-19',
+        time: `${hh}:${mm}`,
+        materialName: 'SR FLO Type R',
+        dryMixTime: 3,
+        wetMixTime: 5,
+        castableQty: 1500,
+        castableUnit: 'Kg',
+        waterLitre: 165,
+        waterPercent: 11.0,
+        waterPh: 7.1,
+        tempWater: 26,
+        tempAmbient: 31
+      });
+      renderMixingReportForm();
+      saveAllToStorage(false);
+    }
+
+    function removeMixingRow(idx) {
+      appState.mixingReport.rows.splice(idx, 1);
+      renderMixingReportForm();
+      saveAllToStorage(false);
+    }
+
+    // ============================================================
+    // MODULE 5: DIGITAL SIGNATURE PAD MODAL
+    // ============================================================
+    const SIG_LABELS = {
+      daily_checked: 'TTD Checked / Review Oleh (Daily Report)',
+      daily_reported: 'TTD Dibuat / Dilaporkan Oleh (Daily Report)',
+      material_user: 'TTD Verifikasi User / Customer (Daily Report Material)',
+      castable_prepared: 'TTD Prepared By (Report Installed Castable)',
+      castable_reviewed: 'TTD Reviewed / Witnessed By (Report Installed Castable)',
+      mixing_prepared: 'TTD Prepared By (Mixing Report)',
+      mixing_reviewed: 'TTD Reviewed By (Mixing Report)'
+    };
+
+    function openSignatureModal(slotKey) {
+      activeSignatureSlot = slotKey;
+      const modal = document.getElementById('signatureModal');
+      const title = document.getElementById('sigModalTitle');
+      if (title) title.textContent = SIG_LABELS[slotKey] || 'Tanda Tangan Digital';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      initSignaturePadCanvas();
+    }
+
+    function closeSignatureModal() {
+      const modal = document.getElementById('signatureModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      activeSignatureSlot = null;
+    }
+
+    function initSignaturePadCanvas() {
+      const canvas = document.getElementById('signaturePadCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      canvas.onpointerdown = (e) => {
+        isDrawingSig = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        ctx.strokeStyle = sigPenColor;
+        ctx.lineWidth = 2.8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      };
+
+      canvas.onpointermove = (e) => {
+        if (!isDrawingSig) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      };
+
+      canvas.onpointerup = () => {
+        isDrawingSig = false;
+      };
+    }
+
+    function setSigPenColor(hex) {
+      sigPenColor = hex;
+    }
+
+    function clearSignaturePad() {
+      const canvas = document.getElementById('signaturePadCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function generateAutoStampSignature() {
+      const canvas = document.getElementById('signaturePadCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = sigPenColor;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(75, 130);
+      ctx.bezierCurveTo(115, 45, 155, 155, 200, 65);
+      ctx.bezierCurveTo(235, 20, 260, 145, 315, 85);
+      ctx.bezierCurveTo(350, 55, 370, 115, 405, 68);
+      ctx.stroke();
+
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(90, 145);
+      ctx.quadraticCurveTo(240, 118, 390, 138);
+      ctx.stroke();
+    }
+
+    function uploadSignatureImage(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('signaturePadCanvas');
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const ratio = Math.min((canvas.width - 40) / img.width, (canvas.height - 30) / img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function saveSignaturePad() {
+      if (!activeSignatureSlot) return;
+      const canvas = document.getElementById('signaturePadCanvas');
+      appState.signatures[activeSignatureSlot] = canvas.toDataURL('image/png');
+      refreshSignaturePreviews();
+      saveAllToStorage(false);
+      closeSignatureModal();
+      showToast('Tanda tangan digital berhasil diterapkan!', 'success');
+    }
+
+    function refreshSignaturePreviews() {
+      Object.keys(SIG_LABELS).forEach(key => {
+        const img = document.getElementById(`sigPreview_${key}`);
+        const empty = document.getElementById(`sigEmpty_${key}`);
+        const dataUrl = appState.signatures[key];
+        if (img && empty) {
+          if (dataUrl) {
+            img.src = dataUrl;
+            img.classList.remove('hidden');
+            empty.classList.add('hidden');
+          } else {
+            img.classList.add('hidden');
+            empty.classList.remove('hidden');
+          }
+        }
+      });
+    }
+
+    // ============================================================
+    // MODULE 6: CAMERA & OCR ENGINE (TESSERACT.JS + SMART PARSER)
+    // ============================================================
+    function openOcrModal(defaultTarget) {
+      const modal = document.getElementById('ocrModal');
+      const sel = document.getElementById('ocrTargetFormSelect');
+      if (sel && defaultTarget) {
+        sel.value = defaultTarget;
+      } else if (sel && ['daily', 'material', 'castable', 'mixing'].includes(activeTab)) {
+        sel.value = activeTab;
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      loadSimulatedFieldLabel();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeOcrModal() {
+      stopDeviceCamera();
+      const modal = document.getElementById('ocrModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function startDeviceCamera() {
+      const video = document.getElementById('ocrVideoFeed');
+      const canvas = document.getElementById('ocrCaptureCanvas');
+      const hint = document.getElementById('ocrCameraOverlayHint');
+      const btnStart = document.getElementById('btnStartCam');
+      const btnStop = document.getElementById('btnStopCam');
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        video.srcObject = cameraStream;
+        video.classList.remove('hidden');
+        canvas.classList.add('hidden');
+        if (hint) hint.classList.add('hidden');
+        btnStart.classList.add('hidden');
+        btnStop.classList.remove('hidden');
+        showToast('Kamera perangkat aktif. Arahkan ke label/dokumen lalu klik Tangkap Gambar.', 'info');
+      } catch (err) {
+        showToast('Kamera langsung tidak diizinkan di pratinjau ini. Gunakan tombol Foto/Galeri atau Simulasi Label Lapangan.', 'info');
+        loadSimulatedFieldLabel();
+      }
+    }
+
+    function stopDeviceCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      const video = document.getElementById('ocrVideoFeed');
+      const canvas = document.getElementById('ocrCaptureCanvas');
+      const btnStart = document.getElementById('btnStartCam');
+      const btnStop = document.getElementById('btnStopCam');
+      if (video) video.classList.add('hidden');
+      if (canvas) canvas.classList.remove('hidden');
+      if (btnStart) btnStart.classList.remove('hidden');
+      if (btnStop) btnStop.classList.add('hidden');
+    }
+
+    function handleOcrFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      stopDeviceCamera();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('ocrCaptureCanvas');
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          const ratio = Math.min(canvas.width / img.width, canvas.height / img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+          document.getElementById('ocrCameraOverlayHint')?.classList.add('hidden');
+          runTesseractOcrOnCanvas(canvas);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function loadSimulatedFieldLabel() {
+      stopDeviceCamera();
+      const target = document.getElementById('ocrTargetFormSelect')?.value || 'castable';
+      const canvas = document.getElementById('ocrCaptureCanvas');
+      const ctx = canvas.getContext('2d');
+      document.getElementById('ocrCameraOverlayHint')?.classList.add('hidden');
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 20px monospace';
+
+      let lines = [];
+      if (target === 'daily') {
+        lines = [
+          'HIDAYAT PROJECT - FIELD SCAN',
+          'Report No: 02/RGD/10/2025',
+          'Activity: Castable Floor Furnace Installation',
+          'Progress: 65 %',
+          'Skilled: 42 Persons',
+          'Reported By: Ardenata Dwi Prakoso'
+        ];
+      } else if (target === 'material') {
+        lines = [
+          'MATERIAL WAREHOUSE TAG - RGD',
+          'Material: SR FLO Type R',
+          'Unit: Kg',
+          'Stock: 17000',
+          'Used: 1850',
+          'Date: 19/10/2025'
+        ];
+      } else if (target === 'mixing') {
+        lines = [
+          'MIXING QC LOG SHEET - RGD',
+          'Date: 2025-10-19   Time: 14:30',
+          'Material: SR FLO Type R',
+          'Castable Qty: 2000 Kg',
+          'Dry Mix: 3 Min    Wet Mix: 5 Min',
+          'Water: 220 Liter  pH: 7.2',
+          'Temp Water: 26 C  Ambient: 31 C'
+        ];
+      } else {
+        lines = [
+          'CASTABLE BATCH LABEL - VALMET / RGD',
+          'Item Drawing: FT-06',
+          'Material: SR FLO Type R',
+          'Batch: B2510-006',
+          'Dry Weight: 2000 Kg',
+          'Dry Mix: 3 Min   Wet Mix: 5 Min',
+          'Water: 220 Liter pH: 7.2',
+          'Temp Material: 29 C  Temp Water: 26 C',
+          'Thickness: 230 mm    Method: VibraCasting'
+        ];
+      }
+
+      lines.forEach((line, idx) => {
+        ctx.fillStyle = idx === 0 ? '#c2410c' : '#0f172a';
+        ctx.font = idx === 0 ? 'bold 21px Arial' : 'bold 18px monospace';
+        ctx.fillText(line, 42, 65 + idx * 36);
+      });
+
+      document.getElementById('ocrResultTextarea').value = lines.slice(1).join('\n');
+      const badge = document.getElementById('ocrStatusBadge');
+      if (badge) {
+        badge.textContent = 'Label Lapangan Terbaca';
+        badge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+      }
+    }
+
+    async function captureFrameAndRunOcr() {
+      const video = document.getElementById('ocrVideoFeed');
+      const canvas = document.getElementById('ocrCaptureCanvas');
+      const ctx = canvas.getContext('2d');
+
+      if (cameraStream && !video.classList.contains('hidden')) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        stopDeviceCamera();
+      }
+      await runTesseractOcrOnCanvas(canvas);
+    }
+
+    async function runTesseractOcrOnCanvas(canvas) {
+      const badge = document.getElementById('ocrStatusBadge');
+      const textarea = document.getElementById('ocrResultTextarea');
+      if (badge) {
+        badge.textContent = 'Memindai OCR (Tesseract.js)...';
+        badge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800';
+      }
+
+      try {
+        if (window.Tesseract) {
+          const result = await window.Tesseract.recognize(canvas.toDataURL('image/png'), 'eng');
+          const text = (result?.data?.text || '').trim();
+          if (text) {
+            textarea.value = text;
+            if (badge) {
+              badge.textContent = 'OCR Selesai ✓';
+              badge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+            }
+            showToast('Pemindaian teks OCR dari gambar berhasil!', 'success');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Tesseract fallback parser:', err);
+      }
+
+      if (badge) {
+        badge.textContent = 'Siap Auto-Fill ✓';
+        badge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+      }
+    }
+
+    function extractFieldFromText(text, regex, defaultVal = '') {
+      const m = text.match(regex);
+      return m && m[1] ? m[1].trim() : defaultVal;
+    }
+
+    function applyOcrToTargetForm() {
+      const target = document.getElementById('ocrTargetFormSelect')?.value || 'castable';
+      const rawText = document.getElementById('ocrResultTextarea')?.value || '';
+      if (!rawText.trim()) {
+        showToast('Teks hasil OCR masih kosong!', 'error');
+        return;
+      }
+
+      const materialName = extractFieldFromText(rawText, /Material\s*[:=-]\s*([^\n\r]+)/i, 'SR FLO Type R');
+      const batchNo = extractFieldFromText(rawText, /Batch(?:\s*No)?\s*[:=-]\s*([A-Za-z0-9-_]+)/i, 'B2510-OCR');
+      const itemDrawing = extractFieldFromText(rawText, /Item(?:\s*Drawing)?\s*[:=-]\s*([A-Za-z0-9-_]+)/i, 'FT-OCR');
+      const dryWeight = parseFloat(extractFieldFromText(rawText, /(?:Dry\s*Weight|Castable\s*Qty|Stock)\s*[:=-]\s*([\d.]+)/i, '2000')) || 2000;
+      const usedQty = parseFloat(extractFieldFromText(rawText, /Used\s*[:=-]\s*([\d.]+)/i, '500')) || 500;
+      const dryMix = parseFloat(extractFieldFromText(rawText, /Dry\s*Mix\s*[:=-]\s*([\d.]+)/i, '3')) || 3;
+      const wetMix = parseFloat(extractFieldFromText(rawText, /Wet\s*Mix\s*[:=-]\s*([\d.]+)/i, '5')) || 5;
+      const waterLitre = parseFloat(extractFieldFromText(rawText, /Water\s*[:=-]\s*([\d.]+)/i, '220')) || 220;
+      const phVal = parseFloat(extractFieldFromText(rawText, /pH\s*[:=-]\s*([\d.]+)/i, '7.2')) || 7.2;
+      const tempWater = parseFloat(extractFieldFromText(rawText, /Temp\s*Water\s*[:=-]\s*([\d.]+)/i, '26')) || 26;
+      const tempMat = parseFloat(extractFieldFromText(rawText, /Temp\s*Material\s*[:=-]\s*([\d.]+)/i, '29')) || 29;
+      const tempAmb = parseFloat(extractFieldFromText(rawText, /Ambient\s*[:=-]\s*([\d.]+)/i, '31')) || 31;
+      const thickness = parseFloat(extractFieldFromText(rawText, /Thickness\s*[:=-]\s*([\d.]+)/i, '230')) || 230;
+
+      if (target === 'daily') {
+        const actName = extractFieldFromText(rawText, /Activity\s*[:=-]\s*([^\n\r]+)/i, `Instalasi ${materialName}`);
+        const prog = parseFloat(extractFieldFromText(rawText, /Progress\s*[:=-]\s*([\d.]+)/i, '65')) || 65;
+        appState.dailyReport.activities.push({
+          id: 'act_ocr_' + Date.now(),
+          description: actName,
+          percentage: prog,
+          unit: '%'
+        });
+        renderDailyReportForm();
+        switchTab('daily');
+      } else if (target === 'material') {
+        const existing = appState.materialReport.items.find(i => i.name.toLowerCase() === materialName.toLowerCase());
+        if (existing) {
+          existing.days[7] = (Number(existing.days[7]) || 0) + usedQty;
+        } else {
+          appState.materialReport.items.push({
+            id: 'm_ocr_' + Date.now(),
+            name: materialName,
+            unit: 'Kg',
+            stock: dryWeight,
+            days: [0, 0, 0, 0, 0, 0, 0, usedQty]
+          });
+        }
+        renderMaterialReportForm();
+        switchTab('material');
+      } else if (target === 'castable') {
+        appState.castableReport.batches.push({
+          id: 'cb_ocr_' + Date.now(),
+          itemNo: itemDrawing,
+          material: materialName,
+          batchNo: batchNo,
+          dryWeight: dryWeight,
+          dryMix: dryMix,
+          wetMix: wetMix,
+          waterLiter: waterLitre,
+          tempMat: tempMat,
+          tempWater: tempWater,
+          phWater: phVal,
+          thickness: thickness,
+          resDim: 'OK',
+          resVis: 'OK',
+          comment: 'Diinput via Scan OCR Kamera'
+        });
+        renderCastableReportForm();
+        switchTab('castable');
+      } else if (target === 'mixing') {
+        const pct = dryWeight > 0 ? Number(((waterLitre / dryWeight) * 100).toFixed(2)) : 0;
+        appState.mixingReport.rows.push({
+          id: 'mx_ocr_' + Date.now(),
+          date: '2025-10-19',
+          time: '14:30',
+          materialName: materialName,
+          dryMixTime: dryMix,
+          wetMixTime: wetMix,
+          castableQty: dryWeight,
+          castableUnit: 'Kg',
+          waterLitre: waterLitre,
+          waterPercent: pct,
+          waterPh: phVal,
+          tempWater: tempWater,
+          tempAmbient: tempAmb
+        });
+        renderMixingReportForm();
+        switchTab('mixing');
+      }
+
+      saveAllToStorage(false);
+      closeOcrModal();
+      showToast('Data hasil Scan OCR Kamera berhasil dimasukkan ke form!', 'success');
+    }
+
+    // ============================================================
+    // MODULE 7: OFFICIAL PDF PREVIEW & EXPORT (4 ATTACHED PDF LAYOUTS)
+    // ============================================================
+    function getValmetLogoSvg() {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="125" height="36" viewBox="0 0 150 42">
+        <text x="4" y="29" font-family="Arial, sans-serif" font-weight="900" font-size="27" fill="#1e293b" letter-spacing="-0.5">Valmet</text>
+        <path d="M110,7 L128,7 L140,21 L128,35 L110,35 L122,21 Z" fill="#22c55e"/>
+        <path d="M102,13 L112,13 L119,21 L112,29 L102,29 L109,21 Z" fill="#86efac"/>
+      </svg>`;
+    }
+
+    function getRgdLogoSvg() {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="44" viewBox="0 0 80 54">
+        <polygon points="40,4 8,40 72,40" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M26,37 C28,23 35,28 38,16 C42,26 46,20 50,30 C52,25 55,32 55,37 Z" fill="#dc2626"/>
+        <text x="40" y="52" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#1e1b4b" text-anchor="middle" letter-spacing="2">RGD</text>
+      </svg>`;
+    }
+
+    function setPreviewDoc(docKey) {
+      activePreviewDoc = docKey;
+      ['daily', 'material', 'castable', 'mixing', 'all'].forEach(k => {
+        const btn = document.getElementById(`prevBtn-${k}`);
+        if (btn) {
+          btn.className = k === docKey
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200';
+        }
+      });
+      renderPdfPreviewSheets();
+    }
+
+    function renderPdfPreviewSheets() {
+      const container = document.getElementById('pdfRenderContainer');
+      if (!container) return;
+      let html = '';
+
+      if (activePreviewDoc === 'daily' || activePreviewDoc === 'all') {
+        html += buildDailyReportPdfHtml();
+      }
+      if (activePreviewDoc === 'material' || activePreviewDoc === 'all') {
+        html += buildMaterialReportPdfHtml();
+      }
+      if (activePreviewDoc === 'castable' || activePreviewDoc === 'all') {
+        html += buildCastableReportPdfHtml();
+      }
+      if (activePreviewDoc === 'mixing' || activePreviewDoc === 'all') {
+        html += buildMixingReportPdfHtml();
+      }
+
+      container.innerHTML = html;
+    }
+
+    // 1. HTML REPLICA OF Daily Report.pdf
+    function buildDailyReportPdfHtml() {
+      const dr = appState.dailyReport;
+      const totalMp = dr.personnel.reduce((a, b) => a + (Number(b.count) || 0), 0);
+      const personnelRowsHtml = dr.personnel.map(p => `
+        <tr>
+          <td class="py-0.5 pr-2 font-medium">${escapeHtml(p.role)}</td>
+          <td class="py-0.5 px-1">:</td>
+          <td class="py-0.5 px-2 border-b border-black text-center font-bold w-14">${Number(p.count) || 0}</td>
+          <td class="py-0.5 pl-2">${escapeHtml(p.unit || 'Persons')}</td>
+        </tr>
+      `).join('');
+
+      let actRowsHtml = '';
+      const maxRows = Math.max(10, dr.activities.length);
+      for (let i = 0; i < maxRows; i++) {
+        const act = dr.activities[i];
+        actRowsHtml += `
+          <tr class="h-6">
+            <td class="border border-black text-center font-semibold">${i < dr.activities.length ? (i + 1) : ''}</td>
+            <td class="border border-black px-2">${act ? escapeHtml(act.description) : ''}</td>
+            <td class="border border-black text-center font-semibold">${act ? (Number(act.percentage) || 0) : ''}</td>
+            <td class="border border-black text-center">${act ? escapeHtml(act.unit || '%') : ''}</td>
+          </tr>
+        `;
+      }
+
+      const photosHtml = (dr.photos || []).map(ph => `
+        <div class="border border-slate-400 p-1 bg-white">
+          <img src="${ph.dataUrl}" alt="Photo" class="w-full h-28 object-cover" />
+          <div class="text-[9px] text-center font-medium mt-0.5 truncate">${escapeHtml(ph.caption || '')}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="report-sheet max-w-[1020px] mx-auto p-6 border border-slate-300">
+          <!-- Header Box -->
+          <table class="w-full border-collapse border-2 border-black mb-3">
+            <tr>
+              <td class="border border-black p-2 w-1/4 text-center align-middle">${getValmetLogoSvg()}</td>
+              <td class="border border-black p-2 w-2/4 text-center align-middle">
+                <div class="text-xl font-extrabold tracking-wide">DAILY REPORT</div>
+              </td>
+              <td class="border border-black p-2 w-1/4 text-center align-middle">${getRgdLogoSvg()}</td>
+            </tr>
+          </table>
+
+          <!-- Info & Manpower Grid -->
+          <div class="grid grid-cols-12 gap-4 text-xs mb-3 px-1">
+            <div class="col-span-7">
+              <table class="w-full">
+                <tr>
+                  <td class="py-1 w-28 font-medium">No</td>
+                  <td class="py-1 w-3">:</td>
+                  <td class="py-1 border-b border-black font-semibold">${escapeHtml(dr.no)}</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-medium">Project Name</td>
+                  <td class="py-1">:</td>
+                  <td class="py-1 border-b border-black font-bold">${escapeHtml(dr.projectName)}</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-medium">Customer</td>
+                  <td class="py-1">:</td>
+                  <td class="py-1 border-b border-black font-semibold">${escapeHtml(dr.customer)}</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-medium">Sub. Cont</td>
+                  <td class="py-1">:</td>
+                  <td class="py-1 border-b border-black font-semibold">${escapeHtml(dr.subCont)}</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-medium">Day/Date</td>
+                  <td class="py-1">:</td>
+                  <td class="py-1 border-b border-black">${escapeHtml(dr.dateFormatted || dr.date)}</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-medium">Shift</td>
+                  <td class="py-1">:</td>
+                  <td class="py-1">
+                    <span class="inline-flex items-center gap-1 mr-4">
+                      <span class="px-2 py-0.5 rounded-full border border-black ${dr.shift.includes('1') ? 'bg-blue-600 text-white font-bold' : ''}">1</span>
+                      <span class="px-2 py-0.5 rounded-full border border-black ${dr.shift.includes('2') ? 'bg-blue-600 text-white font-bold' : ''}">2</span>
+                    </span>
+                    <span class="font-semibold">TIME : ${escapeHtml(dr.timeRange)}</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="col-span-5">
+              <table class="w-full">
+                <tr>
+                  <td class="py-0.5 pr-2 font-bold">Total MP</td>
+                  <td class="py-0.5 px-1">:</td>
+                  <td class="py-0.5 px-2 border-b border-black text-center font-extrabold w-14">${totalMp}</td>
+                  <td class="py-0.5 pl-2 font-semibold">Persons</td>
+                </tr>
+                ${personnelRowsHtml}
+              </table>
+            </div>
+          </div>
+
+          <!-- Work Description & Photo Aktivitas Table -->
+          <table class="pdf-table border-2 border-black">
+            <thead>
+              <tr>
+                <th rowspan="2" class="w-10">No</th>
+                <th class="text-center">Work Description</th>
+                <th class="w-16">Qty</th>
+                <th class="w-14">Unit</th>
+                <th rowspan="2" class="w-[45%]">Photo Aktivitas</th>
+              </tr>
+              <tr>
+                <th class="text-left font-normal px-2">Material/Product Installed</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="4" class="p-0 align-top border-none">
+                  <table class="w-full border-collapse">
+                    ${actRowsHtml}
+                  </table>
+                </td>
+                <td class="align-top p-2 border border-black">
+                  <div class="grid grid-cols-2 gap-2 min-h-[180px]">
+                    ${photosHtml || '<div class="col-span-2 text-center text-slate-400 py-12">Belum ada foto aktivitas</div>'}
+                  </div>
+                  <div class="mt-4 pt-2 border-t border-black text-xs">
+                    <div class="text-right mb-1">${escapeHtml(dr.dateFormatted || dr.date)}</div>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div class="font-semibold mb-1">Checked by:</div>
+                        <div class="h-16 flex items-center justify-center">
+                          ${appState.signatures.daily_checked ? `<img src="${appState.signatures.daily_checked}" class="max-h-14 object-contain" alt="TTD" />` : ''}
+                        </div>
+                        <div class="font-bold underline">${escapeHtml(dr.checkedBy)}</div>
+                      </div>
+                      <div>
+                        <div class="font-semibold mb-1">Reported by</div>
+                        <div class="h-16 flex items-center justify-center">
+                          ${appState.signatures.daily_reported ? `<img src="${appState.signatures.daily_reported}" class="max-h-14 object-contain" alt="TTD" />` : ''}
+                        </div>
+                        <div class="font-bold underline">${escapeHtml(dr.reportedBy)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // 2. HTML REPLICA OF Daily Report Material.pdf
+    function buildMaterialReportPdfHtml() {
+      const mr = appState.materialReport;
+      const dayHeaders = mr.dayDates.map((_, i) => `<th>Day ${i + 1}</th>`).join('');
+      const dateHeaders = mr.dayDates.map(d => `<th class="font-normal text-[10px]">${escapeHtml(d)}</th>`).join('');
+
+      const rowsHtml = mr.items.map((item, idx) => {
+        const { totalUsed, sisa } = computeMaterialRowTotals(item);
+        const dayCells = mr.dayDates.map((_, dIdx) => {
+          const v = item.days[dIdx];
+          return `<td class="text-right">${v && Number(v) !== 0 ? v : ''}</td>`;
+        }).join('');
+        return `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td>${escapeHtml(item.name)}</td>
+            <td class="text-center">${item.stock} ${escapeHtml(item.unit)}</td>
+            <td class="text-center">${totalUsed} ${escapeHtml(item.unit)}</td>
+            <td class="text-center">${sisa} ${escapeHtml(item.unit)}</td>
+            ${dayCells}
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="report-sheet max-w-[1060px] mx-auto p-6 border border-slate-300 page-break-before">
+          <table class="w-full border-collapse border-2 border-black mb-4">
+            <tr>
+              <td class="border border-black p-2 w-1/4 text-center align-middle">${getValmetLogoSvg()}</td>
+              <td class="border border-black p-2 w-2/4 text-center align-middle">
+                <div class="text-sm font-extrabold">RESUME MATERIAL</div>
+                <div class="text-sm font-extrabold">${escapeHtml(mr.projectTitle)}</div>
+                <div class="text-sm font-extrabold">${escapeHtml(mr.customerTitle)}</div>
+              </td>
+              <td class="border border-black p-2 w-1/4 text-center align-middle">${getRgdLogoSvg()}</td>
+            </tr>
+          </table>
+
+          <table class="pdf-table border-2 border-black mb-6">
+            <thead>
+              <tr>
+                <th rowspan="2" class="w-8">No</th>
+                <th rowspan="2">Nama Material</th>
+                <th rowspan="2" class="w-24">Stock</th>
+                <th rowspan="2" class="w-24">Pemakaian</th>
+                <th rowspan="2" class="w-24">Sisa</th>
+                ${dayHeaders}
+              </tr>
+              <tr>
+                ${dateHeaders}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <div class="flex justify-end pr-12 text-xs">
+            <div class="text-center w-64">
+              <div>${escapeHtml(mr.verifyPlace)}, ${escapeHtml(mr.verifyDate)}</div>
+              <div class="mt-1">Mengetahui</div>
+              <div class="h-20 flex items-center justify-center my-1">
+                ${appState.signatures.material_user ? `<img src="${appState.signatures.material_user}" class="max-h-16 object-contain" alt="TTD User" />` : ''}
+              </div>
+              <div class="border-t border-dotted border-black pt-1 font-bold">${escapeHtml(mr.verifiedByUser)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. HTML REPLICA OF Report Installed CAstable.pdf (Page 1 + Page 2)
+    function buildCastableReportPdfHtml() {
+      const ic = appState.castableReport;
+      const totalRows = Math.max(14, ic.batches.length);
+      let batchRowsHtml = '';
+
+      for (let i = 0; i < totalRows; i++) {
+        const b = ic.batches[i];
+        batchRowsHtml += `
+          <tr class="h-5">
+            <td class="text-center font-semibold">${i + 1}</td>
+            ${i === 0 ? `<td rowspan="${totalRows}" class="w-64 p-1 align-middle text-center"><img src="${ic.sketchDataUrl}" alt="Sketch" class="w-full max-h-[290px] object-contain mx-auto" /></td>` : ''}
+            <td class="text-center">${b ? escapeHtml(b.itemNo) : ''}</td>
+            <td>${b ? escapeHtml(b.material) : ''}</td>
+            <td class="text-center">${b ? escapeHtml(b.batchNo) : ''}</td>
+            <td class="text-center">${b ? b.dryWeight : ''}</td>
+            <td class="text-center">${b ? b.dryMix : ''}</td>
+            <td class="text-center">${b ? b.wetMix : ''}</td>
+            <td class="text-center">${b ? b.waterLiter : ''}</td>
+            <td class="text-center">${b ? b.tempMat : ''}</td>
+            <td class="text-center">${b ? b.tempWater : ''}</td>
+            <td class="text-center">${b ? b.phWater : ''}</td>
+            <td class="text-center">${b ? b.thickness : ''}</td>
+            <td class="text-center">${b ? escapeHtml(b.resDim) : ''}</td>
+            <td class="text-center">${b ? escapeHtml(b.resVis) : ''}</td>
+            <td>${b ? escapeHtml(b.comment) : ''}</td>
+          </tr>
+        `;
+      }
+
+      const renderStageBoxes = (arr) => {
+        const p1 = arr && arr[0] ? `<img src="${arr[0].dataUrl}" class="w-full h-44 object-contain mx-auto" />` : '<div class="h-44 flex items-center justify-center text-slate-400">Foto 1</div>';
+        const p2 = arr && arr[1] ? `<img src="${arr[1].dataUrl}" class="w-full h-44 object-contain mx-auto" />` : '<div class="h-44 flex items-center justify-center text-slate-400">Foto 2</div>';
+        return `
+          <div class="grid grid-cols-2 gap-6 p-3 border-x border-b border-black">
+            <div class="border border-black p-2">${p1}</div>
+            <div class="border border-black p-2">${p2}</div>
+          </div>
+        `;
+      };
+
+      return `
+        <!-- PAGE 1: RECORD OF REFRACTORY INSTALLATION BY CASTING -->
+        <div class="report-sheet max-w-[1100px] mx-auto p-5 border border-slate-300 page-break-before">
+          <table class="pdf-table border-2 border-black">
+            <tr>
+              <td rowspan="3" class="w-28 text-center align-middle">${getRgdLogoSvg()}</td>
+              <td rowspan="3" class="w-40 text-center align-middle">${getValmetLogoSvg()}</td>
+              <td rowspan="3" class="text-center align-middle font-extrabold text-sm">
+                RECORD OF REFRACTORY INSTALLATION BY<br/>CASTING
+              </td>
+              <td class="w-28 font-bold">Report No.</td>
+              <td class="w-44 font-bold">: ${escapeHtml(ic.reportNo)}</td>
+            </tr>
+            <tr>
+              <td class="font-bold">Rev No.</td>
+              <td>: ${escapeHtml(ic.revNo)}</td>
+            </tr>
+            <tr>
+              <td class="font-bold">Page</td>
+              <td>: ${escapeHtml(ic.pageNo)}</td>
+            </tr>
+          </table>
+
+          <table class="pdf-table border-x-2 border-b border-black text-[11px]">
+            <tr>
+              <td class="w-1/4"><strong>Date:</strong> ${escapeHtml(ic.date)}</td>
+              <td class="w-1/4"><strong>Shift:</strong> ${escapeHtml(ic.shift)}</td>
+              <td class="w-1/4"><strong>Job No.:</strong> ${escapeHtml(ic.jobNo)}</td>
+              <td class="w-1/4"><strong>Drawing No.: / Line No.:</strong> ${escapeHtml(ic.drawingNo)}</td>
+              <td class="w-32 text-center font-bold">Type of Mixer:</td>
+              <td class="w-32 text-center font-bold">${escapeHtml(ic.mixerType)}</td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold">Project Description:</td>
+              <td colspan="2" class="text-center font-extrabold text-xs">${escapeHtml(ic.projectDesc)}</td>
+              <td class="text-center font-bold">Client Details: <span class="font-extrabold ml-2">${escapeHtml(ic.customer)}</span></td>
+              <td class="text-center font-bold">Location:<br/><span class="border-t border-black block mt-1 pt-0.5">Application Method:</span></td>
+              <td class="text-center font-bold">${escapeHtml(ic.location)}<br/><span class="border-t border-black block mt-1 pt-0.5 text-purple-900">${escapeHtml(ic.applicationMethod)}</span></td>
+            </tr>
+          </table>
+
+          <table class="pdf-table border-2 border-black text-[10px]">
+            <thead>
+              <tr>
+                <th rowspan="2" class="w-8">Mix Batch No.</th>
+                <th rowspan="2" class="w-64">Sketch</th>
+                <th rowspan="2" class="w-20">Item Number At Drawing</th>
+                <th rowspan="2">Material Type</th>
+                <th rowspan="2" class="w-24">Manufacturer's Batch No.</th>
+                <th rowspan="2" class="w-16">Material Dry Weight (kg)</th>
+                <th rowspan="2" class="w-14">Dry Mix Time (Minute)</th>
+                <th rowspan="2" class="w-14">Wet Mix Time (Minute)</th>
+                <th rowspan="2" class="w-16">Potable Water (Liter)</th>
+                <th colspan="2">Temperature</th>
+                <th rowspan="2" class="w-14">PH Water</th>
+                <th rowspan="2" class="w-16">Thickness (mm)</th>
+                <th colspan="2">Result</th>
+                <th rowspan="2" class="w-28">Comments / Part No.</th>
+              </tr>
+              <tr>
+                <th class="w-14">Material (°C)</th>
+                <th class="w-14">Water (°C)</th>
+                <th class="w-14">Dimension</th>
+                <th class="w-14">Visual</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${batchRowsHtml}
+            </tbody>
+          </table>
+
+          <table class="pdf-table border-x-2 border-b-2 border-black">
+            <tr>
+              <td class="w-1/2 text-center font-bold">Prepared By</td>
+              <td class="w-1/2 text-center font-bold">Reviewed/Witnessed By</td>
+            </tr>
+            <tr class="h-24">
+              <td class="text-center align-bottom pb-1">
+                <div class="h-16 flex items-center justify-center">
+                  ${appState.signatures.castable_prepared ? `<img src="${appState.signatures.castable_prepared}" class="max-h-14 object-contain" alt="TTD" />` : ''}
+                </div>
+                <div class="font-bold">${escapeHtml(ic.preparedBy)}</div>
+              </td>
+              <td class="text-center align-bottom pb-1">
+                <div class="h-16 flex items-center justify-center">
+                  ${appState.signatures.castable_reviewed ? `<img src="${appState.signatures.castable_reviewed}" class="max-h-14 object-contain" alt="TTD" />` : ''}
+                </div>
+                <div class="font-bold">${escapeHtml(ic.reviewedBy)}</div>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold">${escapeHtml(ic.preparedCompany)}</td>
+              <td class="text-center font-bold">${escapeHtml(ic.reviewedCompany)}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- PAGE 2: PHOTOGRAPH RECORD OF REFRACTORY INSTALLATION -->
+        <div class="report-sheet max-w-[1000px] mx-auto p-6 border border-slate-300 page-break-before mt-6">
+          <table class="w-full border-collapse border-2 border-black">
+            <tr>
+              <td class="border border-black p-2 w-1/4 text-center">${getRgdLogoSvg()}</td>
+              <td class="border border-black p-2 w-2/4 text-center font-extrabold text-base">RECORD OF REFRACTORY INSTALLATION</td>
+              <td class="border border-black p-2 w-1/4 text-center">${getValmetLogoSvg()}</td>
+            </tr>
+          </table>
+
+          <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">
+            PHOTOGRAPH FEEDTUBE BEFORE INSTALL REFRACTORY
+          </div>
+          ${renderStageBoxes(ic.photos.before)}
+
+          <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">
+            PHOTOGRAPH FEEDTUBE PROCESS INSTALL REFRACTORY
+          </div>
+          ${renderStageBoxes(ic.photos.process)}
+
+          <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">
+            PHOTOGRAPH FEEDTUBE AFTER INSTALL REFRACTORY
+          </div>
+          ${renderStageBoxes(ic.photos.after)}
+        </div>
+      `;
+    }
+
+    // 4. HTML REPLICA OF mixing report.pdf
+    function buildMixingReportPdfHtml() {
+      const mx = appState.mixingReport;
+      const totalRows = Math.max(20, mx.rows.length);
+      let rowsHtml = '';
+
+      for (let i = 0; i < totalRows; i++) {
+        const r = mx.rows[i];
+        rowsHtml += `
+          <tr class="h-6">
+            <td class="text-center">${r ? escapeHtml(r.date) : ''}</td>
+            <td class="text-center">${r ? escapeHtml(r.time) : ''}</td>
+            <td>${r ? escapeHtml(r.materialName) : ''}</td>
+            <td class="text-center">${r ? r.dryMixTime : ''}</td>
+            <td class="text-center">${r ? r.wetMixTime : ''}</td>
+            <td class="text-center font-semibold">${r ? r.castableQty : ''}</td>
+            <td class="text-center">${r ? escapeHtml(r.castableUnit || 'Kg') : ''}</td>
+            <td class="text-center font-semibold">${r ? r.waterLitre : ''}</td>
+            <td class="text-center">${r ? Number(r.waterPercent || 0).toFixed(1) + '%' : ''}</td>
+            <td class="text-center">${r ? r.waterPh : ''}</td>
+            <td class="text-center">${r ? r.tempWater : ''}</td>
+            <td class="text-center">${r ? r.tempAmbient : ''}</td>
+          </tr>
+        `;
+      }
+
+      return `
+        <div class="report-sheet max-w-[920px] mx-auto p-6 border border-slate-300 page-break-before">
+          <div class="flex items-center gap-3 mb-3">
+            ${getRgdLogoSvg()}
+            <div>
+              <div class="text-sm font-extrabold text-indigo-950 tracking-wide border-b-2 border-indigo-950 pb-0.5">PT. REFRACTORINDO GRAHA DINAMIKA</div>
+              <div class="text-[10px] font-semibold text-slate-600 tracking-wider mt-0.5">REFRACTORY &amp; INSULATION SERVICES</div>
+            </div>
+          </div>
+
+          <div class="border-2 border-black">
+            <div class="text-center font-extrabold text-sm py-2 border-b border-black">
+              MIXING PROCESS
+            </div>
+            <table class="pdf-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="w-24">Date</th>
+                  <th rowspan="2" class="w-16">Time</th>
+                  <th rowspan="2">Name Material</th>
+                  <th rowspan="2" class="w-20">Dry Mix Time<br/>(Minute)</th>
+                  <th rowspan="2" class="w-20">Wet Mix Time<br/>(Minute)</th>
+                  <th colspan="2">Castable</th>
+                  <th colspan="3">Water</th>
+                  <th colspan="2">Temp. ( °C )</th>
+                </tr>
+                <tr>
+                  <th class="w-16">Qty</th>
+                  <th class="w-14">Unit</th>
+                  <th class="w-16">Litre</th>
+                  <th class="w-16">%</th>
+                  <th class="w-14">PH</th>
+                  <th class="w-16">Water</th>
+                  <th class="w-16">Ambient</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid grid-cols-2 gap-12 mt-6 px-10 text-xs">
+            <div class="text-center">
+              <div class="font-semibold">Prepared,by</div>
+              <div class="h-20 flex items-center justify-center">
+                ${appState.signatures.mixing_prepared ? `<img src="${appState.signatures.mixing_prepared}" class="max-h-16 object-contain" alt="TTD" />` : ''}
+              </div>
+              <div class="border-t border-dotted border-black pt-1 font-bold">${escapeHtml(mx.preparedBy)}</div>
+            </div>
+            <div class="text-center">
+              <div class="font-semibold">Review,by</div>
+              <div class="h-20 flex items-center justify-center">
+                ${appState.signatures.mixing_reviewed ? `<img src="${appState.signatures.mixing_reviewed}" class="max-h-16 object-contain" alt="TTD" />` : ''}
+              </div>
+              <div class="border-t border-dotted border-black pt-1 font-bold">${escapeHtml(mx.reviewedBy)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function downloadActivePdf() {
+      const element = document.getElementById('pdfRenderContainer');
+      if (!element) return;
+      if (!window.html2pdf) {
+        window.print();
+        return;
+      }
+      showToast('Menyiapkan file PDF untuk diunduh...', 'info');
+      const filenameMap = {
+        daily: 'Hidayat_Project_Daily_Report.pdf',
+        material: 'Hidayat_Project_Daily_Report_Material.pdf',
+        castable: 'Hidayat_Project_Report_Installed_Castable.pdf',
+        mixing: 'Hidayat_Project_Mixing_Report.pdf',
+        all: 'Hidayat_Project_Complete_Refractory_Reports.pdf'
+      };
+      const opt = {
+        margin: [6, 6, 6, 6],
+        filename: filenameMap[activePreviewDoc] || 'Hidayat_Project_Report.pdf',
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: activePreviewDoc === 'mixing' ? 'portrait' : 'landscape' }
+      };
+      window.html2pdf().set(opt).from(element).save().then(() => {
+        showToast('File PDF berhasil diunduh!', 'success');
+      });
+    }
+
+    // ============================================================
+    // BACKUP EXPORT / IMPORT / RESET UTILITIES
+    // ============================================================
+    function toggleDataMenu() {
+      const menu = document.getElementById('dataDropdownMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function exportJsonBackup() {
+      toggleDataMenu();
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Hidayat_Project_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('File backup JSON berhasil diunduh!', 'success');
+    }
+
+    function importJsonBackup(event) {
+      toggleDataMenu();
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          appState = Object.assign(getDefaultState(), parsed);
+          saveAllToStorage(false);
+          renderAllModules();
+          showToast('Data backup JSON berhasil dipulihkan!', 'success');
+        } catch (err) {
+          showToast('Format file JSON tidak valid.', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function openResetConfirmModal() {
+      toggleDataMenu();
+      const m = document.getElementById('resetConfirmModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeResetConfirmModal() {
+      const m = document.getElementById('resetConfirmModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function confirmResetToDefault() {
+      appState = getDefaultState();
+      saveAllToStorage(false);
+      renderAllModules();
+      closeResetConfirmModal();
+      showToast('Data berhasil di-reset ke data contoh 4 dokumen PDF!', 'success');
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderAllModules() {
+      renderDailyReportForm();
+      renderMaterialReportForm();
+      renderCastableReportForm();
+      renderMixingReportForm();
+      updateKpiBanner();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      renderAllModules();
+    });
+  </script>
+</body>
+</html>
