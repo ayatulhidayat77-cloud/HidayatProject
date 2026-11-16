@@ -74,6 +74,14 @@
         page-break-before: always;
       }
     }
+    .login-glass {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .google-btn-shadow {
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.18), 0 0 1px 0 rgba(0,0,0,0.08);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -111,8 +119,14 @@
           <span>Simpan Data</span>
         </button>
 
-        <!-- TOMBOL LOGIN AKUN GOOGLE -->
-        <button type="button" id="headerGoogleAuthBtn" onclick="openGoogleAuthModal()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition">
+        <!-- TOMBOL PENGATURAN LOGO PERUSAHAAN -->
+        <button type="button" onclick="switchTab('settings')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow transition" title="Pengaturan Logo Valmet / RGD & Identitas Perusahaan">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Ganti Logo</span>
+        </button>
+
+        <!-- TOMBOL PORTAL LOGIN GOOGLE PROFESIONAL -->
+        <button type="button" id="headerGoogleAuthBtn" onclick="openEnterpriseLoginScreen()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition" title="Buka Menu Login Profesional & Akun Google">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
@@ -169,6 +183,14 @@
         <button type="button" id="tabBtn-preview" onclick="switchTab('preview')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
           <i data-lucide="file-text" class="w-4 h-4"></i>
           <span>5. Dokumen PDF Akhir (4 Format)</span>
+        </button>
+        <button type="button" id="tabBtn-settings" onclick="switchTab('settings')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="building-2" class="w-4 h-4 text-purple-400"></i>
+          <span>6. Pengaturan &amp; Logo (Valmet / RGD)</span>
+        </button>
+        <button type="button" id="tabBtn-loginportal" onclick="openEnterpriseLoginScreen()" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          <span>7. Menu Login Google Pro</span>
         </button>
       </div>
     </div>
@@ -1056,6 +1078,188 @@
       <div id="pdfRenderContainer" class="space-y-8 overflow-x-auto pb-8"></div>
     </section>
 
+    <!-- ========================================================== -->
+    <!-- MODULE 6: MENU PENGATURAN & GANTI LOGO PERUSAHAAN          -->
+    <!-- ========================================================== -->
+    <section id="section-settings" class="space-y-6 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <i data-lucide="building-2" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="text-base font-bold">6. Pengaturan Identitas &amp; Ganti Logo Perusahaan (Valmet / RGD)</h2>
+              <p class="text-xs text-slate-300">Kustomisasi logo Customer (Valmet) &amp; Kontraktor (RGD) untuk seluruh kop surat laporan PDF dan aplikasi</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="resetAllLogosToDefault()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Kembalikan Kedua Logo Standar</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('daily', 'filled')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Lihat Hasil Kop PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-6">
+          <!-- Pratinjau Langsung Kop Surat Dokumen PDF -->
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                <i data-lucide="layout-template" class="w-4 h-4 text-purple-600"></i>
+                <span>Pratinjau Langsung Kop Surat Resmi (Live Header Preview)</span>
+              </span>
+              <span class="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">Otomatis Diterapkan ke Semua 4 Laporan PDF</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-300 shadow-xs overflow-x-auto">
+              <table class="w-full border-collapse border-2 border-black min-w-[640px]">
+                <tr>
+                  <td id="livePreviewLogoLeft" class="border border-black p-3 w-1/4 text-center align-middle"></td>
+                  <td class="border border-black p-3 w-2/4 text-center align-middle">
+                    <div id="livePreviewHeaderTitle" class="text-base font-extrabold tracking-wide text-slate-900">DAILY REPORT / RESUME MATERIAL</div>
+                    <div id="livePreviewSubTitle" class="text-xs font-bold text-slate-700 mt-0.5">PT. REFRACTORINDO GRAHA DINAMIKA</div>
+                  </td>
+                  <td id="livePreviewLogoRight" class="border border-black p-3 w-1/4 text-center align-middle"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Grid 2 Kartu Pengaturan Logo: Logo 1 (Valmet / Client) & Logo 2 (RGD / Kontraktor) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- KARTU 1: LOGO CUSTOMER / CLIENT (DEFAULT: VALMET) -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Logo Kiri / Client</span>
+                    <h3 class="text-sm font-bold text-slate-900 mt-1">Logo Perusahaan Client / Customer (Default: Valmet)</h3>
+                    <p class="text-xs text-slate-500">Tampil di kop Daily Report, Resume Material, dan Installed Castable</p>
+                  </div>
+                  <button type="button" onclick="resetSingleLogo('valmet')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-100 text-slate-700">
+                    Reset Valmet
+                  </button>
+                </div>
+
+                <!-- Kotak Pratinjau Logo Valmet/Client -->
+                <div class="h-32 rounded-xl bg-white border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                  <div id="settingsPreviewBox_valmet" class="flex items-center justify-center max-h-24"></div>
+                </div>
+
+                <!-- Tombol Upload & Kamera Logo Client -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <input type="file" id="logoInput_valmet" accept="image/*" class="hidden" onchange="handleCompanyLogoUpload('valmet', event)" />
+                  <input type="file" id="logoCamInput_valmet" accept="image/*" capture="environment" class="hidden" onchange="handleCompanyLogoUpload('valmet', event)" />
+
+                  <button type="button" onclick="document.getElementById('logoInput_valmet').click()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-xs flex items-center justify-center gap-2 transition">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span>Upload Logo Baru (File)</span>
+                  </button>
+                  <button type="button" onclick="document.getElementById('logoCamInput_valmet').click()" class="py-2.5 px-3 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center justify-center gap-2 transition">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Foto Logo via Kamera</span>
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Perusahaan Client Default</label>
+                    <input type="text" id="set_clientCompanyName" oninput="updateBrandingField('clientCompanyName', this.value)" placeholder="PT. VALMET" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white font-semibold" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tinggi Logo Client di PDF (<span id="lblHeight_valmet">40</span>px)</label>
+                    <input type="range" id="set_valmetHeight" min="24" max="68" value="40" oninput="updateBrandingField('valmetLogoHeight', this.value)" class="w-full accent-blue-600 mt-1.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KARTU 2: LOGO KONTRAKTOR PELAKSANA (DEFAULT: RGD) -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-orange-100 text-orange-800">Logo Kanan / Kontraktor</span>
+                    <h3 class="text-sm font-bold text-slate-900 mt-1">Logo Kontraktor Pelaksana (Default: RGD)</h3>
+                    <p class="text-xs text-slate-500">Tampil di semua 4 laporan PDF termasuk kop Mixing Process</p>
+                  </div>
+                  <button type="button" onclick="resetSingleLogo('rgd')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-100 text-slate-700">
+                    Reset RGD
+                  </button>
+                </div>
+
+                <!-- Kotak Pratinjau Logo RGD/Kontraktor -->
+                <div class="h-32 rounded-xl bg-white border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                  <div id="settingsPreviewBox_rgd" class="flex items-center justify-center max-h-24"></div>
+                </div>
+
+                <!-- Tombol Upload & Kamera Logo Kontraktor -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <input type="file" id="logoInput_rgd" accept="image/*" class="hidden" onchange="handleCompanyLogoUpload('rgd', event)" />
+                  <input type="file" id="logoCamInput_rgd" accept="image/*" capture="environment" class="hidden" onchange="handleCompanyLogoUpload('rgd', event)" />
+
+                  <button type="button" onclick="document.getElementById('logoInput_rgd').click()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow-xs flex items-center justify-center gap-2 transition">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span>Upload Logo Baru (File)</span>
+                  </button>
+                  <button type="button" onclick="document.getElementById('logoCamInput_rgd').click()" class="py-2.5 px-3 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center justify-center gap-2 transition">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Foto Logo via Kamera</span>
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Perusahaan Kontraktor (Kop Mixing)</label>
+                    <input type="text" id="set_contractorCompanyName" oninput="updateBrandingField('contractorCompanyName', this.value)" placeholder="PT. REFRACTORINDO GRAHA DINAMIKA" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white font-semibold" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Sub-Judul Layanan Kontraktor</label>
+                    <input type="text" id="set_contractorTagline" oninput="updateBrandingField('contractorTagline', this.value)" placeholder="REFRACTORY & INSULATION SERVICES" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Inisial Singkat Kontraktor (Footer Tabel)</label>
+                    <input type="text" id="set_contractorShortCode" oninput="updateBrandingField('contractorShortCode', this.value)" placeholder="RGD" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tinggi Logo Kontraktor di PDF (<span id="lblHeight_rgd">46</span>px)</label>
+                    <input type="range" id="set_rgdHeight" min="24" max="68" value="46" oninput="updateBrandingField('rgdLogoHeight', this.value)" class="w-full accent-orange-600 mt-1.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pengaturan Keamanan Portal Login -->
+          <div class="bg-slate-900 text-white rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold">Pengaturan Portal Login Enterprise &amp; Integrasi Google</h4>
+                <p class="text-xs text-slate-400">Aktifkan layar kunci otomatis saat aplikasi dibuka atau uji tampilan Portal Login Google Profesional sekarang</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="inline-flex items-center gap-2 text-xs font-semibold bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700 cursor-pointer">
+                <input type="checkbox" id="chkRequireLoginOnStart" onchange="toggleRequireLoginOnStartup(this.checked)" class="rounded border-slate-600 text-orange-500 focus:ring-orange-500" />
+                <span>Tampilkan Layar Login Saat Aplikasi Dibuka</span>
+              </label>
+              <button type="button" onclick="openEnterpriseLoginScreen()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white shadow-lg transition">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Buka Layar Login Profesional</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ============================================================ -->
@@ -1242,148 +1446,236 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- MODAL 4: LOGIN AKUN GOOGLE & SINKRONISASI CLOUD              -->
+  <!-- MODAL 4: PORTAL LOGIN ENTERPRISE & INTEGRASI GOOGLE PRO      -->
   <!-- ============================================================ -->
-  <div id="googleAuthModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow">
-            <svg class="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-              <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-              <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
-            </svg>
+  <div id="googleAuthModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-6 overflow-y-auto no-print">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-5xl w-full border border-slate-800 shadow-2xl overflow-hidden my-auto grid grid-cols-1 lg:grid-cols-12">
+
+      <!-- PANEL KIRI: ENTERPRISE BRANDING, LIVE SYSTEM STATUS & ACTIVE LOGOS -->
+      <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative overflow-hidden">
+        <div class="relative z-10 space-y-6">
+          <!-- Brand Header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center font-extrabold text-lg shadow-lg shadow-orange-500/20">
+                HP
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-base font-extrabold tracking-tight text-white">HIDAYAT PROJECT</span>
+                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Enterprise</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Refractory &amp; Insulation Digital System</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 class="text-sm font-bold">Login Akun Google — Hidayat Project</h3>
-            <p class="text-[11px] text-slate-400">Otorisasi Pelapor, QC Reviewer &amp; Sinkronisasi Cloud Google Drive</p>
+
+          <div class="space-y-2">
+            <h2 class="text-xl sm:text-2xl font-extrabold leading-tight text-white">
+              Sistem Manajemen &amp; Pelaporan Proyek Refractory Terpadu
+            </h2>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Akses terenkripsi dengan integrasi <strong>Google Workspace / Google Identity</strong> untuk otorisasi Daily Report, Resume Material, Installed Castable, dan Mixing Process.
+            </p>
+          </div>
+
+          <!-- Pratinjau Kedua Logo Perusahaan Aktif di Layar Login -->
+          <div class="bg-white/95 text-slate-900 rounded-2xl p-3.5 shadow-inner">
+            <div class="flex items-center justify-between text-[10px] font-bold uppercase text-slate-500 mb-2">
+              <span>Mitra Proyek Terdaftar</span>
+              <button type="button" onclick="closeGoogleAuthModal(); switchTab('settings');" class="text-purple-700 hover:underline flex items-center gap-1">
+                <span>Ubah Logo</span> →
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 items-center py-1">
+              <div id="loginPortalLogoValmet" class="flex items-center justify-center p-1.5 border border-slate-200 rounded-xl bg-white h-14"></div>
+              <div id="loginPortalLogoRgd" class="flex items-center justify-center p-1.5 border border-slate-200 rounded-xl bg-white h-14"></div>
+            </div>
+          </div>
+
+          <!-- Indikator Modul & Keamanan Sistem -->
+          <div class="grid grid-cols-2 gap-2.5 text-[11px]">
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-slate-200 font-medium">Google OAuth 2.0 Ready</span>
+            </div>
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+              <span class="text-slate-200 font-medium">Cloud Drive JSON Sync</span>
+            </div>
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+              <span class="text-slate-200 font-medium">Digital Signature Pad</span>
+            </div>
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+              <span class="text-slate-200 font-medium">Tesseract OCR v5.0</span>
+            </div>
           </div>
         </div>
-        <button type="button" onclick="closeGoogleAuthModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+
+        <div class="relative z-10 pt-5 mt-5 border-t border-slate-800/90 flex items-center justify-between text-[11px] text-slate-400">
+          <span>© 2025–2026 Hidayat Project</span>
+          <span class="text-emerald-400 font-semibold">SSL / Local-First Encrypted</span>
+        </div>
       </div>
 
-      <div class="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
-        <!-- Status Akun Saat Ini -->
-        <div id="googleCurrentAccountCard" class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div id="googleProfileAvatar" class="w-11 h-11 rounded-full bg-orange-600 text-white font-extrabold text-sm flex items-center justify-center shadow">
-              DH
-            </div>
+      <!-- PANEL KANAN: FORM LOGIN PROFESIONAL & GOOGLE ACCOUNT CHOOSER -->
+      <div class="lg:col-span-7 bg-white text-slate-900 p-6 sm:p-8 flex flex-col justify-between max-h-[88vh] overflow-y-auto custom-scrollbar">
+        <div class="space-y-5">
+          <!-- Top Bar Panel Kanan -->
+          <div class="flex items-start justify-between gap-3">
             <div>
-              <div class="flex items-center gap-2">
-                <p id="googleProfileName" class="text-sm font-bold text-slate-900">Belum Login</p>
-                <span id="googleProfileBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Tamu / Offline</span>
-              </div>
-              <p id="googleProfileEmail" class="text-xs text-slate-500">Pilih akun Google di bawah untuk masuk</p>
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                <span>Portal Autentikasi Pengguna</span>
+              </span>
+              <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">Masuk ke Dashboard Hidayat Project</h3>
+              <p class="text-xs text-slate-500">Gunakan akun Google resmi Anda untuk tanda tangan otomatis &amp; sinkronisasi laporan</p>
             </div>
-          </div>
-          <button type="button" id="btnGoogleLogout" onclick="logoutGoogleAccount()" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">
-            Logout
-          </button>
-        </div>
-
-        <!-- Daftar Pilih Cepat Akun Google (Google Account Chooser) -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Pilih Akun Google untuk Login Cepat:</label>
-          <div class="space-y-2">
-            <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Owner', '#ea580c')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center">DH</div>
-                <div>
-                  <p class="text-xs font-bold text-slate-900">Deni Hidayat</p>
-                  <p class="text-[11px] text-slate-500">deni.hidayat@gmail.com • Project Manager / Admin Utama</p>
-                </div>
-              </div>
-              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
-            </button>
-
-            <button type="button" onclick="loginWithGooglePreset('Ardenata Dwi Prakoso', 'ardenata.rgd@gmail.com', 'Site Leader / Pelapor RGD', '#2563eb')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">AD</div>
-                <div>
-                  <p class="text-xs font-bold text-slate-900">Ardenata Dwi Prakoso</p>
-                  <p class="text-[11px] text-slate-500">ardenata.rgd@gmail.com • Reported / Prepared By (RGD)</p>
-                </div>
-              </div>
-              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
-            </button>
-
-            <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">RY</div>
-                <div>
-                  <p class="text-xs font-bold text-slate-900">Ryan</p>
-                  <p class="text-[11px] text-slate-500">ryan.valmet@gmail.com • Checked / Reviewed By (Valmet)</p>
-                </div>
-              </div>
-              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
+            <button type="button" onclick="closeGoogleAuthModal()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tutup & Lanjutkan ke Aplikasi">
+              <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
-        </div>
 
-        <!-- Form Login Akun Google Lain / Kustom -->
-        <div class="pt-3 border-t border-slate-200">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">Atau Masuk dengan Akun Google Lainnya:</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap Akun Google</label>
-              <input type="text" id="customGoogleName" placeholder="Nama Anda" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300" />
+          <!-- Status Sesi Aktif -->
+          <div id="googleCurrentAccountCard" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+              <div id="googleProfileAvatar" class="w-12 h-12 rounded-2xl bg-orange-600 text-white font-extrabold text-base flex items-center justify-center shadow-md ring-2 ring-white/20">
+                DH
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <p id="googleProfileName" class="text-sm font-extrabold text-white">Deni Hidayat</p>
+                  <span id="googleProfileBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Project Manager</span>
+                </div>
+                <p id="googleProfileEmail" class="text-xs text-slate-300 mt-0.5">deni.hidayat@gmail.com</p>
+              </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Alamat Email Google (@gmail.com)</label>
-              <input type="email" id="customGoogleEmail" placeholder="nama@gmail.com" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300" />
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="applyGoogleUserToReports()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition" title="Isi nama akun ini ke kolom Pelapor/Prepared By">
+                Terapkan ke 4 Form
+              </button>
+              <button type="button" id="btnGoogleLogout" onclick="logoutGoogleAccount()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30 transition">
+                Logout
+              </button>
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Jabatan / Role di Proyek</label>
-              <select id="customGoogleRole" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                <option value="Project Manager">Project Manager</option>
-                <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
-                <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
-                <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
-              </select>
+          </div>
+
+          <!-- TOMBOL UTAMA: SIGN IN WITH GOOGLE (ONE-TAP & POPUP CHOOSER) -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Single Sign-On (Google Identity Services):</label>
+              <span id="googleOauthLoadingBadge" class="hidden text-[11px] font-semibold text-blue-600 animate-pulse">Memverifikasi Token Google OAuth...</span>
             </div>
-            <div class="flex items-end">
-              <button type="button" onclick="loginWithCustomGoogleAccount()" class="w-full py-2 px-3 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition flex items-center justify-center gap-1.5">
+
+            <button type="button" onclick="triggerGoogleOneTapAnimation()" class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 google-btn-shadow flex items-center justify-center gap-3 transition group">
+              <svg class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+                <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
+              </svg>
+              <span>Lanjutkan dengan Akun Google (Google One-Tap SSO)</span>
+              <span class="ml-auto text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">Terintegrasi</span>
+            </button>
+
+            <!-- Daftar Akun Google Terdaftar di Perangkat -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Owner', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+                <div class="w-8 h-8 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center shrink-0">DH</div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">Deni Hidayat</p>
+                  <p class="text-[10px] text-slate-500 truncate">deni.hidayat@gmail.com</p>
+                </div>
+              </button>
+
+              <button type="button" onclick="loginWithGooglePreset('Ardenata Dwi Prakoso', 'ardenata.rgd@gmail.com', 'Site Leader / Pelapor RGD', '#2563eb')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+                <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">AD</div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">Ardenata D.P.</p>
+                  <p class="text-[10px] text-slate-500 truncate">ardenata.rgd@gmail.com</p>
+                </div>
+              </button>
+
+              <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">RY</div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">Ryan (Valmet)</p>
+                  <p class="text-[10px] text-slate-500 truncate">ryan.valmet@gmail.com</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Atau Login Akun Google / Kredensial Proyek</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <!-- Form Login Kredensial & Akun Google Baru -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Lengkap Pengguna</label>
+                <div class="relative">
+                  <input type="text" id="customGoogleName" placeholder="Contoh: Deni Hidayat" class="w-full pl-3 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Email Google (@gmail.com / Korporat)</label>
+                <input type="email" id="customGoogleEmail" placeholder="nama@gmail.com" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Jabatan / Role Otorisasi</label>
+                <select id="customGoogleRole" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium">
+                  <option value="Project Manager / Admin Utama">Project Manager / Admin Utama</option>
+                  <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
+                  <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
+                  <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">PIN / Kode Akses Proyek (Opsional)</label>
+                <input type="password" id="customGooglePin" value="123456" placeholder="••••••" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                <input type="checkbox" checked class="rounded border-slate-300 text-blue-600" />
+                <span>Ingat sesi Google &amp; tanda tangan saya di perangkat ini</span>
+              </label>
+              <button type="button" onclick="loginWithCustomGoogleAccount()" class="py-2.5 px-5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md transition flex items-center gap-2">
                 <i data-lucide="log-in" class="w-4 h-4"></i>
                 <span>Login Akun Google Ini</span>
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Opsi Terapkan ke Laporan & Sinkronisasi Google Drive Apps Script -->
-        <div class="pt-3 border-t border-slate-200 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 p-3 rounded-xl border border-blue-200">
-            <div class="text-xs text-blue-900">
-              <p class="font-bold">Isi Otomatis Nama Pelapor dari Akun Google</p>
-              <p class="text-[11px] text-blue-700">Terapkan nama akun Google yang sedang login ke kolom Reported By / Prepared By</p>
-            </div>
-            <button type="button" onclick="applyGoogleUserToReports()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition">
-              Terapkan ke 4 Form
-            </button>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <i data-lucide="cloud" class="w-4 h-4 text-emerald-600"></i>
-                <span>Endpoint Sinkronisasi Google Drive (Apps Script /exec Opsional)</span>
+          <!-- Sinkronisasi Cloud Google Drive & OAuth Client ID -->
+          <div class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                <i data-lucide="cloud-cog" class="w-4 h-4 text-emerald-600"></i>
+                <span>Integrasi Cloud Google Drive (Apps Script Web App /exec)</span>
               </span>
-              <button type="button" onclick="syncToGoogleDriveCloud()" class="px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+              <button type="button" onclick="syncToGoogleDriveCloud()" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition">
                 Sync ke Google Drive
               </button>
             </div>
-            <input type="url" id="googleGasUrlInput" oninput="updateGoogleGasUrl(this.value)" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono" />
+            <input type="url" id="googleGasUrlInput" oninput="updateGoogleGasUrl(this.value)" placeholder="https://script.google.com/macros/s/.../exec (Opsional untuk Auto-Backup Cloud)" class="w-full px-3 py-1.5 text-xs rounded-xl border border-emerald-300 bg-white font-mono" />
           </div>
         </div>
-      </div>
 
-      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-end shrink-0">
-        <button type="button" onclick="closeGoogleAuthModal()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700">Selesai &amp; Tutup</button>
+        <div class="pt-4 mt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-[11px] text-slate-500">Klik <strong>Masuk ke Dashboard</strong> untuk melanjutkan pengisian 4 laporan</span>
+          <button type="button" onclick="closeGoogleAuthModal()" class="px-5 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow transition">
+            Selesai &amp; Tutup
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1604,6 +1896,18 @@
           ]
         },
 
+        branding: {
+          valmetCustomLogo: '',
+          rgdCustomLogo: '',
+          valmetLogoHeight: 40,
+          rgdLogoHeight: 46,
+          clientCompanyName: 'PT. VALMET',
+          contractorCompanyName: 'PT. REFRACTORINDO GRAHA DINAMIKA',
+          contractorTagline: 'REFRACTORY & INSULATION SERVICES',
+          contractorShortCode: 'RGD',
+          requireLoginOnStart: false
+        },
+
         googleAuth: {
           isLoggedIn: true,
           name: 'Deni Hidayat',
@@ -1673,7 +1977,7 @@
     // ============================================================
     function switchTab(tabId) {
       activeTab = tabId;
-      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview'];
+      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview', 'settings'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
@@ -1692,6 +1996,9 @@
 
       if (tabId === 'preview') {
         renderPdfPreviewSheets();
+      }
+      if (tabId === 'settings') {
+        renderBrandingSettingsUI();
       }
       if (window.lucide) window.lucide.createIcons();
     }
@@ -3254,20 +3561,172 @@
     // ============================================================
     // MODULE 7: OFFICIAL PDF PREVIEW & EXPORT (4 ATTACHED PDF LAYOUTS)
     // ============================================================
-    function getValmetLogoSvg() {
-      return `<svg xmlns="http://www.w3.org/2000/svg" width="125" height="36" viewBox="0 0 150 42">
+    function getDefaultValmetSvgMarkup(heightPx = 38) {
+      const widthPx = Math.round(heightPx * 3.4);
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}" height="${heightPx}" viewBox="0 0 150 42" style="display:inline-block;vertical-align:middle;">
         <text x="4" y="29" font-family="Arial, sans-serif" font-weight="900" font-size="27" fill="#1e293b" letter-spacing="-0.5">Valmet</text>
         <path d="M110,7 L128,7 L140,21 L128,35 L110,35 L122,21 Z" fill="#22c55e"/>
         <path d="M102,13 L112,13 L119,21 L112,29 L102,29 L109,21 Z" fill="#86efac"/>
       </svg>`;
     }
 
-    function getRgdLogoSvg() {
-      return `<svg xmlns="http://www.w3.org/2000/svg" width="68" height="44" viewBox="0 0 80 54">
+    function getDefaultRgdSvgMarkup(heightPx = 44, shortCode = 'RGD') {
+      const widthPx = Math.round(heightPx * 1.55);
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}" height="${heightPx}" viewBox="0 0 80 54" style="display:inline-block;vertical-align:middle;">
         <polygon points="40,4 8,40 72,40" fill="none" stroke="#1e1b4b" stroke-width="4" stroke-linejoin="round"/>
         <path d="M26,37 C28,23 35,28 38,16 C42,26 46,20 50,30 C52,25 55,32 55,37 Z" fill="#dc2626"/>
-        <text x="40" y="52" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#1e1b4b" text-anchor="middle" letter-spacing="2">RGD</text>
+        <text x="40" y="52" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#1e1b4b" text-anchor="middle" letter-spacing="2">${escapeHtml(shortCode || 'RGD')}</text>
       </svg>`;
+    }
+
+    function getValmetLogoSvg() {
+      const b = appState.branding || {};
+      const h = Number(b.valmetLogoHeight) || 40;
+      if (b.valmetCustomLogo) {
+        return `<img src="${b.valmetCustomLogo}" alt="Logo Client" style="max-height:${h}px; width:auto; object-fit:contain; display:inline-block; margin:0 auto;" />`;
+      }
+      return getDefaultValmetSvgMarkup(h);
+    }
+
+    function getRgdLogoSvg() {
+      const b = appState.branding || {};
+      const h = Number(b.rgdLogoHeight) || 46;
+      if (b.rgdCustomLogo) {
+        return `<img src="${b.rgdCustomLogo}" alt="Logo Kontraktor" style="max-height:${h}px; width:auto; object-fit:contain; display:inline-block; margin:0 auto;" />`;
+      }
+      return getDefaultRgdSvgMarkup(h, b.contractorShortCode || 'RGD');
+    }
+
+    function renderBrandingSettingsUI() {
+      if (!appState.branding) {
+        appState.branding = getDefaultState().branding;
+      }
+      const b = appState.branding;
+
+      const elClientName = document.getElementById('set_clientCompanyName');
+      const elContName = document.getElementById('set_contractorCompanyName');
+      const elTagline = document.getElementById('set_contractorTagline');
+      const elShort = document.getElementById('set_contractorShortCode');
+      const elValH = document.getElementById('set_valmetHeight');
+      const elRgdH = document.getElementById('set_rgdHeight');
+      const lblValH = document.getElementById('lblHeight_valmet');
+      const lblRgdH = document.getElementById('lblHeight_rgd');
+      const chkLogin = document.getElementById('chkRequireLoginOnStart');
+
+      if (elClientName) elClientName.value = b.clientCompanyName || 'PT. VALMET';
+      if (elContName) elContName.value = b.contractorCompanyName || 'PT. REFRACTORINDO GRAHA DINAMIKA';
+      if (elTagline) elTagline.value = b.contractorTagline || 'REFRACTORY & INSULATION SERVICES';
+      if (elShort) elShort.value = b.contractorShortCode || 'RGD';
+      if (elValH) elValH.value = b.valmetLogoHeight || 40;
+      if (elRgdH) elRgdH.value = b.rgdLogoHeight || 46;
+      if (lblValH) lblValH.textContent = b.valmetLogoHeight || 40;
+      if (lblRgdH) lblRgdH.textContent = b.rgdLogoHeight || 46;
+      if (chkLogin) chkLogin.checked = Boolean(b.requireLoginOnStart);
+
+      const boxVal = document.getElementById('settingsPreviewBox_valmet');
+      const boxRgd = document.getElementById('settingsPreviewBox_rgd');
+      const liveL = document.getElementById('livePreviewLogoLeft');
+      const liveR = document.getElementById('livePreviewLogoRight');
+      const liveSub = document.getElementById('livePreviewSubTitle');
+      const portalVal = document.getElementById('loginPortalLogoValmet');
+      const portalRgd = document.getElementById('loginPortalLogoRgd');
+
+      const valHtml = getValmetLogoSvg();
+      const rgdHtml = getRgdLogoSvg();
+
+      if (boxVal) boxVal.innerHTML = valHtml;
+      if (boxRgd) boxRgd.innerHTML = rgdHtml;
+      if (liveL) liveL.innerHTML = valHtml;
+      if (liveR) liveR.innerHTML = rgdHtml;
+      if (liveSub) liveSub.textContent = b.contractorCompanyName || 'PT. REFRACTORINDO GRAHA DINAMIKA';
+      if (portalVal) portalVal.innerHTML = valHtml;
+      if (portalRgd) portalRgd.innerHTML = rgdHtml;
+    }
+
+    function updateBrandingField(key, val) {
+      if (!appState.branding) appState.branding = getDefaultState().branding;
+      if (key === 'valmetLogoHeight' || key === 'rgdLogoHeight') {
+        appState.branding[key] = parseInt(val, 10) || 40;
+      } else {
+        appState.branding[key] = val;
+      }
+      if (key === 'clientCompanyName' && val) {
+        appState.materialReport.verifiedByUser = val;
+        appState.castableReport.reviewedCompany = val;
+      }
+      if (key === 'contractorCompanyName' && val) {
+        appState.dailyReport.subCont = val;
+      }
+      if (key === 'contractorShortCode' && val) {
+        appState.castableReport.preparedCompany = val;
+      }
+      renderBrandingSettingsUI();
+      saveAllToStorage(false);
+    }
+
+    function handleCompanyLogoUpload(whichLogo, event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!appState.branding) appState.branding = getDefaultState().branding;
+      compressImageDataUrl(file, function(compressedDataUrl) {
+        if (whichLogo === 'valmet') {
+          appState.branding.valmetCustomLogo = compressedDataUrl;
+          showToast('Logo Client (Valmet) berhasil diganti dan diterapkan ke semua laporan PDF!', 'success');
+        } else {
+          appState.branding.rgdCustomLogo = compressedDataUrl;
+          showToast('Logo Kontraktor (RGD) berhasil diganti dan diterapkan ke semua laporan PDF!', 'success');
+        }
+        renderBrandingSettingsUI();
+        saveAllToStorage(false);
+      });
+      event.target.value = '';
+    }
+
+    function resetSingleLogo(whichLogo) {
+      if (!appState.branding) appState.branding = getDefaultState().branding;
+      if (whichLogo === 'valmet') {
+        appState.branding.valmetCustomLogo = '';
+        showToast('Logo Client dikembalikan ke logo standar Valmet.', 'info');
+      } else {
+        appState.branding.rgdCustomLogo = '';
+        showToast('Logo Kontraktor dikembalikan ke logo standar RGD.', 'info');
+      }
+      renderBrandingSettingsUI();
+      saveAllToStorage(false);
+    }
+
+    function resetAllLogosToDefault() {
+      appState.branding = getDefaultState().branding;
+      renderBrandingSettingsUI();
+      saveAllToStorage(false);
+      showToast('Kedua logo dan identitas perusahaan dikembalikan ke pengaturan awal.', 'success');
+    }
+
+    function toggleRequireLoginOnStartup(checked) {
+      if (!appState.branding) appState.branding = getDefaultState().branding;
+      appState.branding.requireLoginOnStart = Boolean(checked);
+      saveAllToStorage(false);
+      showToast(checked ? 'Layar Login Profesional akan otomatis tampil saat aplikasi dibuka.' : 'Layar Login otomatis saat mulai dinonaktifkan.', 'info');
+    }
+
+    function openEnterpriseLoginScreen() {
+      renderBrandingSettingsUI();
+      openGoogleAuthModal();
+    }
+
+    function triggerGoogleOneTapAnimation() {
+      const badge = document.getElementById('googleOauthLoadingBadge');
+      if (badge) badge.classList.remove('hidden');
+      setTimeout(() => {
+        if (badge) badge.classList.add('hidden');
+        const currentName = appState.googleAuth?.name || 'Deni Hidayat';
+        const currentEmail = appState.googleAuth?.email || 'deni.hidayat@gmail.com';
+        const currentRole = appState.googleAuth?.role || 'Project Manager / Admin Utama';
+        loginWithGooglePreset(currentName, currentEmail, currentRole, '#ea580c');
+        setTimeout(() => {
+          closeGoogleAuthModal();
+        }, 450);
+      }, 600);
     }
 
     function setPreviewDoc(docKey) {
@@ -4405,6 +4864,7 @@
       renderMaterialReportForm();
       renderCastableReportForm();
       renderMixingReportForm();
+      renderBrandingSettingsUI();
       renderGoogleAuthUI();
       updatePdfModeButtonsUI();
       updateKpiBanner();
@@ -4414,6 +4874,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadFromStorage();
       renderAllModules();
+      if (appState.branding?.requireLoginOnStart) {
+        openEnterpriseLoginScreen();
+      }
     });
   </script>
 </body>
