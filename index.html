@@ -111,6 +111,17 @@
           <span>Simpan Data</span>
         </button>
 
+        <!-- TOMBOL LOGIN AKUN GOOGLE -->
+        <button type="button" id="headerGoogleAuthBtn" onclick="openGoogleAuthModal()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
+          </svg>
+          <span id="headerGoogleAuthLabel">Login Google</span>
+        </button>
+
         <div class="relative">
           <button type="button" onclick="toggleDataMenu()" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
             <i data-lucide="database" class="w-4 h-4"></i>
@@ -233,9 +244,13 @@
               <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
               <span>Scan OCR ke Daily Report</span>
             </button>
-            <button type="button" onclick="openPreviewFor('daily')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+            <button type="button" onclick="openPreviewFor('daily', 'filled')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>Lihat Hasil PDF</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('daily', 'blank')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+              <i data-lucide="file-Spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Blangko Kosong (Manual)</span>
             </button>
           </div>
         </div>
@@ -348,24 +363,54 @@
 
               <!-- Dokumentasi Photo Aktivitas -->
               <div class="mt-4 pt-4 border-t border-slate-200">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <i data-lucide="image" class="w-4 h-4 text-blue-600"></i>
-                    <span>Photo Aktivitas Harian (Ditampilkan di Kolom Photo Aktivitas)</span>
-                  </span>
-                  <div class="flex items-center gap-2">
-                    <label class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                  <div>
+                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <i data-lucide="image" class="w-4 h-4 text-blue-600"></i>
+                      <span>Photo Aktivitas Harian (Ditampilkan di Kolom Photo Aktivitas)</span>
+                    </span>
+                    <p class="text-[11px] text-slate-500">Unggah foto dari galeri/komputer (bisa pilih banyak foto sekaligus), ambil dari kamera, atau ganti foto pada kartu di bawah</p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <input type="file" id="dailyPhotoMultiInput" accept="image/*" multiple class="hidden" onchange="uploadDailyPhoto(event)" />
+                    <input type="file" id="dailyPhotoCameraInput" accept="image/*" capture="environment" class="hidden" onchange="uploadDailyPhoto(event)" />
+                    <input type="file" id="dailyPhotoReplaceInput" accept="image/*" class="hidden" onchange="handleReplaceDailyPhoto(event)" />
+
+                    <button type="button" onclick="triggerDailyPhotoGalleryUpload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition">
                       <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                      <span>Upload / Kamera Foto</span>
-                      <input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadDailyPhoto(event)" />
-                    </label>
-                    <button type="button" onclick="generateSampleDailyPhoto()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                      <span>Upload Foto (Galeri / File)</span>
+                    </button>
+                    <button type="button" onclick="openDailyLiveCameraModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                      <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                      <span>Kamera Langsung</span>
+                    </button>
+                    <button type="button" onclick="generateSampleDailyPhoto()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
                       <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                       <span>+ Foto Contoh Lapangan</span>
                     </button>
+                    <button type="button" onclick="clearAllDailyPhotos()" class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition" title="Hapus semua foto aktivitas">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
                   </div>
                 </div>
-                <div id="dr_photosGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-2"></div>
+
+                <!-- Dropzone Area untuk Drag & Drop atau Klik Upload Foto Aktivitas -->
+                <div id="dailyPhotoDropzone"
+                  onclick="triggerDailyPhotoGalleryUpload()"
+                  ondragover="handleDailyPhotoDragOver(event)"
+                  ondragleave="handleDailyPhotoDragLeave(event)"
+                  ondrop="handleDailyPhotoDrop(event)"
+                  class="mb-3 border-2 border-dashed border-blue-300 hover:border-blue-500 bg-blue-50/40 hover:bg-blue-50/80 rounded-xl p-3 text-center cursor-pointer transition flex flex-col sm:flex-row items-center justify-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="image-plus" class="w-4 h-4"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-xs font-bold text-blue-900">Klik di sini untuk memilih foto dari HP/Komputer atau Seret &amp; Lepas (Drag &amp; Drop) foto ke kotak ini</p>
+                    <p class="text-[11px] text-blue-600">Mendukung JPG, PNG, WebP • Otomatis menyesuaikan ukuran &amp; langsung tampil di kolom <strong>Photo Aktivitas</strong> pada hasil PDF</p>
+                  </div>
+                </div>
+
+                <div id="dr_photosGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2"></div>
               </div>
             </div>
           </div>
@@ -434,9 +479,13 @@
               <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
               <span>Scan OCR Material</span>
             </button>
-            <button type="button" onclick="openPreviewFor('material')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+            <button type="button" onclick="openPreviewFor('material', 'filled')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>Lihat Hasil PDF</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('material', 'blank')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Blangko Kosong (Manual)</span>
             </button>
           </div>
         </div>
@@ -560,9 +609,13 @@
               <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
               <span>Scan OCR Batch Castable</span>
             </button>
-            <button type="button" onclick="openPreviewFor('castable')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+            <button type="button" onclick="openPreviewFor('castable', 'filled')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>Lihat Hasil PDF (2 Hal)</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('castable', 'blank')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Blangko Kosong (Manual)</span>
             </button>
           </div>
         </div>
@@ -850,9 +903,13 @@
               <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
               <span>Scan OCR Mixing</span>
             </button>
-            <button type="button" onclick="openPreviewFor('mixing')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+            <button type="button" onclick="openPreviewFor('mixing', 'filled')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>Lihat Hasil PDF</span>
+            </button>
+            <button type="button" onclick="openPreviewFor('mixing', 'blank')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Blangko Kosong (Manual)</span>
             </button>
           </div>
         </div>
@@ -949,26 +1006,49 @@
     <!-- MODULE 5: PRATINJAU & CETAK DOKUMEN PDF AKHIR              -->
     <!-- ========================================================== -->
     <section id="section-preview" class="space-y-5 hidden print-only-wrapper">
-      <!-- Kontrol Pilih Dokumen Pratinjau (Disembunyikan saat Print) -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
-        <div class="flex flex-wrap items-center gap-1.5">
-          <span class="text-xs font-bold uppercase text-slate-500 mr-2">Pilih Dokumen:</span>
-          <button type="button" id="prevBtn-daily" onclick="setPreviewDoc('daily')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">1. Daily Report.pdf</button>
-          <button type="button" id="prevBtn-material" onclick="setPreviewDoc('material')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">2. Daily Report Material.pdf</button>
-          <button type="button" id="prevBtn-castable" onclick="setPreviewDoc('castable')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">3. Report Installed Castable.pdf</button>
-          <button type="button" id="prevBtn-mixing" onclick="setPreviewDoc('mixing')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">4. Mixing Report.pdf</button>
-          <button type="button" id="prevBtn-all" onclick="setPreviewDoc('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-100 text-orange-800 hover:bg-orange-200">Tampilkan Semua (4 PDF)</button>
+      <!-- Kontrol Pilih Dokumen Pratinjau & Mode Blangko Kosong (Disembunyikan saat Print) -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3 no-print">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-xs font-bold uppercase text-slate-500 mr-1">Pilih Dokumen:</span>
+            <button type="button" id="prevBtn-daily" onclick="setPreviewDoc('daily')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">1. Daily Report.pdf</button>
+            <button type="button" id="prevBtn-material" onclick="setPreviewDoc('material')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">2. Daily Report Material.pdf</button>
+            <button type="button" id="prevBtn-castable" onclick="setPreviewDoc('castable')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">3. Report Installed Castable.pdf</button>
+            <button type="button" id="prevBtn-mixing" onclick="setPreviewDoc('mixing')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">4. Mixing Report.pdf</button>
+            <button type="button" id="prevBtn-all" onclick="setPreviewDoc('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-100 text-orange-800 hover:bg-orange-200">Tampilkan Semua (4 PDF)</button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="downloadActivePdf()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow transition">
+              <i data-lucide="file-down" class="w-4 h-4"></i>
+              <span>Download File PDF</span>
+            </button>
+            <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Cetak / Print Langsung</span>
+            </button>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="downloadActivePdf()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow transition">
-            <i data-lucide="file-down" class="w-4 h-4"></i>
-            <span>Download File PDF</span>
-          </button>
-          <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-            <span>Cetak / Print Langsung</span>
-          </button>
+        <!-- Bar Pilihan Mode Cetak: Hasil Terisi vs Sample/Blangko Isian Kosong (Input Manual) -->
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50 px-3.5 py-2.5 rounded-xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="file-check-2" class="w-4 h-4 text-orange-600"></i>
+              <span>Mode Tampilan &amp; Cetak PDF:</span>
+            </span>
+            <button type="button" id="pdfModeBtn-filled" onclick="setPdfPrintMode('filled')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition">
+              ✓ Hasil Data Terisi (Dari Form Aplikasi)
+            </button>
+            <button type="button" id="pdfModeBtn-blank" onclick="setPdfPrintMode('blank')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 border border-slate-300 hover:bg-amber-50 transition">
+              ✎ Sample / Blangko Isian Kosong (Untuk Input Manual / Tulis Tangan)
+            </button>
+          </div>
+
+          <label id="blankKeepMaterialWrap" class="hidden items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer select-none">
+            <input type="checkbox" id="chkBlankKeepMaterialNames" onchange="toggleBlankKeepMaterialNames(this.checked)" class="rounded border-slate-300 text-orange-600 focus:ring-orange-500" />
+            <span>Tampilkan Nama Project &amp; Daftar Nama Material pada Blangko Kosong</span>
+          </label>
         </div>
       </div>
 
@@ -1161,6 +1241,186 @@
     </div>
   </div>
 
+  <!-- ============================================================ -->
+  <!-- MODAL 4: LOGIN AKUN GOOGLE & SINKRONISASI CLOUD              -->
+  <!-- ============================================================ -->
+  <div id="googleAuthModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+              <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+              <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">Login Akun Google — Hidayat Project</h3>
+            <p class="text-[11px] text-slate-400">Otorisasi Pelapor, QC Reviewer &amp; Sinkronisasi Cloud Google Drive</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeGoogleAuthModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
+        <!-- Status Akun Saat Ini -->
+        <div id="googleCurrentAccountCard" class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div id="googleProfileAvatar" class="w-11 h-11 rounded-full bg-orange-600 text-white font-extrabold text-sm flex items-center justify-center shadow">
+              DH
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p id="googleProfileName" class="text-sm font-bold text-slate-900">Belum Login</p>
+                <span id="googleProfileBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Tamu / Offline</span>
+              </div>
+              <p id="googleProfileEmail" class="text-xs text-slate-500">Pilih akun Google di bawah untuk masuk</p>
+            </div>
+          </div>
+          <button type="button" id="btnGoogleLogout" onclick="logoutGoogleAccount()" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition">
+            Logout
+          </button>
+        </div>
+
+        <!-- Daftar Pilih Cepat Akun Google (Google Account Chooser) -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Pilih Akun Google untuk Login Cepat:</label>
+          <div class="space-y-2">
+            <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Owner', '#ea580c')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center">DH</div>
+                <div>
+                  <p class="text-xs font-bold text-slate-900">Deni Hidayat</p>
+                  <p class="text-[11px] text-slate-500">deni.hidayat@gmail.com • Project Manager / Admin Utama</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
+            </button>
+
+            <button type="button" onclick="loginWithGooglePreset('Ardenata Dwi Prakoso', 'ardenata.rgd@gmail.com', 'Site Leader / Pelapor RGD', '#2563eb')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">AD</div>
+                <div>
+                  <p class="text-xs font-bold text-slate-900">Ardenata Dwi Prakoso</p>
+                  <p class="text-[11px] text-slate-500">ardenata.rgd@gmail.com • Reported / Prepared By (RGD)</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
+            </button>
+
+            <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 flex items-center justify-between transition text-left">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">RY</div>
+                <div>
+                  <p class="text-xs font-bold text-slate-900">Ryan</p>
+                  <p class="text-[11px] text-slate-500">ryan.valmet@gmail.com • Checked / Reviewed By (Valmet)</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold text-blue-600">Masuk →</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Login Akun Google Lain / Kustom -->
+        <div class="pt-3 border-t border-slate-200">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">Atau Masuk dengan Akun Google Lainnya:</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap Akun Google</label>
+              <input type="text" id="customGoogleName" placeholder="Nama Anda" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Alamat Email Google (@gmail.com)</label>
+              <input type="email" id="customGoogleEmail" placeholder="nama@gmail.com" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Jabatan / Role di Proyek</label>
+              <select id="customGoogleRole" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="Project Manager">Project Manager</option>
+                <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
+                <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
+                <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button type="button" onclick="loginWithCustomGoogleAccount()" class="w-full py-2 px-3 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition flex items-center justify-center gap-1.5">
+                <i data-lucide="log-in" class="w-4 h-4"></i>
+                <span>Login Akun Google Ini</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opsi Terapkan ke Laporan & Sinkronisasi Google Drive Apps Script -->
+        <div class="pt-3 border-t border-slate-200 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 p-3 rounded-xl border border-blue-200">
+            <div class="text-xs text-blue-900">
+              <p class="font-bold">Isi Otomatis Nama Pelapor dari Akun Google</p>
+              <p class="text-[11px] text-blue-700">Terapkan nama akun Google yang sedang login ke kolom Reported By / Prepared By</p>
+            </div>
+            <button type="button" onclick="applyGoogleUserToReports()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition">
+              Terapkan ke 4 Form
+            </button>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="cloud" class="w-4 h-4 text-emerald-600"></i>
+                <span>Endpoint Sinkronisasi Google Drive (Apps Script /exec Opsional)</span>
+              </span>
+              <button type="button" onclick="syncToGoogleDriveCloud()" class="px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                Sync ke Google Drive
+              </button>
+            </div>
+            <input type="url" id="googleGasUrlInput" oninput="updateGoogleGasUrl(this.value)" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-end shrink-0">
+        <button type="button" onclick="closeGoogleAuthModal()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700">Selesai &amp; Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 5: KAMERA LANGSUNG KHUSUS PHOTO AKTIVITAS HARIAN       -->
+  <!-- ============================================================ -->
+  <div id="dailyPhotoCameraModal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold">Ambil Foto Aktivitas Harian</h3>
+        </div>
+        <button type="button" onclick="closeDailyLiveCameraModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3">
+        <div class="bg-slate-950 rounded-xl overflow-hidden aspect-video relative flex items-center justify-center">
+          <video id="dailyActVideoFeed" autoplay playsinline class="w-full h-full object-cover"></video>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Caption Foto Aktivitas</label>
+          <input type="text" id="dailyActCameraCaption" placeholder="Contoh: Pemasangan Anchor & Dismantling Floor Furnace..." class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300" />
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeDailyLiveCameraModal()" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+          <button type="button" onclick="captureDailyActivityPhoto()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow">
+            <i data-lucide="aperture" class="w-4 h-4"></i>
+            <span>Jepret &amp; Tambahkan ke Photo Aktivitas</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 no-print pointer-events-none"></div>
 
@@ -1171,6 +1431,10 @@
     const STORAGE_KEY = 'HIDAYAT_PROJECT_REFRACTORY_V25';
     let activeTab = 'daily';
     let activePreviewDoc = 'daily';
+    let pdfPrintMode = 'filled'; // 'filled' | 'blank'
+    let blankKeepMaterialNames = false;
+    let replaceDailyPhotoIndex = null;
+    let dailyCameraStream = null;
     let activeSignatureSlot = null;
     let sigPenColor = '#0f172a';
     let isDrawingSig = false;
@@ -1340,6 +1604,15 @@
           ]
         },
 
+        googleAuth: {
+          isLoggedIn: true,
+          name: 'Deni Hidayat',
+          email: 'deni.hidayat@gmail.com',
+          role: 'Project Manager / Admin Utama',
+          avatarColor: '#ea580c',
+          gasUrl: ''
+        },
+
         signatures: {
           daily_checked: createDefaultSignatureDataUrl('Ryan — Checked', '#1d4ed8'),
           daily_reported: createDefaultSignatureDataUrl('Ardenata D.P.', '#0f172a'),
@@ -1423,10 +1696,50 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
-    function openPreviewFor(docType) {
+    function openPreviewFor(docType, mode = 'filled') {
       activePreviewDoc = docType;
+      pdfPrintMode = mode;
       switchTab('preview');
+      updatePdfModeButtonsUI();
       setPreviewDoc(docType);
+      if (mode === 'blank') {
+        showToast('Menampilkan Blangko Isian Kosong untuk input manual / tulis tangan.', 'info');
+      }
+    }
+
+    function setPdfPrintMode(mode) {
+      pdfPrintMode = mode;
+      updatePdfModeButtonsUI();
+      renderPdfPreviewSheets();
+    }
+
+    function toggleBlankKeepMaterialNames(checked) {
+      blankKeepMaterialNames = Boolean(checked);
+      renderPdfPreviewSheets();
+    }
+
+    function updatePdfModeButtonsUI() {
+      const btnFilled = document.getElementById('pdfModeBtn-filled');
+      const btnBlank = document.getElementById('pdfModeBtn-blank');
+      const keepWrap = document.getElementById('blankKeepMaterialWrap');
+      if (btnFilled && btnBlank) {
+        if (pdfPrintMode === 'filled') {
+          btnFilled.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition';
+          btnBlank.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 border border-slate-300 hover:bg-amber-50 transition';
+        } else {
+          btnFilled.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 border border-slate-300 hover:bg-blue-50 transition';
+          btnBlank.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 shadow-xs transition';
+        }
+      }
+      if (keepWrap) {
+        if (pdfPrintMode === 'blank') {
+          keepWrap.classList.remove('hidden');
+          keepWrap.classList.add('inline-flex');
+        } else {
+          keepWrap.classList.add('hidden');
+          keepWrap.classList.remove('inline-flex');
+        }
+      }
     }
 
     function updateKpiBanner() {
@@ -1617,15 +1930,31 @@
       const grid = document.getElementById('dr_photosGrid');
       if (!grid) return;
       grid.innerHTML = '';
+      if (!appState.dailyReport.photos || appState.dailyReport.photos.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-6 text-center text-xs text-slate-400 bg-white rounded-xl border border-slate-200">
+            Belum ada foto aktivitas harian. Klik tombol <strong>Upload Foto (Galeri / File)</strong> di atas untuk menambahkan foto.
+          </div>
+        `;
+        return;
+      }
       appState.dailyReport.photos.forEach((ph, idx) => {
         const card = document.createElement('div');
-        card.className = 'relative group rounded-lg overflow-hidden border border-slate-200 bg-white shadow-xs';
+        card.className = 'relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs flex flex-col';
         card.innerHTML = `
-          <img src="${ph.dataUrl}" alt="Foto Aktivitas" class="w-full h-24 object-cover" />
-          <input type="text" value="${escapeHtml(ph.caption || '')}" oninput="updateDailyPhotoCaption(${idx}, this.value)" placeholder="Keterangan foto..." class="w-full px-2 py-1 text-[11px] border-t border-slate-200 bg-slate-50" />
-          <button type="button" onclick="removeDailyPhoto(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-85 hover:opacity-100">
-            <i data-lucide="x" class="w-3 h-3"></i>
-          </button>
+          <div class="relative h-32 bg-slate-900 overflow-hidden">
+            <img src="${ph.dataUrl}" alt="Foto Aktivitas" class="w-full h-full object-cover" />
+            <div class="absolute top-1.5 left-1.5 flex items-center gap-1">
+              <span class="px-2 py-0.5 rounded bg-slate-900/75 text-white text-[10px] font-bold">Foto #${idx + 1}</span>
+              <button type="button" onclick="triggerReplaceDailyPhoto(${idx})" class="px-2 py-0.5 rounded bg-blue-600/90 hover:bg-blue-500 text-white text-[10px] font-semibold shadow">
+                Ganti Foto
+              </button>
+            </div>
+            <button type="button" onclick="removeDailyPhoto(${idx})" class="absolute top-1.5 right-1.5 bg-red-600 text-white rounded-full p-1 opacity-90 hover:opacity-100 shadow" title="Hapus Foto">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          </div>
+          <input type="text" value="${escapeHtml(ph.caption || '')}" oninput="updateDailyPhotoCaption(${idx}, this.value)" placeholder="Keterangan foto aktivitas..." class="w-full px-2.5 py-1.5 text-xs font-medium border-t border-slate-200 bg-slate-50 focus:bg-white focus:outline-none" />
         `;
         grid.appendChild(card);
       });
@@ -1645,21 +1974,174 @@
       saveAllToStorage(false);
     }
 
-    function uploadDailyPhoto(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
+    function clearAllDailyPhotos() {
+      appState.dailyReport.photos = [];
+      renderDailyPhotos();
+      saveAllToStorage(false);
+      showToast('Seluruh foto aktivitas harian telah dikosongkan.', 'info');
+    }
+
+    function triggerDailyPhotoGalleryUpload() {
+      const input = document.getElementById('dailyPhotoMultiInput');
+      if (input) input.click();
+    }
+
+    function triggerReplaceDailyPhoto(idx) {
+      replaceDailyPhotoIndex = idx;
+      const input = document.getElementById('dailyPhotoReplaceInput');
+      if (input) input.click();
+    }
+
+    function compressImageDataUrl(file, callback) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        appState.dailyReport.photos.push({
-          id: 'dp_' + Date.now(),
-          caption: file.name.replace(/\.[^/.]+$/, ''),
-          dataUrl: e.target.result
-        });
-        renderDailyPhotos();
-        saveAllToStorage(true);
+        const img = new Image();
+        img.onload = function() {
+          const maxDim = 900;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = function() {
+          callback(e.target.result);
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    function handleReplaceDailyPhoto(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || replaceDailyPhotoIndex === null) return;
+      const targetIdx = replaceDailyPhotoIndex;
+      compressImageDataUrl(file, function(compressedUrl) {
+        if (appState.dailyReport.photos[targetIdx]) {
+          appState.dailyReport.photos[targetIdx].dataUrl = compressedUrl;
+          if (!appState.dailyReport.photos[targetIdx].caption) {
+            appState.dailyReport.photos[targetIdx].caption = file.name.replace(/\.[^/.]+$/, '');
+          }
+          renderDailyPhotos();
+          saveAllToStorage(false);
+          showToast(`Foto Aktivitas #${targetIdx + 1} berhasil diganti!`, 'success');
+        }
+      });
       event.target.value = '';
+    }
+
+    function uploadDailyPhoto(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      processDailyPhotoFiles(files);
+      event.target.value = '';
+    }
+
+    function processDailyPhotoFiles(files) {
+      let processed = 0;
+      files.forEach((file, i) => {
+        if (!file.type.startsWith('image/')) return;
+        compressImageDataUrl(file, function(compressedUrl) {
+          appState.dailyReport.photos.push({
+            id: 'dp_' + Date.now() + '_' + i,
+            caption: file.name.replace(/\.[^/.]+$/, ''),
+            dataUrl: compressedUrl
+          });
+          processed++;
+          if (processed === files.length) {
+            renderDailyPhotos();
+            saveAllToStorage(false);
+            showToast(`${processed} foto aktivitas berhasil diunggah ke laporan!`, 'success');
+          }
+        });
+      });
+    }
+
+    function handleDailyPhotoDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dz = document.getElementById('dailyPhotoDropzone');
+      if (dz) dz.classList.add('ring-2', 'ring-blue-500', 'bg-blue-100/70');
+    }
+
+    function handleDailyPhotoDragLeave(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dz = document.getElementById('dailyPhotoDropzone');
+      if (dz) dz.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-100/70');
+    }
+
+    function handleDailyPhotoDrop(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      handleDailyPhotoDragLeave(event);
+      const files = Array.from(event.dataTransfer?.files || []);
+      if (files.length > 0) {
+        processDailyPhotoFiles(files);
+      }
+    }
+
+    async function openDailyLiveCameraModal() {
+      const modal = document.getElementById('dailyPhotoCameraModal');
+      const video = document.getElementById('dailyActVideoFeed');
+      try {
+        dailyCameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        video.srcObject = dailyCameraStream;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } catch (err) {
+        // Fallback to native file camera picker if WebRTC is blocked in iframe
+        const camInput = document.getElementById('dailyPhotoCameraInput');
+        if (camInput) camInput.click();
+      }
+    }
+
+    function closeDailyLiveCameraModal() {
+      if (dailyCameraStream) {
+        dailyCameraStream.getTracks().forEach(t => t.stop());
+        dailyCameraStream = null;
+      }
+      const modal = document.getElementById('dailyPhotoCameraModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function captureDailyActivityPhoto() {
+      const video = document.getElementById('dailyActVideoFeed');
+      const capInput = document.getElementById('dailyActCameraCaption');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 400;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const caption = (capInput?.value || '').trim() || `Foto Aktivitas Lapangan (${new Date().toLocaleTimeString('id-ID')})`;
+      appState.dailyReport.photos.push({
+        id: 'dp_cam_' + Date.now(),
+        caption: caption,
+        dataUrl: canvas.toDataURL('image/jpeg', 0.85)
+      });
+      if (capInput) capInput.value = '';
+      closeDailyLiveCameraModal();
+      renderDailyPhotos();
+      saveAllToStorage(false);
+      showToast('Foto dari kamera berhasil ditambahkan ke Photo Aktivitas!', 'success');
     }
 
     function generateSampleDailyPhoto() {
@@ -2822,8 +3304,287 @@
       container.innerHTML = html;
     }
 
-    // 1. HTML REPLICA OF Daily Report.pdf
+    // ============================================================
+    // GOOGLE ACCOUNT AUTHENTICATION & CLOUD SYNC LOGIC
+    // ============================================================
+    function renderGoogleAuthUI() {
+      if (!appState.googleAuth) {
+        appState.googleAuth = getDefaultState().googleAuth;
+      }
+      const auth = appState.googleAuth;
+      const headerLabel = document.getElementById('headerGoogleAuthLabel');
+      const avatar = document.getElementById('googleProfileAvatar');
+      const nameEl = document.getElementById('googleProfileName');
+      const emailEl = document.getElementById('googleProfileEmail');
+      const badgeEl = document.getElementById('googleProfileBadge');
+      const logoutBtn = document.getElementById('btnGoogleLogout');
+      const gasInput = document.getElementById('googleGasUrlInput');
+
+      if (gasInput) gasInput.value = auth.gasUrl || '';
+
+      if (auth.isLoggedIn && auth.email) {
+        const initials = (auth.name || 'G').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        if (headerLabel) headerLabel.textContent = auth.name.split(' ')[0] + ' (Google)';
+        if (avatar) {
+          avatar.textContent = initials;
+          avatar.style.backgroundColor = auth.avatarColor || '#ea580c';
+        }
+        if (nameEl) nameEl.textContent = auth.name;
+        if (emailEl) emailEl.textContent = auth.email;
+        if (badgeEl) {
+          badgeEl.textContent = auth.role || 'Terverifikasi Google';
+          badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+        }
+        if (logoutBtn) logoutBtn.classList.remove('hidden');
+      } else {
+        if (headerLabel) headerLabel.textContent = 'Login Google';
+        if (avatar) {
+          avatar.textContent = '?';
+          avatar.style.backgroundColor = '#64748b';
+        }
+        if (nameEl) nameEl.textContent = 'Belum Login Akun Google';
+        if (emailEl) emailEl.textContent = 'Silakan pilih akun Google di bawah untuk masuk';
+        if (badgeEl) {
+          badgeEl.textContent = 'Mode Offline';
+          badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700';
+        }
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+      }
+    }
+
+    function openGoogleAuthModal() {
+      renderGoogleAuthUI();
+      const modal = document.getElementById('googleAuthModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeGoogleAuthModal() {
+      const modal = document.getElementById('googleAuthModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function loginWithGooglePreset(name, email, role, color) {
+      appState.googleAuth = {
+        ...appState.googleAuth,
+        isLoggedIn: true,
+        name: name,
+        email: email,
+        role: role,
+        avatarColor: color
+      };
+      renderGoogleAuthUI();
+      saveAllToStorage(false);
+      showToast(`Berhasil login Google sebagai ${name} (${email})`, 'success');
+    }
+
+    function loginWithCustomGoogleAccount() {
+      const name = (document.getElementById('customGoogleName')?.value || '').trim();
+      let email = (document.getElementById('customGoogleEmail')?.value || '').trim();
+      const role = document.getElementById('customGoogleRole')?.value || 'Project Manager';
+      if (!name) {
+        showToast('Masukkan nama lengkap akun Google Anda terlebih dahulu!', 'error');
+        return;
+      }
+      if (!email) {
+        email = name.toLowerCase().replace(/[^a-z0-9]/g, '.') + '@gmail.com';
+      } else if (!email.includes('@')) {
+        email = email + '@gmail.com';
+      }
+      appState.googleAuth = {
+        ...appState.googleAuth,
+        isLoggedIn: true,
+        name: name,
+        email: email,
+        role: role,
+        avatarColor: '#2563eb'
+      };
+      renderGoogleAuthUI();
+      saveAllToStorage(false);
+      showToast(`Berhasil login Google sebagai ${name} (${email})`, 'success');
+    }
+
+    function logoutGoogleAccount() {
+      appState.googleAuth.isLoggedIn = false;
+      renderGoogleAuthUI();
+      saveAllToStorage(false);
+      showToast('Akun Google telah keluar (Logout). Data lokal tetap tersimpan.', 'info');
+    }
+
+    function applyGoogleUserToReports() {
+      if (!appState.googleAuth?.isLoggedIn) {
+        showToast('Silakan login ke Akun Google terlebih dahulu!', 'error');
+        return;
+      }
+      const userName = appState.googleAuth.name;
+      appState.dailyReport.reportedBy = userName;
+      appState.castableReport.preparedBy = userName.toUpperCase();
+      appState.mixingReport.preparedBy = userName;
+      renderAllModules();
+      saveAllToStorage(false);
+      showToast(`Nama "${userName}" berhasil diterapkan sebagai Pelapor / Prepared By di semua laporan!`, 'success');
+    }
+
+    function updateGoogleGasUrl(val) {
+      if (!appState.googleAuth) appState.googleAuth = {};
+      appState.googleAuth.gasUrl = val.trim();
+      saveAllToStorage(false);
+    }
+
+    async function syncToGoogleDriveCloud() {
+      if (!appState.googleAuth?.isLoggedIn) {
+        showToast('Login ke Akun Google terlebih dahulu sebelum sinkronisasi cloud!', 'error');
+        return;
+      }
+      const gasUrl = (appState.googleAuth.gasUrl || '').trim();
+      if (!gasUrl) {
+        saveAllToStorage(false);
+        showToast(`Data laporan tersimpan pada profil Google ${appState.googleAuth.email} (Penyimpanan Lokal Aktif).`, 'success');
+        return;
+      }
+      try {
+        showToast('Mengirim snapshot database ke Google Drive...', 'info');
+        await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            account: appState.googleAuth.email,
+            timestamp: new Date().toISOString(),
+            payload: appState
+          })
+        });
+        showToast('Sinkronisasi ke Google Drive berhasil!', 'success');
+      } catch (err) {
+        showToast('Data disimpan di lokal perangkat (Endpoint Apps Script tidak dapat dijangkau dari pratinjau).', 'info');
+      }
+    }
+
+    // 1. HTML REPLICA OF Daily Report.pdf (Mendukung Mode Terisi & Mode Blangko Kosong Manual)
     function buildDailyReportPdfHtml() {
+      if (pdfPrintMode === 'blank') {
+        const blankRoles = ['Project Manajer', 'Leader', 'Admin', 'Safetyman', 'Skilled'];
+        const blankPersonnelHtml = blankRoles.map(role => `
+          <tr>
+            <td class="py-1 pr-2 font-medium">${role}</td>
+            <td class="py-1 px-1">:</td>
+            <td class="py-1 px-2 border-b border-black text-center w-16">&nbsp;</td>
+            <td class="py-1 pl-2">${role === 'Project Manajer' || role === 'Admin' ? 'Person' : 'Persons'}</td>
+          </tr>
+        `).join('');
+
+        let blankActRows = '';
+        for (let i = 0; i < 12; i++) {
+          blankActRows += `
+            <tr class="h-6">
+              <td class="border border-black text-center font-semibold">${i < 5 ? (i + 1) : ''}</td>
+              <td class="border border-black px-2 text-slate-400">${i < 5 ? '............................................................................' : ''}</td>
+              <td class="border border-black text-center"></td>
+              <td class="border border-black text-center">${i < 5 ? '%' : ''}</td>
+            </tr>
+          `;
+        }
+
+        return `
+          <div class="report-sheet max-w-[1020px] mx-auto p-6 border border-slate-300">
+            <div class="mb-2 flex items-center justify-between text-[10px] text-slate-500 no-print">
+              <span class="font-bold uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded">BLANGKO ISIAN KOSONG (UNTUK INPUT MANUAL / TULIS TANGAN)</span>
+              <span>Form 1: Daily Report Harian</span>
+            </div>
+            <table class="w-full border-collapse border-2 border-black mb-3">
+              <tr>
+                <td class="border border-black p-2 w-1/4 text-center align-middle">${getValmetLogoSvg()}</td>
+                <td class="border border-black p-2 w-2/4 text-center align-middle">
+                  <div class="text-xl font-extrabold tracking-wide">DAILY REPORT</div>
+                </td>
+                <td class="border border-black p-2 w-1/4 text-center align-middle">${getRgdLogoSvg()}</td>
+              </tr>
+            </table>
+
+            <div class="grid grid-cols-12 gap-4 text-xs mb-3 px-1">
+              <div class="col-span-7">
+                <table class="w-full">
+                  <tr><td class="py-1.5 w-28 font-medium">No</td><td class="py-1.5 w-3">:</td><td class="py-1.5 border-b border-black">&nbsp;</td></tr>
+                  <tr><td class="py-1.5 font-medium">Project Name</td><td class="py-1.5">:</td><td class="py-1.5 border-b border-black">${blankKeepMaterialNames ? escapeHtml(appState.dailyReport.projectName) : '&nbsp;'}</td></tr>
+                  <tr><td class="py-1.5 font-medium">Customer</td><td class="py-1.5">:</td><td class="py-1.5 border-b border-black">${blankKeepMaterialNames ? escapeHtml(appState.dailyReport.customer) : '&nbsp;'}</td></tr>
+                  <tr><td class="py-1.5 font-medium">Sub. Cont</td><td class="py-1.5">:</td><td class="py-1.5 border-b border-black">${blankKeepMaterialNames ? escapeHtml(appState.dailyReport.subCont) : '&nbsp;'}</td></tr>
+                  <tr><td class="py-1.5 font-medium">Day/Date</td><td class="py-1.5">:</td><td class="py-1.5 border-b border-black">&nbsp;</td></tr>
+                  <tr>
+                    <td class="py-1.5 font-medium">Shift</td>
+                    <td class="py-1.5">:</td>
+                    <td class="py-1.5">
+                      <span class="inline-flex items-center gap-1.5 mr-4">
+                        <span class="px-2.5 py-0.5 rounded-full border border-black">1</span>
+                        <span class="px-2.5 py-0.5 rounded-full border border-black">2</span>
+                      </span>
+                      <span class="font-semibold">TIME : ............... - ...............</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="col-span-5">
+                <table class="w-full">
+                  <tr>
+                    <td class="py-1 pr-2 font-bold">Total MP</td>
+                    <td class="py-1 px-1">:</td>
+                    <td class="py-1 px-2 border-b border-black text-center w-16">&nbsp;</td>
+                    <td class="py-1 pl-2 font-semibold">Persons</td>
+                  </tr>
+                  ${blankPersonnelHtml}
+                </table>
+              </div>
+            </div>
+
+            <table class="pdf-table border-2 border-black">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="w-10">No</th>
+                  <th class="text-center">Work Description</th>
+                  <th class="w-16">Qty</th>
+                  <th class="w-14">Unit</th>
+                  <th rowspan="2" class="w-[45%]">Photo Aktivitas</th>
+                </tr>
+                <tr>
+                  <th class="text-left font-normal px-2">Material/Product Installed</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4" class="p-0 align-top border-none">
+                    <table class="w-full border-collapse">${blankActRows}</table>
+                  </td>
+                  <td class="align-top p-2 border border-black">
+                    <div class="grid grid-cols-2 gap-2 min-h-[190px]">
+                      <div class="border border-dashed border-slate-400 h-44 flex items-center justify-center text-[10px] text-slate-400">Area Foto / Dokumentasi 1</div>
+                      <div class="border border-dashed border-slate-400 h-44 flex items-center justify-center text-[10px] text-slate-400">Area Foto / Dokumentasi 2</div>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-black text-xs">
+                      <div class="text-right mb-2">...................................., ......................... 20....</div>
+                      <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div class="font-semibold mb-14">Checked by:</div>
+                          <div class="font-bold">................................................</div>
+                        </div>
+                        <div>
+                          <div class="font-semibold mb-14">Reported by</div>
+                          <div class="font-bold">................................................</div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
       const dr = appState.dailyReport;
       const totalMp = dr.personnel.reduce((a, b) => a + (Number(b.count) || 0), 0);
       const personnelRowsHtml = dr.personnel.map(p => `
@@ -2982,6 +3743,69 @@
     // 2. HTML REPLICA OF Daily Report Material.pdf
     function buildMaterialReportPdfHtml() {
       const mr = appState.materialReport;
+      if (pdfPrintMode === 'blank') {
+        const dayHeaders = Array.from({ length: 8 }, (_, i) => `<th>Day ${i + 1}</th>`).join('');
+        const dateHeaders = Array.from({ length: 8 }, () => `<th class="h-5 font-normal text-[9px] text-slate-400">..../..../20....</th>`).join('');
+        const rowCount = Math.max(15, mr.items.length);
+        let blankRows = '';
+        for (let i = 0; i < rowCount; i++) {
+          const item = mr.items[i];
+          const matName = (blankKeepMaterialNames && item) ? escapeHtml(item.name) : '';
+          const unitHint = (blankKeepMaterialNames && item) ? escapeHtml(item.unit) : '';
+          const emptyDays = Array.from({ length: 8 }, () => `<td class="h-6"></td>`).join('');
+          blankRows += `
+            <tr class="h-6">
+              <td class="text-center">${i + 1}</td>
+              <td>${matName}</td>
+              <td class="text-right text-slate-400 text-[9px] pr-2">${unitHint}</td>
+              <td class="text-right text-slate-400 text-[9px] pr-2">${unitHint}</td>
+              <td class="text-right text-slate-400 text-[9px] pr-2">${unitHint}</td>
+              ${emptyDays}
+            </tr>
+          `;
+        }
+        return `
+          <div class="report-sheet max-w-[1060px] mx-auto p-6 border border-slate-300 page-break-before">
+            <div class="mb-2 flex items-center justify-between text-[10px] text-slate-500 no-print">
+              <span class="font-bold uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded">BLANGKO ISIAN KOSONG (UNTUK INPUT MANUAL / TULIS TANGAN)</span>
+              <span>Form 2: Daily Report Material (Resume Material)</span>
+            </div>
+            <table class="w-full border-collapse border-2 border-black mb-4">
+              <tr>
+                <td class="border border-black p-2 w-1/4 text-center align-middle">${getValmetLogoSvg()}</td>
+                <td class="border border-black p-2 w-2/4 text-center align-middle">
+                  <div class="text-sm font-extrabold">RESUME MATERIAL</div>
+                  <div class="text-sm font-extrabold">${blankKeepMaterialNames ? escapeHtml(mr.projectTitle) : 'PERBAIKAN REFRACTORY'}</div>
+                  <div class="text-sm font-extrabold">${blankKeepMaterialNames ? escapeHtml(mr.customerTitle) : '........................................................................'}</div>
+                </td>
+                <td class="border border-black p-2 w-1/4 text-center align-middle">${getRgdLogoSvg()}</td>
+              </tr>
+            </table>
+            <table class="pdf-table border-2 border-black mb-6">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="w-8">No</th>
+                  <th rowspan="2">Nama Material</th>
+                  <th rowspan="2" class="w-24">Stock</th>
+                  <th rowspan="2" class="w-24">Pemakaian</th>
+                  <th rowspan="2" class="w-24">Sisa</th>
+                  ${dayHeaders}
+                </tr>
+                <tr>${dateHeaders}</tr>
+              </thead>
+              <tbody>${blankRows}</tbody>
+            </table>
+            <div class="flex justify-end pr-12 text-xs">
+              <div class="text-center w-64">
+                <div>.........................., ......................... 20....</div>
+                <div class="mt-1">Mengetahui</div>
+                <div class="h-20"></div>
+                <div class="border-t border-dotted border-black pt-1 font-bold">${blankKeepMaterialNames ? escapeHtml(mr.verifiedByUser) : '........................................'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       const dayHeaders = mr.dayDates.map((_, i) => `<th>Day ${i + 1}</th>`).join('');
       const dateHeaders = mr.dayDates.map(d => `<th class="font-normal text-[10px]">${escapeHtml(d)}</th>`).join('');
 
@@ -3053,6 +3877,117 @@
     // 3. HTML REPLICA OF Report Installed CAstable.pdf (Page 1 + Page 2)
     function buildCastableReportPdfHtml() {
       const ic = appState.castableReport;
+      if (pdfPrintMode === 'blank') {
+        let blankBatchRows = '';
+        for (let i = 0; i < 14; i++) {
+          blankBatchRows += `
+            <tr class="h-6">
+              <td class="text-center font-semibold">${i + 1}</td>
+              ${i === 0 ? `<td rowspan="14" class="w-64 p-2 align-middle text-center"><div class="h-[280px] border border-dashed border-slate-400 flex flex-col items-center justify-center text-[10px] text-slate-400"><span>Area Gambar Sketsa / Drawing Manual</span><span class="mt-1">(Sketch Area Kerja)</span></div></td>` : ''}
+              <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+          `;
+        }
+        const emptyPhotoPair = `
+          <div class="grid grid-cols-2 gap-6 p-3 border-x border-b border-black">
+            <div class="border border-dashed border-slate-400 h-44 flex items-center justify-center text-xs text-slate-400">Tempel / Cetak Foto 1</div>
+            <div class="border border-dashed border-slate-400 h-44 flex items-center justify-center text-xs text-slate-400">Tempel / Cetak Foto 2</div>
+          </div>
+        `;
+        return `
+          <div class="report-sheet max-w-[1100px] mx-auto p-5 border border-slate-300 page-break-before">
+            <div class="mb-2 flex items-center justify-between text-[10px] text-slate-500 no-print">
+              <span class="font-bold uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded">BLANGKO ISIAN KOSONG (UNTUK INPUT MANUAL / TULIS TANGAN)</span>
+              <span>Form 3: Report Installed Castable (Halaman 1 &amp; 2)</span>
+            </div>
+            <table class="pdf-table border-2 border-black">
+              <tr>
+                <td rowspan="3" class="w-28 text-center align-middle">${getRgdLogoSvg()}</td>
+                <td rowspan="3" class="w-40 text-center align-middle">${getValmetLogoSvg()}</td>
+                <td rowspan="3" class="text-center align-middle font-extrabold text-sm">RECORD OF REFRACTORY INSTALLATION BY<br/>CASTING</td>
+                <td class="w-28 font-bold">Report No.</td>
+                <td class="w-44 font-bold">: ........................................</td>
+              </tr>
+              <tr><td class="font-bold">Rev No.</td><td>: ........................................</td></tr>
+              <tr><td class="font-bold">Page</td><td>: ......... of .........</td></tr>
+            </table>
+            <table class="pdf-table border-x-2 border-b border-black text-[11px]">
+              <tr>
+                <td class="w-1/4"><strong>Date:</strong> ..............................</td>
+                <td class="w-1/4"><strong>Shift:</strong> I / II</td>
+                <td class="w-1/4"><strong>Job No.:</strong> ..........................</td>
+                <td class="w-1/4"><strong>Drawing No.: / Line No.:</strong> ....................</td>
+                <td class="w-32 text-center font-bold">Type of Mixer:</td>
+                <td class="w-32 text-center">........................</td>
+              </tr>
+              <tr>
+                <td class="text-center font-bold">Project Description:</td>
+                <td colspan="2" class="text-center font-bold">${blankKeepMaterialNames ? escapeHtml(ic.projectDesc) : '....................................................................................'}</td>
+                <td class="text-center font-bold">Client Details: <span class="ml-1">${blankKeepMaterialNames ? escapeHtml(ic.customer) : '..............................'}</span></td>
+                <td class="text-center font-bold">Location:<br/><span class="border-t border-black block mt-1 pt-0.5">Application Method:</span></td>
+                <td class="text-center">........................<br/><span class="border-t border-black block mt-1 pt-0.5 text-[9px]">Vibra / Handpack / Ramming / Gunning</span></td>
+              </tr>
+            </table>
+            <table class="pdf-table border-2 border-black text-[10px]">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="w-8">Mix Batch No.</th>
+                  <th rowspan="2" class="w-64">Sketch</th>
+                  <th rowspan="2" class="w-20">Item Number At Drawing</th>
+                  <th rowspan="2">Material Type</th>
+                  <th rowspan="2" class="w-24">Manufacturer's Batch No.</th>
+                  <th rowspan="2" class="w-16">Material Dry Weight (kg)</th>
+                  <th rowspan="2" class="w-14">Dry Mix Time (Minute)</th>
+                  <th rowspan="2" class="w-14">Wet Mix Time (Minute)</th>
+                  <th rowspan="2" class="w-16">Potable Water (Liter)</th>
+                  <th colspan="2">Temperature</th>
+                  <th rowspan="2" class="w-14">PH Water</th>
+                  <th rowspan="2" class="w-16">Thickness (mm)</th>
+                  <th colspan="2">Result</th>
+                  <th rowspan="2" class="w-28">Comments / Part No.</th>
+                </tr>
+                <tr>
+                  <th class="w-14">Material (°C)</th>
+                  <th class="w-14">Water (°C)</th>
+                  <th class="w-14">Dimension</th>
+                  <th class="w-14">Visual</th>
+                </tr>
+              </thead>
+              <tbody>${blankBatchRows}</tbody>
+            </table>
+            <table class="pdf-table border-x-2 border-b-2 border-black">
+              <tr>
+                <td class="w-1/2 text-center font-bold">Prepared By</td>
+                <td class="w-1/2 text-center font-bold">Reviewed/Witnessed By</td>
+              </tr>
+              <tr class="h-24">
+                <td class="text-center align-bottom pb-1"><div class="h-16"></div><div class="font-bold">........................................................</div></td>
+                <td class="text-center align-bottom pb-1"><div class="h-16"></div><div class="font-bold">........................................................</div></td>
+              </tr>
+              <tr>
+                <td class="text-center font-bold">RGD</td>
+                <td class="text-center font-bold">........................................................</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="report-sheet max-w-[1000px] mx-auto p-6 border border-slate-300 page-break-before mt-6">
+            <table class="w-full border-collapse border-2 border-black">
+              <tr>
+                <td class="border border-black p-2 w-1/4 text-center">${getRgdLogoSvg()}</td>
+                <td class="border border-black p-2 w-2/4 text-center font-extrabold text-base">RECORD OF REFRACTORY INSTALLATION</td>
+                <td class="border border-black p-2 w-1/4 text-center">${getValmetLogoSvg()}</td>
+              </tr>
+            </table>
+            <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">PHOTOGRAPH FEEDTUBE BEFORE INSTALL REFRACTORY</div>
+            ${emptyPhotoPair}
+            <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">PHOTOGRAPH FEEDTUBE PROCESS INSTALL REFRACTORY</div>
+            ${emptyPhotoPair}
+            <div class="border-x border-b border-black py-1.5 text-center font-bold text-xs bg-slate-50">PHOTOGRAPH FEEDTUBE AFTER INSTALL REFRACTORY</div>
+            ${emptyPhotoPair}
+          </div>
+        `;
+      }
       const totalRows = Math.max(14, ic.batches.length);
       let batchRowsHtml = '';
 
@@ -3219,6 +4154,70 @@
     // 4. HTML REPLICA OF mixing report.pdf
     function buildMixingReportPdfHtml() {
       const mx = appState.mixingReport;
+      if (pdfPrintMode === 'blank') {
+        let blankMixRows = '';
+        for (let i = 0; i < 24; i++) {
+          blankMixRows += `
+            <tr class="h-6">
+              <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+          `;
+        }
+        return `
+          <div class="report-sheet max-w-[920px] mx-auto p-6 border border-slate-300 page-break-before">
+            <div class="mb-2 flex items-center justify-between text-[10px] text-slate-500 no-print">
+              <span class="font-bold uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded">BLANGKO ISIAN KOSONG (UNTUK INPUT MANUAL / TULIS TANGAN)</span>
+              <span>Form 4: Mixing Report</span>
+            </div>
+            <div class="flex items-center gap-3 mb-3">
+              ${getRgdLogoSvg()}
+              <div>
+                <div class="text-sm font-extrabold text-indigo-950 tracking-wide border-b-2 border-indigo-950 pb-0.5">PT. REFRACTORINDO GRAHA DINAMIKA</div>
+                <div class="text-[10px] font-semibold text-slate-600 tracking-wider mt-0.5">REFRACTORY &amp; INSULATION SERVICES</div>
+              </div>
+            </div>
+            <div class="border-2 border-black">
+              <div class="text-center font-extrabold text-sm py-2 border-b border-black">MIXING PROCESS</div>
+              <table class="pdf-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2" class="w-24">Date</th>
+                    <th rowspan="2" class="w-16">Time</th>
+                    <th rowspan="2">Name Material</th>
+                    <th rowspan="2" class="w-20">Dry Mix Time<br/>(Minute)</th>
+                    <th rowspan="2" class="w-20">Wet Mix Time<br/>(Minute)</th>
+                    <th colspan="2">Castable</th>
+                    <th colspan="3">Water</th>
+                    <th colspan="2">Temp. ( °C )</th>
+                  </tr>
+                  <tr>
+                    <th class="w-16">Qty</th>
+                    <th class="w-14">Unit</th>
+                    <th class="w-16">Litre</th>
+                    <th class="w-16">%</th>
+                    <th class="w-14">PH</th>
+                    <th class="w-16">Water</th>
+                    <th class="w-16">Ambient</th>
+                  </tr>
+                </thead>
+                <tbody>${blankMixRows}</tbody>
+              </table>
+            </div>
+            <div class="grid grid-cols-2 gap-12 mt-6 px-10 text-xs">
+              <div class="text-center">
+                <div class="font-semibold">Prepared,by</div>
+                <div class="h-20"></div>
+                <div class="border-t border-dotted border-black pt-1 font-bold">................................................</div>
+              </div>
+              <div class="text-center">
+                <div class="font-semibold">Review,by</div>
+                <div class="h-20"></div>
+                <div class="border-t border-dotted border-black pt-1 font-bold">................................................</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       const totalRows = Math.max(20, mx.rows.length);
       let rowsHtml = '';
 
@@ -3406,6 +4405,8 @@
       renderMaterialReportForm();
       renderCastableReportForm();
       renderMixingReportForm();
+      renderGoogleAuthUI();
+      updatePdfModeButtonsUI();
       updateKpiBanner();
       if (window.lucide) window.lucide.createIcons();
     }
