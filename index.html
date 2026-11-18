@@ -1845,6 +1845,302 @@
   </div><!-- END #appDashboardShell -->
 
   <!-- ============================================================ -->
+  <!-- DASHBOARD KHUSUS ROLE PEKERJA (ABSENSI + DATA PEKERJA)       -->
+  <!-- ============================================================ -->
+  <div id="workerDashboardShell" class="hidden flex-col min-h-screen bg-[#0b1220] text-white no-print">
+    <!-- Top Header Role Pekerja -->
+    <header class="bg-[#111c33] border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20 font-extrabold text-base">
+            HP
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">HIDAYAT PROJECT</h1>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Portal Pekerja</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Refractory Project — Absensi GPS Selfie &amp; Data Pekerja Mandiri</p>
+          </div>
+        </div>
+
+        <!-- Menu Tab Role Pekerja -->
+        <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+          <button type="button" id="wTabBtn-absensi" onclick="switchWorkerDashboardTab('absensi')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            <span>Absensi Proyek</span>
+          </button>
+          <button type="button" id="wTabBtn-pekerja" onclick="switchWorkerDashboardTab('pekerja')" class="px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+            <i data-lucide="user-check" class="w-4 h-4 text-orange-400"></i>
+            <span>Menu Data Pekerja</span>
+          </button>
+        </div>
+
+        <!-- Info Akun & Logout -->
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openEnterpriseLoginScreen(false)" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 transition" title="Ganti Akun">
+            <span id="workerHeaderAvatar" class="w-6 h-6 rounded-full bg-orange-600 text-white text-[10px] font-extrabold flex items-center justify-center">AK</span>
+            <span id="workerHeaderName" class="max-w-[110px] truncate">Aris Kurniawan</span>
+          </button>
+          <button type="button" onclick="logoutGoogleAccount()" class="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-bold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition" title="Logout ke Menu Login">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Dashboard Pekerja -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6">
+
+      <!-- ======================================================== -->
+      <!-- WORKER TAB 1: ABSENSI PROYEK (Seperti Absen (1).jpg)     -->
+      <!-- ======================================================== -->
+      <section id="workerSection-absensi" class="space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <!-- KIRI: Mobile Frame Absensi Proyek Refractory (Persis Absen (1).jpg) -->
+          <div class="lg:col-span-5 mx-auto w-full max-w-[380px]">
+            <div class="bg-slate-950 rounded-[40px] p-3 border-4 border-slate-700 shadow-2xl">
+              <div class="bg-white rounded-[30px] overflow-hidden flex flex-col">
+                <!-- Mobile Top Bar -->
+                <div class="bg-[#111c33] text-white px-4 py-3.5 flex items-center justify-between">
+                  <button type="button" onclick="switchWorkerDashboardTab('pekerja')" class="text-slate-300 hover:text-white" title="Ke Menu Data Pekerja">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                  </button>
+                  <span class="text-sm font-extrabold tracking-tight">Absensi Proyek Refractory</span>
+                  <span class="w-6 h-6 rounded-full overflow-hidden border border-white/30 flex flex-col shrink-0" title="Indonesia">
+                    <span class="h-1/2 bg-red-600 block"></span>
+                    <span class="h-1/2 bg-white block"></span>
+                  </span>
+                </div>
+
+                <!-- Viewfinder Selfie + Overlay GPS -->
+                <div class="relative bg-slate-900 aspect-[3/4] overflow-hidden flex items-center justify-center">
+                  <video id="wPortalVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                  <img id="wPortalSelfiePreview" src="" alt="Preview Selfie Pekerja" class="w-full h-full object-cover" />
+
+                  <!-- Translucent Dark GPS Overlay -->
+                  <div class="absolute bottom-3 inset-x-3 bg-slate-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-center gap-3 text-white">
+                    <div class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                      <i data-lucide="map-pin" class="w-6 h-6 text-slate-900"></i>
+                    </div>
+                    <div class="text-[11px] leading-snug min-w-0">
+                      <p class="font-mono font-bold text-white truncate">GPS: <span id="wPortalGpsText">-6.2383, 106.9756</span></p>
+                      <p class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                        <span>Akurasi: <span id="wPortalAccText">4m (Dalam Area Proyek)</span></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                      </p>
+                      <p id="wPortalTimestampText" class="text-slate-300 text-[10px]">19 Nov 2026, 07:58 WIB</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom Card Lokasi & Tombol Oranye -->
+                <div class="p-4 bg-white text-slate-900 space-y-3">
+                  <div class="border border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2 bg-slate-50/80">
+                    <div class="min-w-0">
+                      <p class="text-[11px] text-slate-500 font-medium">Lokasi Saat Ini</p>
+                      <p id="wPortalLocationName" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">Area Proyek Refractory, Bekasi</p>
+                    </div>
+                    <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <i data-lucide="check" class="w-4 h-4"></i>
+                    </span>
+                  </div>
+
+                  <button type="button" onclick="submitWorkerPortalCheckIn()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-extrabold text-sm shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span id="wPortalSubmitLabel">Ambil Foto &amp; Absen Masuk</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KANAN: Kontrol Kamera, Status Pekerja & Riwayat Absensi Saya -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-[#162033] rounded-2xl border border-slate-800 p-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-base font-extrabold text-white">Absensi Lapangan — Selfie &amp; Verifikasi GPS</h2>
+                  <p class="text-xs text-slate-400 mt-0.5">Absensi Anda otomatis terkirim ke Monitoring Kehadiran &amp; Peta Geofence Admin Utama.</p>
+                </div>
+                <span id="wPortalTodayBadge" class="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Belum Absen Hari Ini</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Profil Pekerja Aktif</label>
+                  <select id="wPortalWorkerSelect" onchange="onWorkerPortalSelectChange()" class="w-full px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Jenis Absensi</label>
+                  <select id="wPortalTypeSelect" onchange="onWorkerPortalTypeChange()" class="w-full px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white">
+                    <option value="Masuk">Absen Masuk (Check-In)</option>
+                    <option value="Pulang">Absen Pulang (Check-Out)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button type="button" id="wBtnStartCam" onclick="startWorkerPortalCamera()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="video" class="w-4 h-4"></i>
+                  <span>Aktifkan Kamera</span>
+                </button>
+                <button type="button" id="wBtnStopCam" onclick="stopWorkerPortalCamera()" class="hidden py-2.5 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="video-off" class="w-4 h-4"></i>
+                  <span>Matikan Kamera</span>
+                </button>
+                <label class="py-2.5 px-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1.5 cursor-pointer transition">
+                  <i data-lucide="upload" class="w-4 h-4"></i>
+                  <span>Upload Foto Selfie</span>
+                  <input type="file" accept="image/*" capture="user" class="hidden" onchange="uploadWorkerPortalSelfie(event)" />
+                </label>
+                <button type="button" onclick="detectWorkerPortalGps()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-600 flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  <span>Perbarui GPS</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Riwayat Absensi Saya -->
+            <div class="bg-[#162033] rounded-2xl border border-slate-800 p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wide">Riwayat Absensi Terakhir</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold">Sinkron Real-Time ke Admin Utama</span>
+              </div>
+              <div id="wPortalHistoryList" class="space-y-2.5 max-h-[280px] overflow-y-auto dark-scrollbar pr-1"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- WORKER TAB 2: DATA PEKERJA (Seperti data pekerja 1.jpg)  -->
+      <!-- ======================================================== -->
+      <section id="workerSection-pekerja" class="hidden space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-xl font-extrabold text-white">Menu Pekerja</h2>
+            <p class="text-xs text-slate-400">Lengkapi registrasi data diri pekerja refractory, unggah pas foto 3x4 &amp; sertifikat K3, atau bagikan link formulir.</p>
+          </div>
+          <button type="button" onclick="switchWorkerDashboardTab('absensi')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-orange-300 border border-slate-700 flex items-center gap-1.5 transition">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+            <span>Kembali ke Absensi</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- KIRI: Bagikan Link Formulir (Persis data pekerja 1.jpg) -->
+          <div class="lg:col-span-5 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 flex flex-col justify-between space-y-5">
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-lg font-extrabold text-white">Bagikan Link Formulir</h3>
+                <p class="text-xs font-bold text-orange-400 mt-1">Generator Link &amp; QR Code</p>
+                <p class="text-xs text-slate-300 mt-1">Bagikan link ini kepada calon pekerja untuk mengisi data mandiri.</p>
+              </div>
+
+              <div class="space-y-2.5">
+                <input type="text" id="wPortalShareLinkInput" readonly class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-slate-200 select-all" />
+                <button type="button" onclick="copyWorkerPortalFormLink()" class="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-lg shadow-orange-600/25 transition flex items-center justify-center gap-2">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                  <span>Salin Link Form</span>
+                </button>
+              </div>
+
+              <div class="pt-3 border-t border-slate-700/80 flex flex-col items-center text-center space-y-3">
+                <div class="bg-white p-3.5 rounded-2xl shadow-lg inline-flex items-center justify-center">
+                  <div id="wPortalQrContainer"></div>
+                </div>
+                <p class="text-xs text-slate-400">Atau scan QR Code ini</p>
+                <button type="button" onclick="downloadWorkerPortalQr()" class="w-full max-w-[200px] py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Unduh QR</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KANAN: Form Registrasi Pekerja (Persis data pekerja 1.jpg) -->
+          <div class="lg:col-span-7 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 space-y-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-white">Form Registrasi Pekerja</h3>
+              <p class="text-xs text-slate-400">Data yang Anda simpan langsung terdaftar ke Direktori Pekerja &amp; ID Card Admin Utama.</p>
+            </div>
+
+            <div class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
+                <input type="text" id="wp_name" placeholder="Nama Lengkap" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">NIK</label>
+                <input type="text" id="wp_nik" maxlength="16" placeholder="16-digit numeric NIK" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Posisi Refractory</label>
+                <select id="wp_role" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white focus:ring-2 focus:ring-orange-500">
+                  <option value="">Pilih Posisi...</option>
+                  <option value="Bricklayer">Bricklayer Refractory</option>
+                  <option value="Castable Operator">Castable Operator</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Safety Inspector">Safety Inspector</option>
+                  <option value="Leader">Leader</option>
+                  <option value="Helper / Skilled">Helper / Skilled</option>
+                </select>
+              </div>
+
+              <!-- Upload Foto (Pas Foto 3x4) -->
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Foto (Pas Foto 3x4)</label>
+                <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
+                  <div class="w-14 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                    <img id="wp_photoPreview" src="" alt="Pas Foto" class="w-full h-full object-cover hidden" />
+                    <i id="wp_photoIcon" data-lucide="user" class="w-7 h-7 text-slate-500"></i>
+                  </div>
+                  <div class="flex-1 text-center">
+                    <i data-lucide="upload" class="w-5 h-5 text-slate-400 mx-auto mb-1"></i>
+                    <p id="wp_photoLabel" class="text-xs font-semibold text-slate-300">Upload on drop / Klik pilih Pas Foto 3x4</p>
+                  </div>
+                  <input type="file" id="wp_photoInput" accept="image/*" class="hidden" onchange="handleWorkerPortalPhotoUpload(event)" />
+                </label>
+              </div>
+
+              <!-- Upload Sertifikat K3 -->
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Sertifikat K3</label>
+                <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
+                  <div class="w-14 h-14 rounded-lg bg-red-500/15 border border-red-500/30 flex flex-col items-center justify-center shrink-0 text-red-400">
+                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                    <span class="text-[9px] font-extrabold">PDF</span>
+                  </div>
+                  <div class="flex-1 text-center">
+                    <i data-lucide="upload" class="w-5 h-5 text-slate-400 mx-auto mb-1"></i>
+                    <p id="wp_certLabel" class="text-xs font-semibold text-slate-300">Upload on drop / Klik pilih Sertifikat K3 (PDF)</p>
+                  </div>
+                  <input type="file" id="wp_certInput" accept=".pdf,image/*" class="hidden" onchange="handleWorkerPortalCertUpload(event)" />
+                </label>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="saveWorkerPortalRegistration()" class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-lg shadow-orange-600/25 transition">
+                  Simpan Data Pekerja
+                </button>
+                <button type="button" onclick="resetWorkerPortalForm()" class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs transition">
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- END #workerDashboardShell -->
+
+  <!-- ============================================================ -->
   <!-- MODAL 1: TANDA TANGAN DIGITAL (DIGITAL SIGNATURE PAD)        -->
   <!-- ============================================================ -->
   <div id="signatureModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
@@ -2163,12 +2459,20 @@
             </button>
 
             <!-- Daftar Akun Google Terdaftar di Perangkat -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Admin Utama', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
+              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Admin Utama', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/60 flex items-center gap-2.5 transition text-left">
                 <div class="w-8 h-8 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center shrink-0">DH</div>
                 <div class="min-w-0">
                   <p class="text-xs font-bold text-slate-900 truncate">Deni Hidayat</p>
                   <p class="text-[10px] text-slate-500 truncate">deni.hidayat@gmail.com</p>
+                </div>
+              </button>
+
+              <button type="button" onclick="loginWithGooglePreset('Aris Kurniawan', 'aris.pekerja@gmail.com', 'Pekerja Lapangan - Refractory', '#d97706')" class="p-2.5 rounded-xl border-2 border-amber-300 bg-amber-50/50 hover:border-orange-500 hover:bg-amber-50 flex items-center gap-2.5 transition text-left">
+                <div class="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shrink-0">AK</div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">Aris Kurniawan</p>
+                  <p class="text-[10px] font-bold text-amber-700 truncate">Role Pekerja</p>
                 </div>
               </button>
 
@@ -2180,7 +2484,7 @@
                 </div>
               </button>
 
-              <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+              <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 flex items-center gap-2.5 transition text-left">
                 <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">RY</div>
                 <div class="min-w-0">
                   <p class="text-xs font-bold text-slate-900 truncate">Ryan (Valmet)</p>
@@ -2214,6 +2518,7 @@
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">Jabatan / Role Otorisasi</label>
                 <select id="customGoogleRole" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium">
                   <option value="Project Manager / Admin Utama">Project Manager / Admin Utama</option>
+                  <option value="Pekerja Lapangan (Refractory)">Pekerja Lapangan (Absensi &amp; Data Pekerja)</option>
                   <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
                   <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
                   <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
@@ -2451,16 +2756,34 @@
       }
     }
 
+    let workerPortalStream = null;
+    let workerPortalUploadedSelfie = '';
+    let workerPortalTempPhoto = '';
+    let workerPortalTempCert = '';
+    let workerPortalCoords = { lat: -6.2383, lng: 106.9756, accuracy: 4 };
+
+    function isPekerjaRole() {
+      const role = (appState.googleAuth?.role || '').toLowerCase();
+      return role.includes('pekerja');
+    }
+
     function completeLoginSession() {
       sessionAuthenticated = true;
-      const shell = document.getElementById('appDashboardShell');
-      if (shell) {
-        shell.classList.remove('hidden');
-        shell.classList.add('flex');
+      const adminShell = document.getElementById('appDashboardShell');
+      const workerShell = document.getElementById('workerDashboardShell');
+      if (isPekerjaRole()) {
+        if (adminShell) { adminShell.classList.add('hidden'); adminShell.classList.remove('flex'); }
+        if (workerShell) { workerShell.classList.remove('hidden'); workerShell.classList.add('flex'); }
+        closeGoogleAuthModal();
+        renderWorkerDashboard();
+        switchWorkerDashboardTab('absensi');
+      } else {
+        if (workerShell) { workerShell.classList.add('hidden'); workerShell.classList.remove('flex'); }
+        if (adminShell) { adminShell.classList.remove('hidden'); adminShell.classList.add('flex'); }
+        applyRoleBasedNavigation();
+        closeGoogleAuthModal();
+        renderAllModules();
       }
-      applyRoleBasedNavigation();
-      closeGoogleAuthModal();
-      renderAllModules();
     }
 
     function getDefaultState() {
@@ -4761,12 +5084,19 @@
     }
 
     function logoutGoogleAccount() {
+      stopWorkerPortalCamera();
+      stopAbsensiSelfieCamera();
       sessionAuthenticated = false;
       appState.googleAuth.isLoggedIn = false;
       const shell = document.getElementById('appDashboardShell');
+      const workerShell = document.getElementById('workerDashboardShell');
       if (shell) {
         shell.classList.add('hidden');
         shell.classList.remove('flex');
+      }
+      if (workerShell) {
+        workerShell.classList.add('hidden');
+        workerShell.classList.remove('flex');
       }
       renderGoogleAuthUI();
       saveAllToStorage(false);
@@ -6697,6 +7027,360 @@
       document.getElementById('workerFormTitle').textContent = 'Form Registrasi Pekerja';
       document.getElementById('workerEditModeBadge').classList.add('hidden');
       if (backToDir) switchPekerjaSubTab('directory');
+    }
+
+    // ============================================================
+    // PORTAL DASHBOARD ROLE PEKERJA JS (ABSENSI + DATA PEKERJA)
+    // ============================================================
+    function renderWorkerDashboard() {
+      ensureAdminCollections();
+      const auth = appState.googleAuth || {};
+      const initials = (auth.name || 'PK').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const avEl = document.getElementById('workerHeaderAvatar');
+      const nmEl = document.getElementById('workerHeaderName');
+      if (avEl) avEl.textContent = initials;
+      if (nmEl) nmEl.textContent = auth.name || 'Pekerja';
+
+      const locEl = document.getElementById('wPortalLocationName');
+      if (locEl) locEl.textContent = appState.geofence?.areaName || 'Area Proyek Refractory, Bekasi';
+
+      const sel = document.getElementById('wPortalWorkerSelect');
+      if (sel) {
+        sel.innerHTML = appState.workers.map(w => `<option value="${escapeHtml(w.id)}">${escapeHtml(w.name)} (${escapeHtml(w.id)} — ${escapeHtml(w.role)})</option>`).join('');
+        const match = appState.workers.find(w => w.name.toLowerCase() === (auth.name || '').toLowerCase());
+        if (match) sel.value = match.id;
+      }
+
+      onWorkerPortalSelectChange();
+      updateWorkerPortalClock();
+      renderWorkerPortalHistory();
+      renderWorkerPortalQr();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function updateWorkerPortalClock() {
+      const now = new Date();
+      const shortDate = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const tsEl = document.getElementById('wPortalTimestampText');
+      if (tsEl) tsEl.textContent = `${shortDate}, ${timeStr} WIB`;
+    }
+
+    function switchWorkerDashboardTab(tabKey) {
+      const secAbs = document.getElementById('workerSection-absensi');
+      const secPek = document.getElementById('workerSection-pekerja');
+      const btnAbs = document.getElementById('wTabBtn-absensi');
+      const btnPek = document.getElementById('wTabBtn-pekerja');
+      if (secAbs) secAbs.classList.toggle('hidden', tabKey !== 'absensi');
+      if (secPek) secPek.classList.toggle('hidden', tabKey !== 'pekerja');
+
+      if (btnAbs) {
+        btnAbs.className = tabKey === 'absensi'
+          ? 'px-3.5 py-2 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+          : 'px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
+      if (btnPek) {
+        btnPek.className = tabKey === 'pekerja'
+          ? 'px-3.5 py-2 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+          : 'px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
+      if (tabKey === 'pekerja') {
+        stopWorkerPortalCamera();
+        renderWorkerPortalQr();
+      } else {
+        updateWorkerPortalClock();
+        renderWorkerPortalHistory();
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function onWorkerPortalSelectChange() {
+      const sel = document.getElementById('wPortalWorkerSelect');
+      const img = document.getElementById('wPortalSelfiePreview');
+      const w = appState.workers.find(x => x.id === sel?.value) || appState.workers[0];
+      if (img && w && !workerPortalUploadedSelfie) {
+        img.src = w.photoUrl;
+      }
+      renderWorkerPortalHistory();
+    }
+
+    function onWorkerPortalTypeChange() {
+      const t = document.getElementById('wPortalTypeSelect')?.value || 'Masuk';
+      const lbl = document.getElementById('wPortalSubmitLabel');
+      if (lbl) lbl.textContent = t === 'Pulang' ? 'Ambil Foto & Absen Pulang' : 'Ambil Foto & Absen Masuk';
+    }
+
+    async function startWorkerPortalCamera() {
+      const video = document.getElementById('wPortalVideo');
+      const img = document.getElementById('wPortalSelfiePreview');
+      const btnStart = document.getElementById('wBtnStartCam');
+      const btnStop = document.getElementById('wBtnStopCam');
+      try {
+        workerPortalStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        video.srcObject = workerPortalStream;
+        video.classList.remove('hidden');
+        img.classList.add('hidden');
+        btnStart.classList.add('hidden');
+        btnStop.classList.remove('hidden');
+        showToast('Kamera selfie aktif! Silakan klik Ambil Foto & Absen Masuk.', 'success');
+      } catch (err) {
+        showToast('Kamera langsung tidak tersedia di pratinjau. Gunakan Upload Foto Selfie atau langsung klik Ambil Foto & Absen Masuk.', 'info');
+      }
+    }
+
+    function stopWorkerPortalCamera() {
+      if (workerPortalStream) {
+        workerPortalStream.getTracks().forEach(t => t.stop());
+        workerPortalStream = null;
+      }
+      const video = document.getElementById('wPortalVideo');
+      const img = document.getElementById('wPortalSelfiePreview');
+      const btnStart = document.getElementById('wBtnStartCam');
+      const btnStop = document.getElementById('wBtnStopCam');
+      if (video) video.classList.add('hidden');
+      if (img) img.classList.remove('hidden');
+      if (btnStart) btnStart.classList.remove('hidden');
+      if (btnStop) btnStop.classList.add('hidden');
+    }
+
+    function uploadWorkerPortalSelfie(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      stopWorkerPortalCamera();
+      compressImageDataUrl(file, (url) => {
+        workerPortalUploadedSelfie = url;
+        const img = document.getElementById('wPortalSelfiePreview');
+        if (img) img.src = url;
+        showToast('Foto selfie siap digunakan untuk absensi!', 'success');
+      });
+      event.target.value = '';
+    }
+
+    function detectWorkerPortalGps() {
+      const gpsText = document.getElementById('wPortalGpsText');
+      const accText = document.getElementById('wPortalAccText');
+      if (!navigator.geolocation) {
+        showToast('Menggunakan koordinat area proyek Bekasi.', 'info');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          workerPortalCoords = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: Math.round(pos.coords.accuracy || 4)
+          };
+          if (gpsText) gpsText.textContent = `${workerPortalCoords.lat.toFixed(4)}, ${workerPortalCoords.lng.toFixed(4)}`;
+          if (accText) accText.textContent = `${workerPortalCoords.accuracy}m (Dalam Area Proyek)`;
+          showToast('Koordinat GPS Anda berhasil diperbarui!', 'success');
+        },
+        () => {
+          const jLat = (appState.geofence?.lat || -6.2383) + (Math.random() - 0.5) * 0.001;
+          const jLng = (appState.geofence?.lng || 106.9756) + (Math.random() - 0.5) * 0.001;
+          workerPortalCoords = { lat: jLat, lng: jLng, accuracy: 4 };
+          if (gpsText) gpsText.textContent = `${jLat.toFixed(4)}, ${jLng.toFixed(4)}`;
+          if (accText) accText.textContent = '4m (Dalam Area Proyek)';
+          showToast('Lokasi GPS terverifikasi di dalam area proyek Bekasi.', 'success');
+        },
+        { enableHighAccuracy: true, timeout: 4000 }
+      );
+    }
+
+    function submitWorkerPortalCheckIn() {
+      const sel = document.getElementById('wPortalWorkerSelect');
+      const w = appState.workers.find(x => x.id === sel?.value) || appState.workers[0];
+      if (!w) return;
+      const type = document.getElementById('wPortalTypeSelect')?.value || 'Masuk';
+      const video = document.getElementById('wPortalVideo');
+      let finalPhoto = workerPortalUploadedSelfie || w.photoUrl;
+
+      if (workerPortalStream && video && !video.classList.contains('hidden')) {
+        const c = document.createElement('canvas');
+        c.width = video.videoWidth || 480;
+        c.height = video.videoHeight || 640;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(video, 0, 0, c.width, c.height);
+        finalPhoto = c.toDataURL('image/jpeg', 0.85);
+        stopWorkerPortalCamera();
+      }
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' WIB';
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      const entry = {
+        id: 'att_' + Date.now(),
+        workerId: w.id,
+        name: w.name,
+        role: w.role,
+        time: type === 'Pulang' ? `${timeStr} (Pulang)` : timeStr,
+        date: dateStr,
+        lat: workerPortalCoords.lat + (Math.random() - 0.5) * 0.0006,
+        lng: workerPortalCoords.lng + (Math.random() - 0.5) * 0.0006,
+        accuracy: workerPortalCoords.accuracy || 4,
+        status: 'Hadir',
+        verifiedGps: true,
+        photoMatch: true,
+        photoUrl: finalPhoto
+      };
+
+      const idx = appState.attendanceLogs.findIndex(l => l.workerId === w.id);
+      if (idx >= 0) appState.attendanceLogs[idx] = entry;
+      else appState.attendanceLogs.unshift(entry);
+
+      workerPortalUploadedSelfie = '';
+      saveAllToStorage(false);
+      renderWorkerPortalHistory();
+      showToast(`Absen ${type} berhasil dicatat (${timeStr}) & terkirim ke Admin Utama!`, 'success');
+    }
+
+    function renderWorkerPortalHistory() {
+      const container = document.getElementById('wPortalHistoryList');
+      const badge = document.getElementById('wPortalTodayBadge');
+      const sel = document.getElementById('wPortalWorkerSelect');
+      if (!container) return;
+
+      const activeWorkerId = sel?.value || '';
+      const myLog = appState.attendanceLogs.find(l => l.workerId === activeWorkerId && l.status === 'Hadir');
+      if (badge) {
+        if (myLog) {
+          badge.textContent = `✓ Hadir (${myLog.time})`;
+          badge.className = 'text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        } else {
+          badge.textContent = 'Belum Absen Hari Ini';
+          badge.className = 'text-[11px] font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        }
+      }
+
+      const recent = appState.attendanceLogs.slice(0, 6);
+      container.innerHTML = recent.map(l => `
+        <div class="bg-[#1e293b] border border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img src="${l.photoUrl}" alt="${escapeHtml(l.name)}" class="w-10 h-10 rounded-lg object-cover border border-slate-600 shrink-0" />
+            <div class="min-w-0">
+              <p class="text-xs font-extrabold text-white truncate">${escapeHtml(l.name)}</p>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(l.role)} • ${escapeHtml(l.date)}</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-[11px] font-bold text-slate-200">${escapeHtml(l.time)}</p>
+            <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold ${l.status === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-amber-500/20 text-amber-300'}">${l.status === 'Hadir' ? 'TERVERIFIKASI GPS' : escapeHtml(l.status)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderWorkerPortalQr() {
+      const inp = document.getElementById('wPortalShareLinkInput');
+      const qrBox = document.getElementById('wPortalQrContainer');
+      const url = getWorkerShareLinkUrl();
+      if (inp) inp.value = url;
+      if (qrBox && window.QRCode) {
+        qrBox.innerHTML = '';
+        new window.QRCode(qrBox, {
+          text: url,
+          width: 170,
+          height: 170,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff'
+        });
+      }
+    }
+
+    function copyWorkerPortalFormLink() {
+      const inp = document.getElementById('wPortalShareLinkInput');
+      if (!inp) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(inp.value).then(() => {
+          showToast('Link Formulir Pekerja berhasil disalin!', 'success');
+        }).catch(() => fallbackCopyText(inp));
+      } else {
+        fallbackCopyText(inp);
+      }
+    }
+
+    function downloadWorkerPortalQr() {
+      const qrBox = document.getElementById('wPortalQrContainer');
+      if (!qrBox) return;
+      const canvas = qrBox.querySelector('canvas');
+      const img = qrBox.querySelector('img');
+      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+      if (!dataUrl) return;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'QR_Form_Pekerja_Hidayat_Project.png';
+      a.click();
+      showToast('QR Code Formulir Pekerja berhasil diunduh!', 'success');
+    }
+
+    function handleWorkerPortalPhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      compressImageDataUrl(file, (url) => {
+        workerPortalTempPhoto = url;
+        const prev = document.getElementById('wp_photoPreview');
+        const icon = document.getElementById('wp_photoIcon');
+        const lbl = document.getElementById('wp_photoLabel');
+        if (prev) { prev.src = url; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = `Foto dipilih: ${file.name}`;
+      });
+      event.target.value = '';
+    }
+
+    function handleWorkerPortalCertUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      workerPortalTempCert = file.name;
+      const lbl = document.getElementById('wp_certLabel');
+      if (lbl) lbl.textContent = `Sertifikat K3 terlampir: ${file.name}`;
+      showToast(`Sertifikat "${file.name}" berhasil dilampirkan!`, 'success');
+      event.target.value = '';
+    }
+
+    function saveWorkerPortalRegistration() {
+      const name = (document.getElementById('wp_name')?.value || '').trim();
+      const nik = (document.getElementById('wp_nik')?.value || '').trim();
+      const role = document.getElementById('wp_role')?.value || '';
+      if (!name) {
+        showToast('Nama Lengkap wajib diisi!', 'error');
+        return;
+      }
+      if (!role) {
+        showToast('Silakan pilih Posisi Refractory terlebih dahulu!', 'error');
+        return;
+      }
+      const nextNum = 402 + appState.workers.length;
+      const newId = `REF-${nextNum}`;
+      appState.workers.unshift({
+        id: newId,
+        name,
+        nik: nik || '3216000000000000',
+        role,
+        project: 'Boiler Unit 2',
+        status: 'Active',
+        validThru: 'Dec 2027',
+        certName: workerPortalTempCert || 'Sertifikat_K3_Terlampir.pdf',
+        photoUrl: workerPortalTempPhoto || createWorkerAvatarSvg(name, '#f97316', '#facc15')
+      });
+      saveAllToStorage(false);
+      resetWorkerPortalForm();
+      renderWorkerDashboard();
+      showToast(`Data pekerja ${name} (${newId}) berhasil disimpan & langsung tampil di Admin Utama!`, 'success');
+    }
+
+    function resetWorkerPortalForm() {
+      document.getElementById('wp_name').value = '';
+      document.getElementById('wp_nik').value = '';
+      document.getElementById('wp_role').value = '';
+      workerPortalTempPhoto = '';
+      workerPortalTempCert = '';
+      const prev = document.getElementById('wp_photoPreview');
+      const icon = document.getElementById('wp_photoIcon');
+      if (prev) { prev.src = ''; prev.classList.add('hidden'); }
+      if (icon) icon.classList.remove('hidden');
+      document.getElementById('wp_photoLabel').textContent = 'Upload on drop / Klik pilih Pas Foto 3x4';
+      document.getElementById('wp_certLabel').textContent = 'Upload on drop / Klik pilih Sertifikat K3 (PDF)';
     }
 
     function renderAllModules() {
