@@ -8,6 +8,9 @@
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -82,9 +85,32 @@
     .google-btn-shadow {
       box-shadow: 0 2px 4px 0 rgba(0,0,0,0.18), 0 0 1px 0 rgba(0,0,0,0.08);
     }
+    .leaflet-container {
+      z-index: 10 !important;
+      background: #0f172a;
+    }
+    .worker-id-card {
+      background: linear-gradient(155deg, #1e293b 0%, #0f172a 68%, #ea580c 68.5%, #f97316 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .dark-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .dark-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .dark-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-slate-950">
+
+  <!-- DASHBOARD SHELL (TERSEMBUNYI SAAT PERTAMA BUKA APLIKASI — MUNCUL SETELAH LOGIN) -->
+  <div id="appDashboardShell" class="hidden flex-col min-h-screen bg-slate-100">
 
   <!-- TOP HEADER BAR -->
   <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 no-print shadow-md">
@@ -125,8 +151,14 @@
           <span>Ganti Logo</span>
         </button>
 
+        <!-- BADGE ROLE ADMIN UTAMA -->
+        <span id="headerAdminRoleBadge" class="hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow">
+          <i data-lucide="crown" class="w-3.5 h-3.5"></i>
+          <span>Admin Utama</span>
+        </span>
+
         <!-- TOMBOL PORTAL LOGIN GOOGLE PROFESIONAL -->
-        <button type="button" id="headerGoogleAuthBtn" onclick="openEnterpriseLoginScreen()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition" title="Buka Menu Login Profesional & Akun Google">
+        <button type="button" id="headerGoogleAuthBtn" onclick="openEnterpriseLoginScreen(false)" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition" title="Ganti Akun / Info Login Google">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
@@ -134,6 +166,11 @@
             <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
           </svg>
           <span id="headerGoogleAuthLabel">Login Google</span>
+        </button>
+
+        <button type="button" onclick="logoutGoogleAccount()" class="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition" title="Keluar ke Menu Login">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Logout</span>
         </button>
 
         <div class="relative">
@@ -188,8 +225,18 @@
           <i data-lucide="building-2" class="w-4 h-4 text-purple-400"></i>
           <span>6. Pengaturan &amp; Logo (Valmet / RGD)</span>
         </button>
-        <button type="button" id="tabBtn-loginportal" onclick="openEnterpriseLoginScreen()" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        <button type="button" id="tabBtn-absensi" data-admin-only="true" onclick="switchTab('absensi')" class="tab-nav-btn hidden flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-200 hover:bg-slate-700/60 border border-orange-500/30 bg-orange-500/10">
+          <i data-lucide="map-pin" class="w-4 h-4 text-orange-400"></i>
+          <span>7. Absensi Pekerja</span>
+          <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-orange-500 text-white">Admin</span>
+        </button>
+        <button type="button" id="tabBtn-pekerja" data-admin-only="true" onclick="switchTab('pekerja')" class="tab-nav-btn hidden flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-200 hover:bg-slate-700/60 border border-emerald-500/30 bg-emerald-500/10">
+          <i data-lucide="id-card" class="w-4 h-4 text-emerald-400"></i>
+          <span>8. Data Pekerja</span>
+          <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-600 text-white">Admin</span>
+        </button>
+        <button type="button" id="tabBtn-loginportal" onclick="openEnterpriseLoginScreen(false)" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+          <i data-lucide="shield-check" class="w-4 h-4 text-sky-400"></i>
           <span>7. Menu Login Google Pro</span>
         </button>
       </div>
@@ -1260,7 +1307,542 @@
       </div>
     </section>
 
+    <!-- ========================================================== -->
+    <!-- MODULE 7: ABSENSI PEKERJA (KHUSUS ROLE ADMIN UTAMA)        -->
+    <!-- ========================================================== -->
+    <section id="section-absensi" class="space-y-5 hidden no-print">
+      <div class="bg-[#0f172a] text-white rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+        <!-- Header Monitoring Kehadiran (Seperti Absen(2).jpg) -->
+        <div class="bg-[#111c33] border-b border-slate-800 px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/25 shrink-0">
+              <i data-lucide="radar" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white uppercase">MONITORING KEHADIRAN PEKERJA</h2>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/40">Role Admin Utama</span>
+              </div>
+              <p id="absensiLiveClock" class="text-xs text-slate-400 mt-0.5">Kamis, 19 Nov 2026 | 07:45 WIB</p>
+            </div>
+          </div>
+
+          <!-- KPI Pills (Total Pekerja, Hadir, Izin/Alpa) -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-2 text-xs font-bold">
+              <i data-lucide="users" class="w-4 h-4 text-slate-300"></i>
+              <span class="text-slate-300">Total Pekerja:</span>
+              <span id="absKpiTotal" class="text-white text-sm">50</span>
+            </div>
+            <div class="px-3.5 py-2 rounded-xl bg-emerald-950/80 border border-emerald-700/60 flex items-center gap-2 text-xs font-bold">
+              <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+              <span class="text-emerald-200">Hadir:</span>
+              <span id="absKpiHadir" class="text-emerald-400 text-sm">42</span>
+            </div>
+            <div class="px-3.5 py-2 rounded-xl bg-rose-950/80 border border-rose-700/60 flex items-center gap-2 text-xs font-bold">
+              <i data-lucide="user-x" class="w-4 h-4 text-rose-400"></i>
+              <span class="text-rose-200">Izin/Alpa:</span>
+              <span id="absKpiIzinAlpa" class="text-rose-400 text-sm">8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Navigation Bar Absensi -->
+        <div class="bg-[#15223b] border-b border-slate-800 px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" id="absSubBtn-monitor" onclick="switchAbsensiSubTab('monitor')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow flex items-center gap-1.5 transition">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+              <span>Peta Aktif &amp; Log Kehadiran</span>
+            </button>
+            <button type="button" id="absSubBtn-checkin" onclick="switchAbsensiSubTab('checkin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+              <i data-lucide="smartphone" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>Kamera Absen Masuk (GPS)</span>
+            </button>
+            <button type="button" id="absSubBtn-settings" onclick="switchAbsensiSubTab('settings')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Pengaturan Geofence &amp; Rekap</span>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="syncAttendanceToDailyReport()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sync Hadir ke Daily Report</span>
+            </button>
+            <button type="button" onclick="exportAttendanceCsv()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 1: PETA GEOLOGI & GEOFENCE + LOG KEHADIRAN (Absen(2).jpg) -->
+        <div id="absensiView-monitor" class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- KOLOM KIRI: PETA GEOLOGI & GEOFENCE PROYEK -->
+          <div class="lg:col-span-6 bg-[#162033] rounded-2xl border border-slate-700/80 p-4 flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-extrabold tracking-wide text-white uppercase">PETA GEOLOGI &amp; GEOFENCE PROYEK</h3>
+              <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                STATUS AREA: <span class="text-emerald-400">AKTIF</span>
+              </span>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden border border-slate-700 flex-1" style="min-height: 460px;">
+              <div id="absensiLeafletMap" style="height: 460px; width: 100%;"></div>
+
+              <!-- Overlay Badges seperti Absen(2).jpg -->
+              <div class="absolute top-3 right-3 z-[400] px-3 py-1.5 rounded-lg bg-slate-900/85 backdrop-blur-xs border border-slate-600/80 text-[11px] font-semibold text-slate-200 pointer-events-none">
+                Industrial Plant Satellite GPS
+              </div>
+              <div class="absolute bottom-3 left-3 z-[400] px-3 py-1.5 rounded-lg bg-slate-900/85 backdrop-blur-xs border border-slate-600/80 text-[11px] font-bold text-slate-200 pointer-events-none">
+                GEOFENCE: <span id="absMapAreaLabel">Area Proyek Refractory, Bekasi</span>
+              </div>
+              <button type="button" onclick="focusGeofenceBounds()" class="absolute bottom-3 right-3 z-[400] px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-orange-600 text-white border border-slate-600 text-xs font-bold flex items-center gap-1.5 shadow-lg transition">
+                <i data-lucide="scan-search" class="w-3.5 h-3.5"></i>
+                <span>Lihat Geofence</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KOLOM KANAN: LOG KEHADIRAN PEKERJA -->
+          <div class="lg:col-span-6 bg-[#162033] rounded-2xl border border-slate-700/80 p-4 flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h3 class="text-sm font-extrabold tracking-wide text-white uppercase">LOG KEHADIRAN PEKERJA</h3>
+              <span class="text-xs font-semibold text-slate-300">Terverifikasi Hari Ini: <strong id="absVerifiedCount" class="text-emerald-400 text-sm">0</strong></span>
+            </div>
+
+            <!-- Live Counter Bar -->
+            <div class="bg-[#1e293b] border border-slate-700 rounded-xl px-3.5 py-2.5 mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-200">
+                <span class="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
+                  <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+                </span>
+                <span>Live Counter</span>
+              </div>
+              <div class="text-[11px] text-slate-400">
+                GPS Coordinate • <span id="absHeaderCoord" class="text-slate-200 font-mono">-6.2383° S, 106.9756° E</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase tracking-wider">TERVERIFIKASI GPS</span>
+            </div>
+
+            <!-- Search & Filter Log -->
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <input type="text" id="absLogSearch" oninput="renderAbsensiLogs()" placeholder="Cari nama pekerja atau posisi..." class="flex-1 min-w-[160px] px-3 py-1.5 text-xs rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:ring-2 focus:ring-orange-500" />
+              <select id="absLogStatusFilter" onchange="renderAbsensiLogs()" class="px-2.5 py-1.5 text-xs rounded-lg bg-slate-900 border border-slate-700 text-slate-200">
+                <option value="all">Semua Status</option>
+                <option value="Hadir">Hadir (GPS)</option>
+                <option value="Izin">Izin</option>
+                <option value="Alpa">Alpa</option>
+              </select>
+              <button type="button" onclick="switchAbsensiSubTab('checkin')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white flex items-center gap-1 transition">
+                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                <span>+ Absen Masuk</span>
+              </button>
+            </div>
+
+            <!-- Scrollable Log List -->
+            <div id="absensiLogList" class="space-y-2.5 overflow-y-auto dark-scrollbar pr-1" style="max-height: 365px;"></div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 2: KAMERA ABSENSI PROYEK REFRACTORY (Absen (1).jpg) -->
+        <div id="absensiView-checkin" class="hidden p-5">
+          <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Mobile Phone Preview Frame (Sesuai Absen (1).jpg) -->
+            <div class="lg:col-span-5 mx-auto w-full max-w-[360px]">
+              <div class="bg-slate-950 rounded-[36px] p-3 border-4 border-slate-700 shadow-2xl">
+                <div class="bg-white rounded-[26px] overflow-hidden flex flex-col">
+                  <!-- Mobile Top App Bar -->
+                  <div class="bg-[#111c33] text-white px-4 py-3.5 flex items-center justify-between">
+                    <button type="button" onclick="switchAbsensiSubTab('monitor')" class="text-slate-300 hover:text-white">
+                      <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    <span class="text-sm font-extrabold tracking-tight">Absensi Proyek Refractory</span>
+                    <span class="w-6 h-6 rounded-full overflow-hidden border border-white/30 flex flex-col shrink-0" title="Indonesia">
+                      <span class="h-1/2 bg-red-600 block"></span>
+                      <span class="h-1/2 bg-white block"></span>
+                    </span>
+                  </div>
+
+                  <!-- Camera Viewfinder + GPS HUD Overlay -->
+                  <div class="relative bg-slate-900 aspect-[3/4] overflow-hidden flex items-center justify-center">
+                    <video id="absenSelfieVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                    <img id="absenSelfiePreview" src="" alt="Preview Selfie Pekerja" class="w-full h-full object-cover" />
+
+                    <!-- GPS Overlay Box di Bagian Bawah Foto -->
+                    <div class="absolute bottom-3 inset-x-3 bg-slate-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-center gap-3 text-white">
+                      <div class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="map-pin" class="w-6 h-6 text-slate-900"></i>
+                      </div>
+                      <div class="text-[11px] leading-snug min-w-0">
+                        <p class="font-mono font-bold text-white truncate">GPS: <span id="checkinGpsText">-6.2383, 106.9756</span></p>
+                        <p class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                          <span>Akurasi: <span id="checkinAccuracyText">4m (Dalam Area Proyek)</span></span>
+                          <span id="checkinStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                        </p>
+                        <p id="checkinTimestampText" class="text-slate-300 text-[10px]">19 Nov 2026, 07:58 WIB</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Mobile Bottom Action Area -->
+                  <div class="p-4 bg-white text-slate-900 space-y-3">
+                    <div class="border border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2 bg-slate-50/70">
+                      <div class="min-w-0">
+                        <p class="text-[11px] text-slate-500 font-medium">Lokasi Saat Ini</p>
+                        <p id="checkinLocationName" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">Area Proyek Refractory, Bekasi</p>
+                      </div>
+                      <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                      </span>
+                    </div>
+
+                    <button type="button" onclick="submitWorkerCheckIn()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-extrabold text-sm shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2">
+                      <i data-lucide="camera" class="w-4 h-4"></i>
+                      <span id="checkinSubmitBtnLabel">Ambil Foto &amp; Absen Masuk</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel Kontrol Kamera, Pilihan Pekerja & Status GPS -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="bg-[#162033] rounded-2xl border border-slate-700 p-5 space-y-4">
+                <div>
+                  <h3 class="text-base font-extrabold text-white">Panel Absensi Mandiri Berbasis Selfie &amp; GPS Geofence</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Foto otomatis diberi stempel koordinat GPS dan waktu WIB, lalu langsung masuk ke Peta Geofence &amp; Log Kehadiran.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Pilih Pekerja (Dari Direktori Pekerja)</label>
+                    <select id="checkinWorkerSelect" onchange="onCheckinWorkerChange()" class="w-full px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Jenis Absensi</label>
+                    <select id="checkinTypeSelect" onchange="onCheckinTypeChange()" class="w-full px-3 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white">
+                      <option value="Masuk">Absen Masuk (Check-In)</option>
+                      <option value="Pulang">Absen Pulang (Check-Out)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Tombol Kamera & GPS -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button type="button" id="btnStartAbsenCam" onclick="startAbsensiSelfieCamera()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="video" class="w-4 h-4"></i>
+                    <span>Aktifkan Kamera</span>
+                  </button>
+                  <button type="button" id="btnStopAbsenCam" onclick="stopAbsensiSelfieCamera()" class="hidden py-2.5 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="video-off" class="w-4 h-4"></i>
+                    <span>Matikan Kamera</span>
+                  </button>
+                  <label class="py-2.5 px-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1.5 cursor-pointer transition">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span>Upload Foto Selfie</span>
+                    <input type="file" accept="image/*" capture="user" class="hidden" onchange="uploadAbsensiSelfiePhoto(event)" />
+                  </label>
+                  <button type="button" onclick="detectLiveGpsForCheckin()" class="py-2.5 px-3 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-600 flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                    <span>Deteksi GPS Live</span>
+                  </button>
+                </div>
+
+                <!-- Catat Izin / Alpa Cepat -->
+                <div class="pt-4 border-t border-slate-700/80">
+                  <p class="text-xs font-bold text-slate-300 mb-2">Catat Status Izin / Sakit / Alpa (Tanpa Selfie):</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="recordNonPresentStatus('Izin')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition">
+                      Catat sebagai IZIN
+                    </button>
+                    <button type="button" onclick="recordNonPresentStatus('Alpa')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition">
+                      Catat sebagai ALPA
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 3: PENGATURAN GEOFENCE & REKAP -->
+        <div id="absensiView-settings" class="hidden p-5 space-y-4">
+          <div class="bg-[#162033] rounded-2xl border border-slate-700 p-5 max-w-3xl space-y-4">
+            <h3 class="text-sm font-extrabold text-white uppercase">Konfigurasi Titik Pusat &amp; Radius Geofence Proyek</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Area Proyek</label>
+                <input type="text" id="geoAreaName" oninput="updateGeofenceConfig('areaName', this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Radius Geofence (Meter)</label>
+                <input type="number" id="geoRadius" min="50" max="5000" oninput="updateGeofenceConfig('radius', this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Latitude Pusat Proyek</label>
+                <input type="number" step="0.0001" id="geoLat" oninput="updateGeofenceConfig('lat', this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white font-mono" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Longitude Pusat Proyek</label>
+                <input type="number" step="0.0001" id="geoLng" oninput="updateGeofenceConfig('lng', this.value)" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-700 text-white font-mono" />
+              </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+              <button type="button" onclick="applyGeofenceToMap()" class="px-4 py-2 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                Simpan &amp; Terapkan ke Peta Geofence
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 8: DATA PEKERJA (KHUSUS ROLE ADMIN UTAMA)           -->
+    <!-- ========================================================== -->
+    <section id="section-pekerja" class="space-y-5 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Header Data Pekerja -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2.5 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              <i data-lucide="id-card" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold">Refractory Worker Data — Direktori Pekerja &amp; Registrasi</h2>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Admin Utama</span>
+              </div>
+              <p class="text-xs text-slate-400">Admin View &gt; Worker Directory, Generator ID Card + QR Code &amp; Link Formulir Registrasi Mandiri</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="pekSubBtn-directory" onclick="switchPekerjaSubTab('directory')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-600 text-white shadow flex items-center gap-1.5 transition">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>Direktori &amp; ID Card</span>
+            </button>
+            <button type="button" id="pekSubBtn-register" onclick="switchPekerjaSubTab('register')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>Registrasi &amp; Link QR Form</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 1: WORKER DIRECTORY & ID CARD PREVIEW (Seperti image_6c3e09.png) -->
+        <div id="pekerjaView-directory" class="p-5 space-y-5 bg-slate-50/70">
+          <!-- Search & Filter Toolbar -->
+          <div class="flex flex-wrap items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="relative flex-1 min-w-[220px]">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="workerSearchInput" oninput="renderWorkerDirectory()" placeholder="Cari nama pekerja, posisi, NIK, atau ID (REF-...)..." class="w-full pl-10 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500" />
+            </div>
+            <select id="workerRoleFilter" onchange="renderWorkerDirectory()" class="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-700">
+              <option value="all">Semua Posisi (All Roles)</option>
+              <option value="Bricklayer">Bricklayer</option>
+              <option value="Castable Operator">Castable Operator</option>
+              <option value="Supervisor">Supervisor</option>
+              <option value="Safety Inspector">Safety Inspector</option>
+              <option value="Leader">Leader</option>
+              <option value="Helper / Skilled">Helper / Skilled</option>
+            </select>
+            <select id="workerStatusFilter" onchange="renderWorkerDirectory()" class="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-700">
+              <option value="all">Semua Status</option>
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+            <button type="button" onclick="openPrintAllIdCardsModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Cetak Semua ID Card</span>
+            </button>
+          </div>
+
+          <!-- Grid 2 Kolom: Worker Directory Table (Kiri) + ID Card Preview (Kanan) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- Tabel Worker Directory -->
+            <div class="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+              <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-900">Worker Directory</h3>
+                <span id="workerDirectoryCount" class="text-xs font-semibold text-slate-500">0 Pekerja Terdaftar</span>
+              </div>
+              <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-xs border-collapse min-w-[640px]">
+                  <thead>
+                    <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                      <th class="py-2.5 px-3 text-left font-bold">Photo</th>
+                      <th class="py-2.5 px-3 text-left font-bold">Name</th>
+                      <th class="py-2.5 px-3 text-left font-bold">ID</th>
+                      <th class="py-2.5 px-3 text-left font-bold">Role</th>
+                      <th class="py-2.5 px-3 text-left font-bold">Project</th>
+                      <th class="py-2.5 px-3 text-center font-bold">Status</th>
+                      <th class="py-2.5 px-3 text-center font-bold">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workerDirectoryTableBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Panel Kanan: ID Card Preview (Generated) -->
+            <div class="lg:col-span-5 xl:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-xs p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-sm font-extrabold text-slate-900">ID Card Preview (Generated)</h3>
+                  <p id="idCardReadySubtitle" class="text-[11px] text-slate-500">Ready to Print (0 cards)</p>
+                </div>
+                <button type="button" onclick="openPrintAllIdCardsModal()" class="p-2 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 transition" title="Cetak Semua Kartu">
+                  <i data-lucide="printer" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <div id="workerIdCardPreviewGrid" class="grid grid-cols-2 gap-3 max-h-[540px] overflow-y-auto custom-scrollbar pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 2: BAGIKAN LINK FORMULIR & FORM REGISTRASI PEKERJA (Seperti data pekerja 1.jpg) -->
+        <div id="pekerjaView-register" class="hidden p-5 sm:p-6 bg-[#0f172a] text-white">
+          <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- KIRI: Bagikan Link Formulir (Generator Link & QR Code) -->
+            <div class="lg:col-span-5 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 flex flex-col justify-between space-y-5">
+              <div class="space-y-4">
+                <div>
+                  <h3 class="text-lg font-extrabold text-white">Bagikan Link Formulir</h3>
+                  <p class="text-xs font-bold text-orange-400 mt-1">Generator Link &amp; QR Code</p>
+                  <p class="text-xs text-slate-300 mt-1">Bagikan link ini kepada calon pekerja untuk mengisi data mandiri lengkap dengan pas foto &amp; sertifikat K3.</p>
+                </div>
+
+                <div class="space-y-2.5">
+                  <input type="text" id="workerShareLinkInput" readonly class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-slate-200 select-all" />
+                  <button type="button" onclick="copyWorkerFormLink()" class="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-lg shadow-orange-600/25 transition flex items-center justify-center gap-2">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>Salin Link Form</span>
+                  </button>
+                </div>
+
+                <div class="pt-3 border-t border-slate-700/80 flex flex-col items-center text-center space-y-3">
+                  <div class="bg-white p-3.5 rounded-2xl shadow-lg inline-flex items-center justify-center">
+                    <div id="workerShareQrContainer"></div>
+                  </div>
+                  <p class="text-xs text-slate-400">Atau scan QR Code ini</p>
+                  <div class="flex flex-wrap items-center justify-center gap-2 w-full">
+                    <button type="button" onclick="downloadWorkerFormQr()" class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                      <span>Unduh QR</span>
+                    </button>
+                    <button type="button" onclick="openSelfRegistrationPreviewModal()" class="flex-1 py-2 px-4 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                      <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                      <span>Tes Form Mandiri</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KANAN: Form Registrasi Pekerja -->
+            <div class="lg:col-span-7 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 id="workerFormTitle" class="text-lg font-extrabold text-white">Form Registrasi Pekerja</h3>
+                  <p class="text-xs text-slate-400">Data tersimpan langsung ke Worker Directory &amp; otomatis membuat ID Card Refractory</p>
+                </div>
+                <span id="workerEditModeBadge" class="hidden text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Mode Edit Pekerja</span>
+              </div>
+
+              <input type="hidden" id="wf_editId" value="" />
+
+              <div class="space-y-3.5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
+                  <input type="text" id="wf_name" placeholder="Contoh: Aris Kurniawan" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">NIK (16 Digit)</label>
+                    <input type="text" id="wf_nik" maxlength="16" placeholder="16-digit numeric NIK" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Posisi Refractory</label>
+                    <select id="wf_role" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white focus:ring-2 focus:ring-orange-500">
+                      <option value="">Pilih Posisi...</option>
+                      <option value="Bricklayer">Bricklayer Refractory</option>
+                      <option value="Castable Operator">Castable Operator</option>
+                      <option value="Supervisor">Supervisor</option>
+                      <option value="Safety Inspector">Safety Inspector</option>
+                      <option value="Leader">Leader</option>
+                      <option value="Helper / Skilled">Helper / Skilled</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Proyek Penugasan</label>
+                    <input type="text" id="wf_project" value="Boiler Unit 2" placeholder="Boiler Unit 2 / Furnace 3 Rebuild" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Status Keaktifan</label>
+                    <select id="wf_status" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white">
+                      <option value="Active">Active</option>
+                      <option value="On Leave">On Leave</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Upload Pas Foto 3x4 -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Foto (Pas Foto 3x4)</label>
+                  <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
+                    <div class="w-14 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                      <img id="wf_photoPreview" src="" alt="Pas Foto" class="w-full h-full object-cover hidden" />
+                      <i id="wf_photoPlaceholderIcon" data-lucide="user" class="w-7 h-7 text-slate-500"></i>
+                    </div>
+                    <div class="flex-1 text-center">
+                      <i data-lucide="upload" class="w-5 h-5 text-slate-400 mx-auto mb-1"></i>
+                      <p id="wf_photoLabel" class="text-xs font-semibold text-slate-300">Klik untuk pilih atau seret Pas Foto 3x4 (JPG/PNG)</p>
+                    </div>
+                    <input type="file" id="wf_photoInput" accept="image/*" class="hidden" onchange="handleWorkerPhotoUpload(event)" />
+                  </label>
+                </div>
+
+                <!-- Upload Sertifikat K3 -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Sertifikat K3 (PDF / Gambar)</label>
+                  <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
+                    <div class="w-14 h-14 rounded-lg bg-red-500/15 border border-red-500/30 flex flex-col items-center justify-center shrink-0 text-red-400">
+                      <i data-lucide="file-text" class="w-6 h-6"></i>
+                      <span class="text-[9px] font-extrabold">PDF</span>
+                    </div>
+                    <div class="flex-1 text-center">
+                      <i data-lucide="upload" class="w-5 h-5 text-slate-400 mx-auto mb-1"></i>
+                      <p id="wf_certLabel" class="text-xs font-semibold text-slate-300">Upload Sertifikat K3 / SIO / Lisensi Safety</p>
+                    </div>
+                    <input type="file" id="wf_certInput" accept=".pdf,image/*" class="hidden" onchange="handleWorkerCertUpload(event)" />
+                  </label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3 pt-2">
+                  <button type="button" onclick="saveWorkerRegistration()" class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-lg shadow-orange-600/25 transition">
+                    Simpan Data Pekerja
+                  </button>
+                  <button type="button" onclick="resetWorkerRegistrationForm(true)" class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs transition">
+                    Batal
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  </div><!-- END #appDashboardShell -->
 
   <!-- ============================================================ -->
   <!-- MODAL 1: TANDA TANGAN DIGITAL (DIGITAL SIGNATURE PAD)        -->
@@ -1533,7 +2115,7 @@
               <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">Masuk ke Dashboard Hidayat Project</h3>
               <p class="text-xs text-slate-500">Gunakan akun Google resmi Anda untuk tanda tangan otomatis &amp; sinkronisasi laporan</p>
             </div>
-            <button type="button" onclick="closeGoogleAuthModal()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tutup & Lanjutkan ke Aplikasi">
+            <button type="button" id="btnCloseLoginModalX" onclick="closeGoogleAuthModal()" class="hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tutup & Selesai &amp; Tutup">
               <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
@@ -1582,7 +2164,7 @@
 
             <!-- Daftar Akun Google Terdaftar di Perangkat -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Owner', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
+              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Admin Utama', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
                 <div class="w-8 h-8 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center shrink-0">DH</div>
                 <div class="min-w-0">
                   <p class="text-xs font-bold text-slate-900 truncate">Deni Hidayat</p>
@@ -1671,8 +2253,8 @@
         </div>
 
         <div class="pt-4 mt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <span class="text-[11px] text-slate-500">Klik <strong>Masuk ke Dashboard</strong> untuk melanjutkan pengisian 4 laporan</span>
-          <button type="button" onclick="closeGoogleAuthModal()" class="px-5 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow transition">
+          <span id="loginFooterHintText" class="text-[11px] text-slate-500">Silakan pilih akun <strong>Admin Utama</strong> atau login Google untuk membuka Dashboard.</span>
+          <button type="button" id="btnCloseLoginModalFooter" onclick="closeGoogleAuthModal()" class="hidden px-5 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow transition">
             Selesai &amp; Tutup
           </button>
         </div>
@@ -1710,6 +2292,52 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 6: CETAK & DOWNLOAD ID CARD PEKERJA (PDF / PRINT)      -->
+  <!-- ============================================================ -->
+  <div id="printIdCardsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-5xl w-full border border-slate-200 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0 no-print">
+        <div class="flex items-center gap-2">
+          <i data-lucide="id-card" class="w-5 h-5 text-orange-400"></i>
+          <h3 id="printIdModalTitle" class="text-sm font-bold">Pratinjau Cetak ID Card Pekerja Refractory</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="downloadIdCardsPdf()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-500 text-white flex items-center gap-1.5">
+            <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+            <span>Download PDF</span>
+          </button>
+          <button type="button" onclick="window.print()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Print</span>
+          </button>
+          <button type="button" onclick="closePrintIdCardsModal()" class="text-slate-400 hover:text-white ml-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div id="printIdCardsBody" class="p-6 overflow-y-auto bg-slate-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 7: DETAIL FOTO ABSENSI & KOORDINAT GPS                 -->
+  <!-- ============================================================ -->
+  <div id="absensiPhotoDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-slate-900 text-white rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-bold flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          <span>Bukti Foto &amp; Verifikasi GPS</span>
+        </h3>
+        <button type="button" onclick="closeAbsensiPhotoDetail()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="absensiPhotoDetailBody" class="p-5 space-y-3"></div>
     </div>
   </div>
 
@@ -1765,6 +2393,74 @@
         <text x="408" y="264" font-family="monospace" font-size="11" fill="#fde047" text-anchor="end">${dateText}</text>
       </svg>`;
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    let sessionAuthenticated = false;
+    let absensiLeafletMap = null;
+    let absensiMarkersLayer = null;
+    let absensiGeofenceLayer = null;
+    let absensiSelfieStream = null;
+    let checkinCurrentCoords = { lat: -6.2383, lng: 106.9756, accuracy: 4 };
+    let checkinUploadedPhotoUrl = '';
+    let workerFormTempPhotoUrl = '';
+    let workerFormTempCertName = '';
+    let absensiClockTimer = null;
+
+    function createWorkerAvatarSvg(name, shirtColor, helmetColor) {
+      const initials = (name || 'WK').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="200" viewBox="0 0 180 200">
+        <defs>
+          <linearGradient id="bgw_${initials}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#334155"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+        </defs>
+        <rect width="180" height="200" fill="url(#bgw_${initials})"/>
+        <path d="M25,200 C25,148 52,132 90,132 C128,132 155,148 155,200 Z" fill="${shirtColor}"/>
+        <rect x="64" y="138" width="10" height="62" fill="#e2e8f0" opacity="0.7"/>
+        <rect x="106" y="138" width="10" height="62" fill="#e2e8f0" opacity="0.7"/>
+        <circle cx="90" cy="92" r="34" fill="#d6a37a"/>
+        <path d="M52,82 C52,50 68,36 90,36 C112,36 128,50 128,82 Z" fill="${helmetColor}" stroke="#0f172a" stroke-width="2"/>
+        <rect x="46" y="76" width="88" height="10" rx="5" fill="${helmetColor}" stroke="#0f172a" stroke-width="1.5"/>
+        <rect x="70" y="88" width="16" height="9" rx="3" fill="rgba(255,255,255,0.45)" stroke="#334155" stroke-width="1.5"/>
+        <rect x="94" y="88" width="16" height="9" rx="3" fill="rgba(255,255,255,0.45)" stroke="#334155" stroke-width="1.5"/>
+        <line x1="86" y1="92" x2="94" y2="92" stroke="#334155" stroke-width="1.5"/>
+        <path d="M80,111 Q90,117 100,111" fill="none" stroke="#5c3a21" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function isAdminUtamaRole() {
+      const role = (appState.googleAuth?.role || '').toLowerCase();
+      return role.includes('admin utama') || role.includes('owner');
+    }
+
+    function applyRoleBasedNavigation() {
+      const isAdmin = isAdminUtamaRole();
+      const adminBadge = document.getElementById('headerAdminRoleBadge');
+      if (adminBadge) {
+        if (isAdmin) adminBadge.classList.remove('hidden');
+        else adminBadge.classList.add('hidden');
+      }
+      document.querySelectorAll('[data-admin-only="true"]').forEach(el => {
+        if (isAdmin) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+      if (!isAdmin && (activeTab === 'absensi' || activeTab === 'pekerja')) {
+        switchTab('daily');
+      }
+    }
+
+    function completeLoginSession() {
+      sessionAuthenticated = true;
+      const shell = document.getElementById('appDashboardShell');
+      if (shell) {
+        shell.classList.remove('hidden');
+        shell.classList.add('flex');
+      }
+      applyRoleBasedNavigation();
+      closeGoogleAuthModal();
+      renderAllModules();
     }
 
     function getDefaultState() {
@@ -1905,8 +2601,174 @@
           contractorCompanyName: 'PT. REFRACTORINDO GRAHA DINAMIKA',
           contractorTagline: 'REFRACTORY & INSULATION SERVICES',
           contractorShortCode: 'RGD',
-          requireLoginOnStart: false
+          requireLoginOnStart: true
         },
+        geofence: {
+          areaName: 'Area Proyek Refractory, Bekasi',
+          lat: -6.2383,
+          lng: 106.9756,
+          radius: 350
+        },
+        workers: [
+          {
+            id: 'REF-401',
+            name: 'Aris Kurniawan',
+            nik: '3216021405910004',
+            role: 'Bricklayer',
+            project: 'Furnace 3 Rebuild',
+            status: 'Active',
+            validThru: 'Dec 2027',
+            certName: 'Sertifikat_K3_Aris_Kurniawan.pdf',
+            photoUrl: createWorkerAvatarSvg('Aris Kurniawan', '#f97316', '#facc15')
+          },
+          {
+            id: 'REF-012',
+            name: 'Budi Santoso',
+            nik: '3216082209880002',
+            role: 'Supervisor',
+            project: 'Kiln 2 Relining',
+            status: 'Active',
+            validThru: 'Dec 2027',
+            certName: 'Sertifikat_K3_Supervisor_Budi.pdf',
+            photoUrl: createWorkerAvatarSvg('Budi Santoso', '#ea580c', '#ffffff')
+          },
+          {
+            id: 'REF-218',
+            name: 'Hendra Wijaya',
+            nik: '3275041103900009',
+            role: 'Safety Inspector',
+            project: 'Furnace 3 Rebuild',
+            status: 'Active',
+            validThru: 'Dec 2027',
+            certName: 'Lisensi_AK3_Umum_Hendra.pdf',
+            photoUrl: createWorkerAvatarSvg('Hendra Wijaya', '#0284c7', '#ffffff')
+          },
+          {
+            id: 'REF-105',
+            name: 'Slamet Raharjo',
+            nik: '3216050911870001',
+            role: 'Bricklayer',
+            project: 'Ladle Prep',
+            status: 'On Leave',
+            validThru: 'Dec 2027',
+            certName: 'Sertifikat_K3_Slamet.pdf',
+            photoUrl: createWorkerAvatarSvg('Slamet Raharjo', '#d97706', '#f8fafc')
+          },
+          {
+            id: 'REF-309',
+            name: 'Ahmad Fauzi',
+            nik: '3216011807930005',
+            role: 'Castable Operator',
+            project: 'Boiler Unit 2',
+            status: 'Active',
+            validThru: 'Dec 2027',
+            certName: 'Sertifikat_K3_Ahmad_Fauzi.pdf',
+            photoUrl: createWorkerAvatarSvg('Ahmad Fauzi', '#16a34a', '#facc15')
+          },
+          {
+            id: 'REF-315',
+            name: 'Dedi Kurniawan',
+            nik: '3216092504920007',
+            role: 'Castable Operator',
+            project: 'Boiler Unit 2',
+            status: 'Active',
+            validThru: 'Dec 2027',
+            certName: 'Sertifikat_K3_Dedi_Kurniawan.pdf',
+            photoUrl: createWorkerAvatarSvg('Dedi Kurniawan', '#2563eb', '#ffffff')
+          }
+        ],
+        attendanceLogs: [
+          {
+            id: 'att_1',
+            workerId: 'REF-012',
+            name: 'Budi Santoso',
+            role: 'Bricklayer Refractory',
+            time: '07:15 WIB',
+            date: '19 Nov 2026',
+            lat: -6.2379,
+            lng: 106.9752,
+            accuracy: 4,
+            status: 'Hadir',
+            verifiedGps: true,
+            photoMatch: true,
+            photoUrl: createWorkerAvatarSvg('Budi Santoso', '#ea580c', '#f97316')
+          },
+          {
+            id: 'att_2',
+            workerId: 'REF-309',
+            name: 'Ahmad Fauzi',
+            role: 'Castable Operator',
+            time: '07:30 WIB',
+            date: '19 Nov 2026',
+            lat: -6.2385,
+            lng: 106.9761,
+            accuracy: 5,
+            status: 'Hadir',
+            verifiedGps: true,
+            photoMatch: true,
+            photoUrl: createWorkerAvatarSvg('Ahmad Fauzi', '#16a34a', '#facc15')
+          },
+          {
+            id: 'att_3',
+            workerId: 'REF-315',
+            name: 'Dedi Kurniawan',
+            role: 'Bricklayer Refractory',
+            time: '07:32 WIB',
+            date: '19 Nov 2026',
+            lat: -6.2381,
+            lng: 106.9749,
+            accuracy: 3,
+            status: 'Hadir',
+            verifiedGps: true,
+            photoMatch: true,
+            photoUrl: createWorkerAvatarSvg('Dedi Kurniawan', '#2563eb', '#ffffff')
+          },
+          {
+            id: 'att_4',
+            workerId: 'REF-401',
+            name: 'Aris Kurniawan',
+            role: 'Bricklayer Refractory',
+            time: '07:40 WIB',
+            date: '19 Nov 2026',
+            lat: -6.2388,
+            lng: 106.9758,
+            accuracy: 4,
+            status: 'Hadir',
+            verifiedGps: true,
+            photoMatch: true,
+            photoUrl: createWorkerAvatarSvg('Aris Kurniawan', '#f97316', '#facc15')
+          },
+          {
+            id: 'att_5',
+            workerId: 'REF-218',
+            name: 'Hendra Wijaya',
+            role: 'Safety Inspector',
+            time: '07:44 WIB',
+            date: '19 Nov 2026',
+            lat: -6.2376,
+            lng: 106.9760,
+            accuracy: 6,
+            status: 'Hadir',
+            verifiedGps: true,
+            photoMatch: true,
+            photoUrl: createWorkerAvatarSvg('Hendra Wijaya', '#0284c7', '#ffffff')
+          },
+          {
+            id: 'att_6',
+            workerId: 'REF-105',
+            name: 'Slamet Raharjo',
+            role: 'Bricklayer Refractory',
+            time: '-',
+            date: '19 Nov 2026',
+            lat: null,
+            lng: null,
+            accuracy: null,
+            status: 'Izin',
+            verifiedGps: false,
+            photoMatch: false,
+            photoUrl: createWorkerAvatarSvg('Slamet Raharjo', '#d97706', '#f8fafc')
+          }
+        ],
 
         googleAuth: {
           isLoggedIn: true,
@@ -1976,8 +2838,12 @@
     // NAVIGATION & KPI UPDATES
     // ============================================================
     function switchTab(tabId) {
+      if ((tabId === 'absensi' || tabId === 'pekerja') && !isAdminUtamaRole()) {
+        showToast('Menu ini khusus untuk Role Admin Utama!', 'error');
+        return;
+      }
       activeTab = tabId;
-      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview', 'settings'];
+      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview', 'settings', 'absensi', 'pekerja'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
@@ -1986,10 +2852,12 @@
           else sec.classList.add('hidden');
         }
         if (btn) {
+          const isAdminBtn = btn.getAttribute('data-admin-only') === 'true';
+          const hiddenClass = (isAdminBtn && !isAdminUtamaRole()) ? ' hidden' : '';
           if (t === tabId) {
-            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow';
+            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow' + hiddenClass;
           } else {
-            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60';
+            btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60' + hiddenClass;
           }
         }
       });
@@ -1999,6 +2867,15 @@
       }
       if (tabId === 'settings') {
         renderBrandingSettingsUI();
+      }
+      if (tabId === 'absensi') {
+        renderAbsensiModule();
+        setTimeout(() => {
+          if (absensiLeafletMap) absensiLeafletMap.invalidateSize();
+        }, 120);
+      }
+      if (tabId === 'pekerja') {
+        renderPekerjaModule();
       }
       if (window.lucide) window.lucide.createIcons();
     }
@@ -3709,8 +4586,19 @@
       showToast(checked ? 'Layar Login Profesional akan otomatis tampil saat aplikasi dibuka.' : 'Layar Login otomatis saat mulai dinonaktifkan.', 'info');
     }
 
-    function openEnterpriseLoginScreen() {
+    function openEnterpriseLoginScreen(isMandatoryGate = false) {
       renderBrandingSettingsUI();
+      const closeX = document.getElementById('btnCloseLoginModalX');
+      const closeFooter = document.getElementById('btnCloseLoginModalFooter');
+      const hint = document.getElementById('loginFooterHintText');
+      const canClose = sessionAuthenticated && !isMandatoryGate;
+      if (closeX) closeX.classList.toggle('hidden', !canClose);
+      if (closeFooter) closeFooter.classList.toggle('hidden', !canClose);
+      if (hint) {
+        hint.innerHTML = canClose
+          ? 'Anda sedang login sebagai <strong>' + escapeHtml(appState.googleAuth?.name || '') + '</strong> (' + escapeHtml(appState.googleAuth?.role || '') + ').'
+          : 'Pertama buka aplikasi: silakan login sebagai <strong>Admin Utama</strong> atau akun Google lainnya untuk membuka Dashboard.';
+      }
       openGoogleAuthModal();
     }
 
@@ -3723,10 +4611,7 @@
         const currentEmail = appState.googleAuth?.email || 'deni.hidayat@gmail.com';
         const currentRole = appState.googleAuth?.role || 'Project Manager / Admin Utama';
         loginWithGooglePreset(currentName, currentEmail, currentRole, '#ea580c');
-        setTimeout(() => {
-          closeGoogleAuthModal();
-        }, 450);
-      }, 600);
+      }, 450);
     }
 
     function setPreviewDoc(docKey) {
@@ -3822,6 +4707,10 @@
     }
 
     function closeGoogleAuthModal() {
+      if (!sessionAuthenticated) {
+        showToast('Silakan login terlebih dahulu untuk membuka Dashboard!', 'error');
+        return;
+      }
       const modal = document.getElementById('googleAuthModal');
       if (modal) {
         modal.classList.add('hidden');
@@ -3840,13 +4729,14 @@
       };
       renderGoogleAuthUI();
       saveAllToStorage(false);
-      showToast(`Berhasil login Google sebagai ${name} (${email})`, 'success');
+      completeLoginSession();
+      showToast(`Selamat datang, ${name} (${role})!`, 'success');
     }
 
     function loginWithCustomGoogleAccount() {
       const name = (document.getElementById('customGoogleName')?.value || '').trim();
       let email = (document.getElementById('customGoogleEmail')?.value || '').trim();
-      const role = document.getElementById('customGoogleRole')?.value || 'Project Manager';
+      const role = document.getElementById('customGoogleRole')?.value || 'Project Manager / Admin Utama';
       if (!name) {
         showToast('Masukkan nama lengkap akun Google Anda terlebih dahulu!', 'error');
         return;
@@ -3866,14 +4756,22 @@
       };
       renderGoogleAuthUI();
       saveAllToStorage(false);
-      showToast(`Berhasil login Google sebagai ${name} (${email})`, 'success');
+      completeLoginSession();
+      showToast(`Berhasil login sebagai ${name} (${role})!`, 'success');
     }
 
     function logoutGoogleAccount() {
+      sessionAuthenticated = false;
       appState.googleAuth.isLoggedIn = false;
+      const shell = document.getElementById('appDashboardShell');
+      if (shell) {
+        shell.classList.add('hidden');
+        shell.classList.remove('flex');
+      }
       renderGoogleAuthUI();
       saveAllToStorage(false);
-      showToast('Akun Google telah keluar (Logout). Data lokal tetap tersimpan.', 'info');
+      openEnterpriseLoginScreen(true);
+      showToast('Anda telah keluar (Logout). Silakan login kembali.', 'info');
     }
 
     function applyGoogleUserToReports() {
@@ -4859,13 +5757,957 @@
         .replace(/"/g, '&quot;');
     }
 
+    // ============================================================
+    // MODULE 7 JS: ABSENSI PEKERJA (GEOFENCE MAP + CAMERA SELFIE)
+    // ============================================================
+    function ensureAdminCollections() {
+      const def = getDefaultState();
+      if (!appState.geofence) appState.geofence = def.geofence;
+      if (!Array.isArray(appState.workers) || appState.workers.length === 0) appState.workers = def.workers;
+      if (!Array.isArray(appState.attendanceLogs) || appState.attendanceLogs.length === 0) appState.attendanceLogs = def.attendanceLogs;
+    }
+
+    function updateAbsensiLiveClock() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const clockEl = document.getElementById('absensiLiveClock');
+      const tsEl = document.getElementById('checkinTimestampText');
+      if (clockEl) clockEl.textContent = `${dateStr} | ${timeStr} WIB`;
+      if (tsEl) {
+        const shortDate = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        tsEl.textContent = `${shortDate}, ${timeStr} WIB`;
+      }
+    }
+
+    function renderAbsensiModule() {
+      ensureAdminCollections();
+      updateAbsensiLiveClock();
+      if (!absensiClockTimer) {
+        absensiClockTimer = setInterval(updateAbsensiLiveClock, 15000);
+      }
+      renderAbsensiKpis();
+      renderAbsensiLogs();
+      renderCheckinWorkerSelect();
+      renderGeofenceSettingsInputs();
+      initAbsensiLeafletMap();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function switchAbsensiSubTab(subId) {
+      ['monitor', 'checkin', 'settings'].forEach(k => {
+        const view = document.getElementById(`absensiView-${k}`);
+        const btn = document.getElementById(`absSubBtn-${k}`);
+        if (view) view.classList.toggle('hidden', k !== subId);
+        if (btn) {
+          btn.className = k === subId
+            ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+            : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition';
+        }
+      });
+      if (subId === 'monitor') {
+        stopAbsensiSelfieCamera();
+        setTimeout(() => {
+          if (absensiLeafletMap) absensiLeafletMap.invalidateSize();
+        }, 100);
+      } else if (subId === 'checkin') {
+        renderCheckinWorkerSelect();
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderAbsensiKpis() {
+      const totalWorkers = appState.workers.length;
+      const hadirCount = appState.attendanceLogs.filter(l => l.status === 'Hadir').length;
+      const izinAlpaCount = Math.max(0, totalWorkers - hadirCount);
+      const elTot = document.getElementById('absKpiTotal');
+      const elHad = document.getElementById('absKpiHadir');
+      const elIz = document.getElementById('absKpiIzinAlpa');
+      const elVer = document.getElementById('absVerifiedCount');
+      if (elTot) elTot.textContent = totalWorkers;
+      if (elHad) elHad.textContent = hadirCount;
+      if (elIz) elIz.textContent = izinAlpaCount;
+      if (elVer) elVer.textContent = hadirCount;
+    }
+
+    function initAbsensiLeafletMap() {
+      const mapEl = document.getElementById('absensiLeafletMap');
+      if (!mapEl || typeof L === 'undefined') return;
+      const geo = appState.geofence;
+      const areaLbl = document.getElementById('absMapAreaLabel');
+      const headerCoord = document.getElementById('absHeaderCoord');
+      if (areaLbl) areaLbl.textContent = geo.areaName;
+      if (headerCoord) headerCoord.textContent = `${Math.abs(geo.lat).toFixed(4)}° S, ${geo.lng.toFixed(4)}° E`;
+
+      if (!absensiLeafletMap) {
+        absensiLeafletMap = L.map('absensiLeafletMap', {
+          center: [geo.lat, geo.lng],
+          zoom: 16,
+          zoomControl: true
+        });
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          attribution: 'Esri World Imagery'
+        }).addTo(absensiLeafletMap);
+        absensiGeofenceLayer = L.layerGroup().addTo(absensiLeafletMap);
+        absensiMarkersLayer = L.layerGroup().addTo(absensiLeafletMap);
+      }
+
+      drawGeofenceAndMarkers();
+    }
+
+    function drawGeofenceAndMarkers() {
+      if (!absensiLeafletMap || !absensiGeofenceLayer || !absensiMarkersLayer) return;
+      absensiGeofenceLayer.clearLayers();
+      absensiMarkersLayer.clearLayers();
+
+      const geo = appState.geofence;
+      const dLat = (geo.radius || 350) / 111000;
+      const dLng = (geo.radius || 350) / 111000;
+      const polygonCoords = [
+        [geo.lat + dLat * 0.9, geo.lng - dLng * 0.6],
+        [geo.lat + dLat * 0.75, geo.lng + dLng * 0.85],
+        [geo.lat - dLat * 0.25, geo.lng + dLng * 1.0],
+        [geo.lat - dLat * 0.95, geo.lng + dLng * 0.35],
+        [geo.lat - dLat * 0.7, geo.lng - dLng * 0.85],
+        [geo.lat + dLat * 0.15, geo.lng - dLng * 0.95]
+      ];
+
+      L.polygon(polygonCoords, {
+        color: '#22c55e',
+        weight: 3,
+        fillColor: '#22c55e',
+        fillOpacity: 0.16
+      }).addTo(absensiGeofenceLayer).bindPopup(`<strong>Geofence Aktif</strong><br/>${escapeHtml(geo.areaName)}<br/>Radius: ${geo.radius}m`);
+
+      appState.attendanceLogs.forEach(log => {
+        if (log.status !== 'Hadir' || log.lat === null || log.lng === null) return;
+        const pinIcon = L.divIcon({
+          className: 'custom-gps-pin',
+          html: `<div style="width:28px;height:28px;border-radius:9999px;background:#2563eb;border:3px solid #ffffff;box-shadow:0 3px 10px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:10px;">${escapeHtml((log.name || 'P').slice(0,2).toUpperCase())}</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        L.marker([log.lat, log.lng], { icon: pinIcon })
+          .addTo(absensiMarkersLayer)
+          .bindPopup(`
+            <div style="min-width:170px;font-family:Inter,sans-serif;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <img src="${log.photoUrl}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;" />
+                <div>
+                  <div style="font-weight:800;font-size:12px;color:#0f172a;">${escapeHtml(log.name)}</div>
+                  <div style="font-size:10px;color:#475569;">${escapeHtml(log.role)}</div>
+                </div>
+              </div>
+              <div style="font-size:10px;color:#059669;font-weight:700;">✓ Check-In: ${escapeHtml(log.time)}</div>
+              <div style="font-size:10px;color:#64748b;font-family:monospace;">${log.lat.toFixed(4)}, ${log.lng.toFixed(4)}</div>
+            </div>
+          `);
+      });
+    }
+
+    function focusGeofenceBounds() {
+      if (!absensiLeafletMap) return;
+      const geo = appState.geofence;
+      absensiLeafletMap.setView([geo.lat, geo.lng], 16, { animate: true });
+      showToast('Peta dipusatkan ke area Geofence Proyek.', 'info');
+    }
+
+    function focusWorkerOnMap(logId) {
+      const log = appState.attendanceLogs.find(l => l.id === logId);
+      if (!log) return;
+      if (absensiLeafletMap && log.lat !== null && log.lng !== null) {
+        absensiLeafletMap.setView([log.lat, log.lng], 18, { animate: true });
+      }
+      openAbsensiPhotoDetail(logId);
+    }
+
+    function renderAbsensiLogs() {
+      const listEl = document.getElementById('absensiLogList');
+      if (!listEl) return;
+      const q = (document.getElementById('absLogSearch')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('absLogStatusFilter')?.value || 'all';
+      listEl.innerHTML = '';
+
+      const filtered = appState.attendanceLogs.filter(l => {
+        const matchText = !q || l.name.toLowerCase().includes(q) || l.role.toLowerCase().includes(q) || (l.workerId || '').toLowerCase().includes(q);
+        const matchStatus = statusFilter === 'all' || l.status === statusFilter;
+        return matchText && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">Tidak ada log kehadiran yang cocok dengan filter.</div>';
+        return;
+      }
+
+      filtered.forEach(log => {
+        const isHadir = log.status === 'Hadir';
+        const statusPill = isHadir
+          ? '<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-extrabold uppercase tracking-wide">TERVERIFIKASI GPS</span>'
+          : `<span class="inline-block mt-1 px-2 py-0.5 rounded-full ${log.status === 'Izin' ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40' : 'bg-rose-500/25 text-rose-300 border border-rose-500/40'} text-[9px] font-extrabold uppercase">${escapeHtml(log.status)}</span>`;
+
+        const coordText = (log.lat !== null && log.lng !== null)
+          ? `${Math.abs(log.lat).toFixed(4)}° S, ${log.lng.toFixed(4)}° E`
+          : 'Tidak di lokasi proyek';
+
+        const card = document.createElement('div');
+        card.className = 'bg-[#1e293b] hover:bg-[#243249] border border-slate-700/80 rounded-xl p-3 flex items-center justify-between gap-3 transition cursor-pointer';
+        card.onclick = () => focusWorkerOnMap(log.id);
+        card.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="relative w-14 h-14 rounded-xl overflow-hidden border border-slate-600 shrink-0 bg-slate-800">
+              <img src="${log.photoUrl}" alt="${escapeHtml(log.name)}" class="w-full h-full object-cover" />
+              ${isHadir ? '<div class="absolute bottom-0 inset-x-0 bg-slate-950/80 text-[8px] font-bold text-slate-200 text-center py-0.5">GPS Stamped</div>' : ''}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-extrabold text-white truncate">${escapeHtml(log.name)}</p>
+              <p class="text-[11px] text-slate-300 truncate">${escapeHtml(log.role)}</p>
+              <p class="text-[10px] text-slate-400 font-mono mt-0.5">${escapeHtml(coordText)}</p>
+            </div>
+          </div>
+
+          <div class="text-right shrink-0 flex items-center gap-3">
+            <div>
+              <p class="text-xs font-bold text-slate-200">Check-In: ${escapeHtml(log.time)}</p>
+              ${statusPill}
+            </div>
+            <div class="pl-3 border-l border-slate-700 text-center">
+              <div class="w-7 h-7 rounded-lg ${isHadir ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'} flex items-center justify-center mx-auto">
+                <i data-lucide="${isHadir ? 'camera' : 'alert-circle'}" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[9px] font-semibold ${isHadir ? 'text-emerald-300' : 'text-slate-400'} block mt-0.5">${isHadir ? 'Foto Cocok' : log.status}</span>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function openAbsensiPhotoDetail(logId) {
+      const log = appState.attendanceLogs.find(l => l.id === logId);
+      if (!log) return;
+      const modal = document.getElementById('absensiPhotoDetailModal');
+      const body = document.getElementById('absensiPhotoDetailBody');
+      if (!modal || !body) return;
+      body.innerHTML = `
+        <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950">
+          <img src="${log.photoUrl}" alt="${escapeHtml(log.name)}" class="w-full max-h-72 object-contain mx-auto" />
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+          <div><span class="text-slate-400 block text-[10px]">Nama Pekerja</span><strong>${escapeHtml(log.name)}</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Posisi</span><strong>${escapeHtml(log.role)}</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Waktu Check-In</span><strong class="text-emerald-400">${escapeHtml(log.time)} (${escapeHtml(log.date)})</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Status</span><strong>${escapeHtml(log.status)}</strong></div>
+          <div class="col-span-2"><span class="text-slate-400 block text-[10px]">Koordinat GPS</span><strong class="font-mono text-sky-300">${log.lat !== null ? log.lat.toFixed(5) + ', ' + log.lng.toFixed(5) : 'N/A'}</strong></div>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeAbsensiPhotoDetail() {
+      const modal = document.getElementById('absensiPhotoDetailModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function renderCheckinWorkerSelect() {
+      const sel = document.getElementById('checkinWorkerSelect');
+      if (!sel) return;
+      sel.innerHTML = appState.workers.map(w => `<option value="${escapeHtml(w.id)}">${escapeHtml(w.name)} (${escapeHtml(w.id)} — ${escapeHtml(w.role)})</option>`).join('');
+      onCheckinWorkerChange();
+    }
+
+    function onCheckinWorkerChange() {
+      const sel = document.getElementById('checkinWorkerSelect');
+      const img = document.getElementById('absenSelfiePreview');
+      const w = appState.workers.find(x => x.id === sel?.value) || appState.workers[0];
+      if (img && w && !checkinUploadedPhotoUrl) {
+        img.src = w.photoUrl;
+      }
+      const locEl = document.getElementById('checkinLocationName');
+      if (locEl) locEl.textContent = appState.geofence.areaName;
+    }
+
+    function onCheckinTypeChange() {
+      const t = document.getElementById('checkinTypeSelect')?.value || 'Masuk';
+      const lbl = document.getElementById('checkinSubmitBtnLabel');
+      if (lbl) lbl.textContent = t === 'Pulang' ? 'Ambil Foto & Absen Pulang' : 'Ambil Foto & Absen Masuk';
+    }
+
+    async function startAbsensiSelfieCamera() {
+      const video = document.getElementById('absenSelfieVideo');
+      const img = document.getElementById('absenSelfiePreview');
+      const btnStart = document.getElementById('btnStartAbsenCam');
+      const btnStop = document.getElementById('btnStopAbsenCam');
+      try {
+        absensiSelfieStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        video.srcObject = absensiSelfieStream;
+        video.classList.remove('hidden');
+        img.classList.add('hidden');
+        btnStart.classList.add('hidden');
+        btnStop.classList.remove('hidden');
+        showToast('Kamera selfie aktif! Siap mengambil foto absensi.', 'success');
+      } catch (err) {
+        showToast('Kamera tidak tersedia di pratinjau. Anda dapat menggunakan tombol Upload Foto Selfie atau langsung klik Ambil Foto & Absen Masuk.', 'info');
+      }
+    }
+
+    function stopAbsensiSelfieCamera() {
+      if (absensiSelfieStream) {
+        absensiSelfieStream.getTracks().forEach(t => t.stop());
+        absensiSelfieStream = null;
+      }
+      const video = document.getElementById('absenSelfieVideo');
+      const img = document.getElementById('absenSelfiePreview');
+      const btnStart = document.getElementById('btnStartAbsenCam');
+      const btnStop = document.getElementById('btnStopAbsenCam');
+      if (video) video.classList.add('hidden');
+      if (img) img.classList.remove('hidden');
+      if (btnStart) btnStart.classList.remove('hidden');
+      if (btnStop) btnStop.classList.add('hidden');
+    }
+
+    function uploadAbsensiSelfiePhoto(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      stopAbsensiSelfieCamera();
+      compressImageDataUrl(file, (url) => {
+        checkinUploadedPhotoUrl = url;
+        const img = document.getElementById('absenSelfiePreview');
+        if (img) img.src = url;
+        showToast('Foto selfie siap diverifikasi untuk absensi!', 'success');
+      });
+      event.target.value = '';
+    }
+
+    function detectLiveGpsForCheckin() {
+      const gpsText = document.getElementById('checkinGpsText');
+      const accText = document.getElementById('checkinAccuracyText');
+      if (!navigator.geolocation) {
+        showToast('GPS browser tidak aktif, menggunakan koordinat area proyek Bekasi.', 'info');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const acc = Math.round(pos.coords.accuracy || 5);
+          checkinCurrentCoords = { lat, lng, accuracy: acc };
+          if (gpsText) gpsText.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          if (accText) accText.textContent = `${acc}m (Dalam Area Proyek)`;
+          showToast('Koordinat GPS perangkat berhasil diperbarui!', 'success');
+        },
+        () => {
+          const jitterLat = appState.geofence.lat + (Math.random() - 0.5) * 0.0012;
+          const jitterLng = appState.geofence.lng + (Math.random() - 0.5) * 0.0012;
+          checkinCurrentCoords = { lat: jitterLat, lng: jitterLng, accuracy: 4 };
+          if (gpsText) gpsText.textContent = `${jitterLat.toFixed(4)}, ${jitterLng.toFixed(4)}`;
+          if (accText) accText.textContent = `4m (Dalam Area Proyek)`;
+          showToast('Menggunakan koordinat Geofence Proyek Bekasi (Simulasi GPS).', 'info');
+        },
+        { enableHighAccuracy: true, timeout: 4000 }
+      );
+    }
+
+    function submitWorkerCheckIn() {
+      const sel = document.getElementById('checkinWorkerSelect');
+      const w = appState.workers.find(x => x.id === sel?.value);
+      if (!w) return;
+      const type = document.getElementById('checkinTypeSelect')?.value || 'Masuk';
+      const video = document.getElementById('absenSelfieVideo');
+      let finalPhoto = checkinUploadedPhotoUrl || w.photoUrl;
+
+      if (absensiSelfieStream && video && !video.classList.contains('hidden')) {
+        const c = document.createElement('canvas');
+        c.width = video.videoWidth || 480;
+        c.height = video.videoHeight || 640;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(video, 0, 0, c.width, c.height);
+        finalPhoto = c.toDataURL('image/jpeg', 0.85);
+        stopAbsensiSelfieCamera();
+      }
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' WIB';
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const lat = checkinCurrentCoords.lat + (Math.random() - 0.5) * 0.0008;
+      const lng = checkinCurrentCoords.lng + (Math.random() - 0.5) * 0.0008;
+
+      const existingIdx = appState.attendanceLogs.findIndex(l => l.workerId === w.id);
+      const entry = {
+        id: 'att_' + Date.now(),
+        workerId: w.id,
+        name: w.name,
+        role: w.role,
+        time: type === 'Pulang' ? `${timeStr} (Pulang)` : timeStr,
+        date: dateStr,
+        lat: lat,
+        lng: lng,
+        accuracy: checkinCurrentCoords.accuracy || 4,
+        status: 'Hadir',
+        verifiedGps: true,
+        photoMatch: true,
+        photoUrl: finalPhoto
+      };
+
+      if (existingIdx >= 0) appState.attendanceLogs[existingIdx] = entry;
+      else appState.attendanceLogs.unshift(entry);
+
+      checkinUploadedPhotoUrl = '';
+      saveAllToStorage(false);
+      renderAbsensiKpis();
+      renderAbsensiLogs();
+      drawGeofenceAndMarkers();
+      switchAbsensiSubTab('monitor');
+      showToast(`Absen ${type} berhasil untuk ${w.name} — Terverifikasi GPS!`, 'success');
+    }
+
+    function recordNonPresentStatus(statusVal) {
+      const sel = document.getElementById('checkinWorkerSelect');
+      const w = appState.workers.find(x => x.id === sel?.value);
+      if (!w) return;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const existingIdx = appState.attendanceLogs.findIndex(l => l.workerId === w.id);
+      const entry = {
+        id: 'att_' + Date.now(),
+        workerId: w.id,
+        name: w.name,
+        role: w.role,
+        time: '-',
+        date: dateStr,
+        lat: null,
+        lng: null,
+        accuracy: null,
+        status: statusVal,
+        verifiedGps: false,
+        photoMatch: false,
+        photoUrl: w.photoUrl
+      };
+      if (existingIdx >= 0) appState.attendanceLogs[existingIdx] = entry;
+      else appState.attendanceLogs.unshift(entry);
+
+      saveAllToStorage(false);
+      renderAbsensiKpis();
+      renderAbsensiLogs();
+      drawGeofenceAndMarkers();
+      switchAbsensiSubTab('monitor');
+      showToast(`${w.name} dicatat berstatus ${statusVal}.`, 'info');
+    }
+
+    function renderGeofenceSettingsInputs() {
+      const g = appState.geofence;
+      const elName = document.getElementById('geoAreaName');
+      const elRad = document.getElementById('geoRadius');
+      const elLat = document.getElementById('geoLat');
+      const elLng = document.getElementById('geoLng');
+      if (elName) elName.value = g.areaName || '';
+      if (elRad) elRad.value = g.radius || 350;
+      if (elLat) elLat.value = g.lat || -6.2383;
+      if (elLng) elLng.value = g.lng || 106.9756;
+    }
+
+    function updateGeofenceConfig(key, val) {
+      if (key === 'areaName') appState.geofence.areaName = val;
+      else appState.geofence[key] = parseFloat(val) || appState.geofence[key];
+      saveAllToStorage(false);
+    }
+
+    function applyGeofenceToMap() {
+      checkinCurrentCoords.lat = appState.geofence.lat;
+      checkinCurrentCoords.lng = appState.geofence.lng;
+      switchAbsensiSubTab('monitor');
+      initAbsensiLeafletMap();
+      focusGeofenceBounds();
+      showToast('Area Geofence Proyek berhasil diperbarui!', 'success');
+    }
+
+    function syncAttendanceToDailyReport() {
+      const hadirLogs = appState.attendanceLogs.filter(l => l.status === 'Hadir');
+      const roleCounts = {};
+      hadirLogs.forEach(l => {
+        const r = l.role || 'Skilled';
+        roleCounts[r] = (roleCounts[r] || 0) + 1;
+      });
+      const mapped = Object.keys(roleCounts).map((roleName, idx) => ({
+        id: 'p_sync_' + idx,
+        role: roleName,
+        count: roleCounts[roleName],
+        unit: roleCounts[roleName] === 1 ? 'Person' : 'Persons'
+      }));
+      if (mapped.length > 0) {
+        appState.dailyReport.personnel = mapped;
+        renderDailyReportForm();
+        saveAllToStorage(false);
+        showToast(`Jumlah ${hadirLogs.length} pekerja hadir berhasil disinkronkan ke Daily Report Harian!`, 'success');
+      }
+    }
+
+    function exportAttendanceCsv() {
+      const headers = ['Worker ID', 'Nama', 'Posisi', 'Tanggal', 'Jam Check-In', 'Status', 'Latitude', 'Longitude'];
+      const rows = appState.attendanceLogs.map(l => [
+        l.workerId || '-', `"${l.name}"`, `"${l.role}"`, `"${l.date}"`, `"${l.time}"`, l.status, l.lat ?? '', l.lng ?? ''
+      ].join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rekap_Absensi_Pekerja_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('File CSV Rekap Absensi berhasil diunduh!', 'success');
+    }
+
+    // ============================================================
+    // MODULE 8 JS: DATA PEKERJA (DIRECTORY, ID CARD, QR & FORM)
+    // ============================================================
+    function renderPekerjaModule() {
+      ensureAdminCollections();
+      renderWorkerDirectory();
+      renderShareFormQrCode();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function switchPekerjaSubTab(subId) {
+      ['directory', 'register'].forEach(k => {
+        const view = document.getElementById(`pekerjaView-${k}`);
+        const btn = document.getElementById(`pekSubBtn-${k}`);
+        if (view) view.classList.toggle('hidden', k !== subId);
+        if (btn) {
+          btn.className = k === subId
+            ? 'px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+            : 'px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition';
+        }
+      });
+      if (subId === 'register') {
+        renderShareFormQrCode();
+      } else {
+        renderWorkerDirectory();
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function getFilteredWorkers() {
+      const q = (document.getElementById('workerSearchInput')?.value || '').toLowerCase().trim();
+      const roleF = document.getElementById('workerRoleFilter')?.value || 'all';
+      const statusF = document.getElementById('workerStatusFilter')?.value || 'all';
+      return appState.workers.filter(w => {
+        const mText = !q || w.name.toLowerCase().includes(q) || w.id.toLowerCase().includes(q) || w.role.toLowerCase().includes(q) || (w.nik || '').includes(q);
+        const mRole = roleF === 'all' || w.role.toLowerCase().includes(roleF.toLowerCase());
+        const mStatus = statusF === 'all' || w.status === statusF;
+        return mText && mRole && mStatus;
+      });
+    }
+
+    function renderWorkerDirectory() {
+      const tbody = document.getElementById('workerDirectoryTableBody');
+      const cardGrid = document.getElementById('workerIdCardPreviewGrid');
+      const countLbl = document.getElementById('workerDirectoryCount');
+      const readyLbl = document.getElementById('idCardReadySubtitle');
+      if (!tbody || !cardGrid) return;
+
+      const list = getFilteredWorkers();
+      if (countLbl) countLbl.textContent = `${list.length} Pekerja Terdaftar`;
+      if (readyLbl) readyLbl.textContent = `Ready to Print (${list.length} cards)`;
+
+      tbody.innerHTML = '';
+      cardGrid.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400">Tidak ada data pekerja ditemukan.</td></tr>';
+        cardGrid.innerHTML = '<div class="col-span-2 py-8 text-center text-xs text-slate-400">Belum ada kartu untuk ditampilkan.</div>';
+        return;
+      }
+
+      list.forEach(w => {
+        const statusClass = w.status === 'Active'
+          ? 'bg-emerald-100 text-emerald-700'
+          : w.status === 'On Leave'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-slate-200 text-slate-600';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <img src="${w.photoUrl}" alt="${escapeHtml(w.name)}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-xs" />
+          </td>
+          <td class="py-2.5 px-3">
+            <p class="font-bold text-slate-900">${escapeHtml(w.name)}</p>
+            <p class="text-[10px] text-slate-400 font-mono">NIK: ${escapeHtml(w.nik || '-')}</p>
+          </td>
+          <td class="py-2.5 px-3 font-mono font-bold text-slate-700">${escapeHtml(w.id)}</td>
+          <td class="py-2.5 px-3 font-medium text-slate-700">${escapeHtml(w.role)}</td>
+          <td class="py-2.5 px-3 text-slate-600">${escapeHtml(w.project)}</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusClass}">${escapeHtml(w.status)}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <button type="button" onclick="openSingleWorkerIdCard('${escapeHtml(w.id)}')" class="p-1.5 rounded-lg text-slate-500 hover:bg-blue-50 hover:text-blue-600" title="Lihat ID Card">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="editWorkerData('${escapeHtml(w.id)}')" class="p-1.5 rounded-lg text-slate-500 hover:bg-amber-50 hover:text-amber-600" title="Edit Data Pekerja">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="deleteWorkerData('${escapeHtml(w.id)}')" class="p-1.5 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600" title="Hapus Pekerja">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Mini ID Card in right panel (like image_6c3e09.png)
+        const cardWrap = document.createElement('div');
+        cardWrap.className = 'worker-id-card rounded-xl p-2.5 text-white shadow-md border border-slate-700 cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between';
+        cardWrap.onclick = () => openSingleWorkerIdCard(w.id);
+        const qrId = `miniQr_${w.id.replace(/[^a-zA-Z0-9]/g, '')}`;
+        cardWrap.innerHTML = buildWorkerIdCardInnerHtml(w, qrId, true);
+        cardGrid.appendChild(cardWrap);
+
+        setTimeout(() => {
+          const qrTarget = document.getElementById(qrId);
+          if (qrTarget && window.QRCode) {
+            qrTarget.innerHTML = '';
+            new window.QRCode(qrTarget, {
+              text: `${w.id}|${w.name}|${w.role}|${w.project}`,
+              width: 44,
+              height: 44,
+              colorDark: '#0f172a',
+              colorLight: '#ffffff'
+            });
+          }
+        }, 20);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function buildWorkerIdCardInnerHtml(w, qrDomId, isCompact) {
+      return `
+        <div>
+          <div class="text-center border-b border-white/15 pb-1.5 mb-2">
+            <p class="${isCompact ? 'text-[9px]' : 'text-xs'} font-extrabold tracking-widest uppercase text-white">REFRACTORY WORKER</p>
+            <p class="${isCompact ? 'text-[7px]' : 'text-[9px]'} text-orange-300 font-semibold">HIDAYAT PROJECT — PT. RGD</p>
+          </div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <img src="${w.photoUrl}" alt="${escapeHtml(w.name)}" class="${isCompact ? 'w-12 h-14' : 'w-20 h-24'} rounded-lg object-cover border-2 border-white/80 shadow" />
+            <div class="${isCompact ? 'w-11 h-11 text-[7px]' : 'w-16 h-16 text-[9px]'} rounded-full bg-emerald-600/90 border-2 border-emerald-300 flex flex-col items-center justify-center text-center font-extrabold leading-tight p-1 shadow">
+              <span>K3</span>
+              <span>PASS</span>
+            </div>
+          </div>
+          <p class="${isCompact ? 'text-[11px]' : 'text-sm'} font-extrabold text-white leading-tight truncate">${escapeHtml(w.name)}</p>
+          <p class="${isCompact ? 'text-[8px]' : 'text-[11px]'} font-bold uppercase text-orange-300 truncate">${escapeHtml(w.role)}</p>
+          <p class="${isCompact ? 'text-[8px]' : 'text-[10px]'} text-slate-300 font-mono mt-1">ID: ${escapeHtml(w.id)}</p>
+          <p class="${isCompact ? 'text-[8px]' : 'text-[10px]'} text-slate-300 truncate">PROJ: ${escapeHtml(w.project)}</p>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-white/20 flex items-end justify-between gap-1">
+          <div class="bg-white p-1 rounded-md shadow-sm">
+            <div id="${qrDomId}"></div>
+          </div>
+          <div class="text-right">
+            <span class="${isCompact ? 'text-[7px]' : 'text-[9px]'} block text-white/80 uppercase font-semibold">Valid Thru</span>
+            <span class="${isCompact ? 'text-[8px]' : 'text-[10px]'} font-extrabold text-white">${escapeHtml(w.validThru || 'Dec 2027')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function openSingleWorkerIdCard(workerId) {
+      const w = appState.workers.find(x => x.id === workerId);
+      if (!w) return;
+      renderIdCardsPrintModal([w], `ID Card Pekerja — ${w.name} (${w.id})`);
+    }
+
+    function openPrintAllIdCardsModal() {
+      const list = getFilteredWorkers();
+      if (list.length === 0) {
+        showToast('Tidak ada data pekerja untuk dicetak!', 'error');
+        return;
+      }
+      renderIdCardsPrintModal(list, `Cetak Semua ID Card Pekerja (${list.length} Kartu)`);
+    }
+
+    function renderIdCardsPrintModal(workersList, titleText) {
+      const modal = document.getElementById('printIdCardsModal');
+      const titleEl = document.getElementById('printIdModalTitle');
+      const body = document.getElementById('printIdCardsBody');
+      if (!modal || !body) return;
+      if (titleEl) titleEl.textContent = titleText;
+      body.innerHTML = '';
+
+      workersList.forEach((w, idx) => {
+        const card = document.createElement('div');
+        card.className = 'worker-id-card rounded-2xl p-4 text-white shadow-xl border border-slate-700 w-full max-w-[260px] mx-auto flex flex-col justify-between';
+        card.style.minHeight = '355px';
+        const qrId = `printQr_${idx}_${w.id.replace(/[^a-zA-Z0-9]/g, '')}`;
+        card.innerHTML = buildWorkerIdCardInnerHtml(w, qrId, false);
+        body.appendChild(card);
+
+        setTimeout(() => {
+          const qrTarget = document.getElementById(qrId);
+          if (qrTarget && window.QRCode) {
+            qrTarget.innerHTML = '';
+            new window.QRCode(qrTarget, {
+              text: `${w.id}|${w.name}|${w.role}|NIK:${w.nik}|${w.project}`,
+              width: 66,
+              height: 66,
+              colorDark: '#0f172a',
+              colorLight: '#ffffff'
+            });
+          }
+        }, 30);
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closePrintIdCardsModal() {
+      const modal = document.getElementById('printIdCardsModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function downloadIdCardsPdf() {
+      const el = document.getElementById('printIdCardsBody');
+      if (!el || !window.html2pdf) {
+        window.print();
+        return;
+      }
+      showToast('Menyiapkan PDF ID Card Pekerja...', 'info');
+      window.html2pdf().set({
+        margin: [8, 8, 8, 8],
+        filename: 'Hidayat_Project_Worker_ID_Cards.pdf',
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(el).save().then(() => {
+        showToast('PDF ID Card Pekerja berhasil diunduh!', 'success');
+      });
+    }
+
+    // Generator Link & QR Code Form Mandiri (data pekerja 1.jpg)
+    function getWorkerShareLinkUrl() {
+      const base = (window.location.href && window.location.href.startsWith('http'))
+        ? window.location.href.split('#')[0]
+        : 'https://refractory-project.id/join/form-pekerja';
+      return base.includes('form-pekerja') ? base : `${base}#join-pekerja`;
+    }
+
+    function renderShareFormQrCode() {
+      const linkInput = document.getElementById('workerShareLinkInput');
+      const qrBox = document.getElementById('workerShareQrContainer');
+      const url = getWorkerShareLinkUrl();
+      if (linkInput) linkInput.value = url;
+      if (qrBox && window.QRCode) {
+        qrBox.innerHTML = '';
+        new window.QRCode(qrBox, {
+          text: url,
+          width: 170,
+          height: 170,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff'
+        });
+      }
+    }
+
+    function copyWorkerFormLink() {
+      const input = document.getElementById('workerShareLinkInput');
+      if (!input) return;
+      const val = input.value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(val).then(() => {
+          showToast('Link Formulir Registrasi Pekerja berhasil disalin!', 'success');
+        }).catch(() => fallbackCopyText(input));
+      } else {
+        fallbackCopyText(input);
+      }
+    }
+
+    function fallbackCopyText(inputEl) {
+      inputEl.select();
+      try {
+        document.execCommand('copy');
+        showToast('Link Formulir Registrasi Pekerja berhasil disalin!', 'success');
+      } catch (e) {
+        showToast('Silakan salin link secara manual dari kotak URL.', 'info');
+      }
+    }
+
+    function downloadWorkerFormQr() {
+      const qrBox = document.getElementById('workerShareQrContainer');
+      if (!qrBox) return;
+      const canvas = qrBox.querySelector('canvas');
+      const img = qrBox.querySelector('img');
+      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+      if (!dataUrl) return;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'QR_Form_Registrasi_Pekerja_Hidayat_Project.png';
+      a.click();
+      showToast('Gambar QR Code Formulir Pekerja berhasil diunduh!', 'success');
+    }
+
+    function openSelfRegistrationPreviewModal() {
+      resetWorkerRegistrationForm(false);
+      document.getElementById('wf_name')?.focus();
+      showToast('Anda dapat langsung mengisi Form Registrasi Pekerja di sebelah kanan.', 'info');
+    }
+
+    function handleWorkerPhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      compressImageDataUrl(file, (url) => {
+        workerFormTempPhotoUrl = url;
+        const prev = document.getElementById('wf_photoPreview');
+        const icon = document.getElementById('wf_photoPlaceholderIcon');
+        const lbl = document.getElementById('wf_photoLabel');
+        if (prev) { prev.src = url; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = `Foto dipilih: ${file.name}`;
+      });
+      event.target.value = '';
+    }
+
+    function handleWorkerCertUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      workerFormTempCertName = file.name;
+      const lbl = document.getElementById('wf_certLabel');
+      if (lbl) lbl.textContent = `Sertifikat K3 terlampir: ${file.name}`;
+      showToast(`File sertifikat "${file.name}" berhasil dilampirkan!`, 'success');
+      event.target.value = '';
+    }
+
+    function saveWorkerRegistration() {
+      const editId = document.getElementById('wf_editId')?.value || '';
+      const name = (document.getElementById('wf_name')?.value || '').trim();
+      const nik = (document.getElementById('wf_nik')?.value || '').trim();
+      const role = document.getElementById('wf_role')?.value || '';
+      const project = (document.getElementById('wf_project')?.value || 'Boiler Unit 2').trim();
+      const status = document.getElementById('wf_status')?.value || 'Active';
+
+      if (!name) {
+        showToast('Nama Lengkap pekerja wajib diisi!', 'error');
+        return;
+      }
+      if (!role) {
+        showToast('Silakan pilih Posisi Refractory terlebih dahulu!', 'error');
+        return;
+      }
+
+      if (editId) {
+        const idx = appState.workers.findIndex(w => w.id === editId);
+        if (idx >= 0) {
+          appState.workers[idx] = {
+            ...appState.workers[idx],
+            name,
+            nik: nik || appState.workers[idx].nik,
+            role,
+            project,
+            status,
+            photoUrl: workerFormTempPhotoUrl || appState.workers[idx].photoUrl,
+            certName: workerFormTempCertName || appState.workers[idx].certName
+          };
+        }
+        showToast(`Data pekerja ${name} berhasil diperbarui!`, 'success');
+      } else {
+        const nextNum = 402 + appState.workers.length;
+        const newId = `REF-${nextNum}`;
+        appState.workers.unshift({
+          id: newId,
+          name,
+          nik: nik || '3216000000000000',
+          role,
+          project,
+          status,
+          validThru: 'Dec 2027',
+          certName: workerFormTempCertName || 'Sertifikat_K3_Terverifikasi.pdf',
+          photoUrl: workerFormTempPhotoUrl || createWorkerAvatarSvg(name, '#f97316', '#facc15')
+        });
+        showToast(`Pekerja baru ${name} (${newId}) berhasil didaftarkan & ID Card dibuat!`, 'success');
+      }
+
+      saveAllToStorage(false);
+      resetWorkerRegistrationForm(false);
+      renderWorkerDirectory();
+      renderCheckinWorkerSelect();
+      renderAbsensiKpis();
+      switchPekerjaSubTab('directory');
+    }
+
+    function editWorkerData(workerId) {
+      const w = appState.workers.find(x => x.id === workerId);
+      if (!w) return;
+      document.getElementById('wf_editId').value = w.id;
+      document.getElementById('wf_name').value = w.name;
+      document.getElementById('wf_nik').value = w.nik || '';
+      document.getElementById('wf_role').value = w.role;
+      document.getElementById('wf_project').value = w.project || 'Boiler Unit 2';
+      document.getElementById('wf_status').value = w.status || 'Active';
+      workerFormTempPhotoUrl = w.photoUrl;
+      workerFormTempCertName = w.certName || '';
+
+      const prev = document.getElementById('wf_photoPreview');
+      const icon = document.getElementById('wf_photoPlaceholderIcon');
+      if (prev && w.photoUrl) { prev.src = w.photoUrl; prev.classList.remove('hidden'); }
+      if (icon) icon.classList.add('hidden');
+      document.getElementById('wf_photoLabel').textContent = 'Klik untuk ganti Pas Foto 3x4';
+      document.getElementById('wf_certLabel').textContent = w.certName ? `Sertifikat: ${w.certName}` : 'Upload Sertifikat K3';
+      document.getElementById('workerFormTitle').textContent = `Edit Data Pekerja (${w.id})`;
+      document.getElementById('workerEditModeBadge').classList.remove('hidden');
+      switchPekerjaSubTab('register');
+    }
+
+    function deleteWorkerData(workerId) {
+      appState.workers = appState.workers.filter(w => w.id !== workerId);
+      saveAllToStorage(false);
+      renderWorkerDirectory();
+      renderAbsensiKpis();
+      showToast(`Data pekerja ${workerId} telah dihapus.`, 'info');
+    }
+
+    function resetWorkerRegistrationForm(backToDir) {
+      document.getElementById('wf_editId').value = '';
+      document.getElementById('wf_name').value = '';
+      document.getElementById('wf_nik').value = '';
+      document.getElementById('wf_role').value = '';
+      document.getElementById('wf_project').value = 'Boiler Unit 2';
+      document.getElementById('wf_status').value = 'Active';
+      workerFormTempPhotoUrl = '';
+      workerFormTempCertName = '';
+      const prev = document.getElementById('wf_photoPreview');
+      const icon = document.getElementById('wf_photoPlaceholderIcon');
+      if (prev) { prev.src = ''; prev.classList.add('hidden'); }
+      if (icon) icon.classList.remove('hidden');
+      document.getElementById('wf_photoLabel').textContent = 'Klik untuk pilih atau seret Pas Foto 3x4 (JPG/PNG)';
+      document.getElementById('wf_certLabel').textContent = 'Upload Sertifikat K3 / SIO / Lisensi Safety';
+      document.getElementById('workerFormTitle').textContent = 'Form Registrasi Pekerja';
+      document.getElementById('workerEditModeBadge').classList.add('hidden');
+      if (backToDir) switchPekerjaSubTab('directory');
+    }
+
     function renderAllModules() {
+      ensureAdminCollections();
       renderDailyReportForm();
       renderMaterialReportForm();
       renderCastableReportForm();
       renderMixingReportForm();
       renderBrandingSettingsUI();
       renderGoogleAuthUI();
+      applyRoleBasedNavigation();
       updatePdfModeButtonsUI();
       updateKpiBanner();
       if (window.lucide) window.lucide.createIcons();
@@ -4873,10 +6715,16 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       loadFromStorage();
+      ensureAdminCollections();
       renderAllModules();
-      if (appState.branding?.requireLoginOnStart) {
-        openEnterpriseLoginScreen();
+      // Pertama buka aplikasi: selalu tampilkan Menu Login terlebih dahulu, bukan Dashboard
+      sessionAuthenticated = false;
+      const shell = document.getElementById('appDashboardShell');
+      if (shell) {
+        shell.classList.add('hidden');
+        shell.classList.remove('flex');
       }
+      openEnterpriseLoginScreen(true);
     });
   </script>
 </body>
