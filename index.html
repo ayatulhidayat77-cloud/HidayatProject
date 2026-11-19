@@ -145,8 +145,8 @@
           <span>Simpan Data</span>
         </button>
 
-        <!-- TOMBOL PENGATURAN LOGO PERUSAHAAN -->
-        <button type="button" onclick="switchTab('settings')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow transition" title="Pengaturan Logo Valmet / RGD & Identitas Perusahaan">
+        <!-- TOMBOL PENGATURAN LOGO PERUSAHAAN (KHUSUS ADMIN UTAMA) -->
+        <button type="button" id="headerBtnGantiLogo" data-admin-only="true" onclick="switchTab('settings')" class="hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow transition" title="Pengaturan Logo Valmet / RGD & Identitas Perusahaan (Admin Utama)">
           <i data-lucide="settings" class="w-4 h-4"></i>
           <span>Ganti Logo</span>
         </button>
@@ -157,8 +157,14 @@
           <span>Admin Utama</span>
         </span>
 
+        <!-- BADGE ROLE SUPERVISOR MITRA (SUPERVISOR / LEADER RGD) -->
+        <span id="headerSupervisorRoleBadge" class="hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow">
+          <i data-lucide="hard-hat" class="w-3.5 h-3.5"></i>
+          <span>Supervisor Mitra (RGD)</span>
+        </span>
+
         <!-- TOMBOL PORTAL LOGIN GOOGLE PROFESIONAL -->
-        <button type="button" id="headerGoogleAuthBtn" onclick="openEnterpriseLoginScreen(false)" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition" title="Ganti Akun / Info Login Google">
+        <button type="button" id="headerGoogleAuthBtn" onclick="openEnterpriseLoginScreen(false)" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 shadow border border-slate-200 transition" title="Info Akun & Sinkronisasi Google Drive">
           <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
@@ -201,6 +207,11 @@
     <!-- NAVIGATION TABS -->
     <div class="bg-slate-800/90 border-t border-slate-700/80">
       <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-1 overflow-x-auto custom-scrollbar py-1.5">
+        <button type="button" id="tabBtn-suppekerja" data-supervisor-only="true" onclick="switchTab('suppekerja')" class="tab-nav-btn hidden flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-200 hover:bg-slate-700/60 border border-sky-500/30 bg-sky-500/10">
+          <i data-lucide="hard-hat" class="w-4 h-4 text-sky-400"></i>
+          <span>Menu Pekerja (Absensi &amp; Data)</span>
+          <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-600 text-white">Supervisor</span>
+        </button>
         <button type="button" id="tabBtn-daily" onclick="switchTab('daily')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow">
           <i data-lucide="clipboard-list" class="w-4 h-4"></i>
           <span>1. Daily Report Harian</span>
@@ -215,13 +226,13 @@
         </button>
         <button type="button" id="tabBtn-mixing" onclick="switchTab('mixing')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
           <i data-lucide="flask-conical" class="w-4 h-4"></i>
-          <span>4. Mixing Report</span>
+          <span>4. Daily Mixing Report</span>
         </button>
         <button type="button" id="tabBtn-preview" onclick="switchTab('preview')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
           <i data-lucide="file-text" class="w-4 h-4"></i>
           <span>5. Dokumen PDF Akhir (4 Format)</span>
         </button>
-        <button type="button" id="tabBtn-settings" onclick="switchTab('settings')" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
+        <button type="button" id="tabBtn-settings" data-admin-only="true" onclick="switchTab('settings')" class="tab-nav-btn hidden flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
           <i data-lucide="building-2" class="w-4 h-4 text-purple-400"></i>
           <span>6. Pengaturan &amp; Logo (Valmet / RGD)</span>
         </button>
@@ -234,6 +245,11 @@
           <i data-lucide="id-card" class="w-4 h-4 text-emerald-400"></i>
           <span>8. Data Pekerja</span>
           <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-600 text-white">Admin</span>
+        </button>
+        <button type="button" id="tabBtn-users" data-admin-only="true" onclick="switchTab('users')" class="tab-nav-btn hidden flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-200 hover:bg-slate-700/60 border border-indigo-500/30 bg-indigo-500/10">
+          <i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i>
+          <span>9. Pengaturan User</span>
+          <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-indigo-600 text-white">Admin</span>
         </button>
         <button type="button" id="tabBtn-loginportal" onclick="openEnterpriseLoginScreen(false)" class="tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition text-slate-300 hover:bg-slate-700/60">
           <i data-lucide="shield-check" class="w-4 h-4 text-sky-400"></i>
@@ -325,6 +341,34 @@
         </div>
 
         <div class="p-5 space-y-6">
+          <!-- MULTI-FORM MANAGER: DAILY REPORT HARIAN -->
+          <div class="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-orange-400">Daftar Form Daily Report Harian</span>
+                  <span id="drFormsCountBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/40">1 Form</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Kelola banyak form Daily Report per hari/shift — Tambah, Edit, Duplicate, Hapus, serta Cetak PDF per Form atau Semua Form.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="createNewDailyForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                  <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                  <span>+ Tambah Form</span>
+                </button>
+                <button type="button" onclick="duplicateActiveDailyForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+                  <i data-lucide="copy-plus" class="w-3.5 h-3.5"></i>
+                  <span>Duplicate Form Aktif</span>
+                </button>
+                <button type="button" onclick="previewAllDailyFormsPdf()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak Semua Form (PDF)</span>
+                </button>
+              </div>
+            </div>
+            <div id="drFormsListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+          </div>
+
           <!-- Informasi Umum Project -->
           <div>
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
@@ -560,6 +604,34 @@
         </div>
 
         <div class="p-5 space-y-6">
+          <!-- MULTI-FORM MANAGER: DAILY REPORT MATERIAL -->
+          <div class="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-sky-400">Daftar Form Daily Report Material</span>
+                  <span id="mrFormsCountBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">1 Form</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Kelola banyak form Resume Material per unit/area — Tambah, Edit, Duplicate, Hapus, serta Cetak PDF per Form atau Semua Form.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="createNewMaterialForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+                  <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                  <span>+ Tambah Form</span>
+                </button>
+                <button type="button" onclick="duplicateActiveMaterialForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+                  <i data-lucide="copy-plus" class="w-3.5 h-3.5"></i>
+                  <span>Duplicate Form Aktif</span>
+                </button>
+                <button type="button" onclick="previewAllMaterialFormsPdf()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak Semua Form (PDF)</span>
+                </button>
+              </div>
+            </div>
+            <div id="mrFormsListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+          </div>
+
           <!-- Metadata Material Report -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
@@ -690,6 +762,34 @@
         </div>
 
         <div class="p-5 space-y-6">
+          <!-- MULTI-FORM MANAGER: REPORT INSTALLED CASTABLE -->
+          <div class="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-purple-400">Daftar Form Report Installed Castable</span>
+                  <span id="icFormsCountBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">1 Form</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Kelola banyak form Installed Castable per area/shift — Tambah, Edit, Duplicate, Hapus, serta Cetak PDF per Form atau Semua Form.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="createNewCastableForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-purple-600 hover:bg-purple-500 text-white shadow transition">
+                  <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                  <span>+ Tambah Form</span>
+                </button>
+                <button type="button" onclick="duplicateActiveCastableForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+                  <i data-lucide="copy-plus" class="w-3.5 h-3.5"></i>
+                  <span>Duplicate Form Aktif</span>
+                </button>
+                <button type="button" onclick="previewAllCastableFormsPdf()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak Semua Form (PDF)</span>
+                </button>
+              </div>
+            </div>
+            <div id="icFormsListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+          </div>
+
           <!-- Metadata Header Installed Castable -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             <div>
@@ -963,7 +1063,7 @@
               <i data-lucide="flask-conical" class="w-5 h-5"></i>
             </span>
             <div>
-              <h2 class="text-base font-bold">4. Form Mixing Report (Mixing Process)</h2>
+              <h2 class="text-base font-bold">4. Daily Mixing Report — Multi-Form Manager (Mixing Process)</h2>
               <p class="text-xs text-slate-300">Tanggal, Jam, Material, Waktu Dry/Wet Mix, Qty Castable (Kg), Air (Liter &amp; % otomatis terhadap Castable), pH, Suhu Air &amp; Suhu Ruangan (Ambient)</p>
             </div>
           </div>
@@ -983,7 +1083,62 @@
           </div>
         </div>
 
-        <div class="p-5 space-y-6">
+        <div class="p-5 space-y-5">
+          <!-- MULTI-FORM MANAGER: TAMBAH, EDIT, DUPLICATE, HAPUS FORM MIXING (>3 FORM/HARI) -->
+          <div class="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-3.5 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Daftar Form Daily Mixing Report</span>
+                  <span id="mxFormsCountBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">1 Form</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Kelola lebih dari 3 Form Mixing dalam 1 hari — klik <strong>Duplicate</strong> untuk menyalin form cepat, <strong>Edit</strong> untuk membuka, atau <strong>Cetak PDF</strong>.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="createNewMixingForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
+                  <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                  <span>+ Tambah Form</span>
+                </button>
+                <button type="button" onclick="duplicateActiveMixingForm()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition">
+                  <i data-lucide="copy-plus" class="w-3.5 h-3.5"></i>
+                  <span>Duplicate Form Aktif</span>
+                </button>
+                <button type="button" onclick="previewAllMixingFormsPdf()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow transition">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak Semua Form (PDF)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid Kartu Form Mixing -->
+            <div id="mxFormsListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+
+            <!-- Metadata Form Mixing Aktif yang Sedang Diedit -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">No. Form Mixing</label>
+                <input type="text" id="mxf_formNo" oninput="updateActiveMixingFormMeta('formNo', this.value)" class="w-full px-3 py-1.5 text-xs font-mono font-bold rounded-lg bg-slate-800 border border-slate-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Judul / Area Pengecoran</label>
+                <input type="text" id="mxf_title" oninput="updateActiveMixingFormMeta('title', this.value)" class="w-full px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 border border-slate-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Tanggal Form</label>
+                <input type="date" id="mxf_date" onchange="updateActiveMixingFormMeta('date', this.value)" class="w-full px-3 py-1.5 text-xs rounded-lg bg-slate-800 border border-slate-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Shift / Sesi</label>
+                <select id="mxf_shift" onchange="updateActiveMixingFormMeta('shift', this.value)" class="w-full px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 border border-slate-700 text-white">
+                  <option value="Shift 1 (Pagi)">Shift 1 (Pagi)</option>
+                  <option value="Shift 1 (Siang)">Shift 1 (Siang)</option>
+                  <option value="Shift 2 (Malam)">Shift 2 (Malam)</option>
+                  <option value="Shift 1 & 2">Shift 1 &amp; 2</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/70 border border-emerald-200 px-4 py-3 rounded-xl">
             <div class="flex items-center gap-2.5">
               <i data-lucide="calculator" class="w-5 h-5 text-emerald-600 shrink-0"></i>
@@ -1753,9 +1908,15 @@
               <input type="hidden" id="wf_editId" value="" />
 
               <div class="space-y-3.5">
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
-                  <input type="text" id="wf_name" placeholder="Contoh: Aris Kurniawan" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
+                    <input type="text" id="wf_name" placeholder="Contoh: Aris Kurniawan" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">No. Telepon / WhatsApp (ID Card)</label>
+                    <input type="tel" id="wf_phone" placeholder="Contoh: 0812-8841-2091" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                  </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1792,9 +1953,16 @@
                   </div>
                 </div>
 
-                <!-- Upload Pas Foto 3x4 -->
+                <!-- Upload Pas Foto 3x4 + Kamera -->
                 <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Foto (Pas Foto 3x4)</label>
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                    <label class="block text-xs font-bold text-slate-300">Upload Foto (Pas Foto 3x4)</label>
+                    <button type="button" onclick="openWorkerPhotoCameraModal('adminForm')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                      <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                      <span>Ambil via Kamera</span>
+                    </button>
+                  </div>
+                  <input type="file" id="wf_photoCamFallback" accept="image/*" capture="user" class="hidden" onchange="handleWorkerPhotoUpload(event)" />
                   <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
                     <div class="w-14 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                       <img id="wf_photoPreview" src="" alt="Pas Foto" class="w-full h-full object-cover hidden" />
@@ -1834,6 +2002,332 @@
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 9: PENGATURAN USER (SEMUA ROLE/JABATAN — ADMIN)     -->
+    <!-- ========================================================== -->
+    <section id="section-users" class="space-y-5 hidden no-print">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-white">
+          <div class="flex items-center gap-3">
+            <span class="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <i data-lucide="user-cog" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold">9. Pengaturan User &amp; Kredensial Login (Semua Role/Jabatan)</h2>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Admin Utama</span>
+              </div>
+              <p class="text-xs text-slate-300">Kelola akun Username &amp; Password terintegrasi Email Google (Tambah, Edit, Duplicate, Hapus) untuk seluruh role aplikasi</p>
+            </div>
+          </div>
+          <button type="button" onclick="resetUserMgmtForm()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow flex items-center gap-1.5 transition">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>+ User Baru</span>
+          </button>
+        </div>
+
+        <div class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start bg-slate-50/70">
+          <!-- FORM TAMBAH / EDIT USER (4 KOLOM) -->
+          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 id="umFormTitle" class="text-sm font-extrabold text-slate-900">Tambah User Baru</h3>
+                <p class="text-[11px] text-slate-500">Akun langsung aktif untuk Login Username &amp; Password</p>
+              </div>
+              <span id="umEditBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Mode Edit</span>
+            </div>
+
+            <input type="hidden" id="um_editId" value="" />
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                <input type="text" id="um_name" placeholder="Contoh: Budi Santoso" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Username Login</label>
+                  <input type="text" id="um_username" placeholder="contoh: budi" oninput="this.value=this.value.replace(/\s+/g,'').toLowerCase()" class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                  <input type="text" id="um_password" placeholder="Min. 4 karakter" class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Email Google Terintegrasi (Drive Sync &amp; TTD)</label>
+                <input type="email" id="um_email" placeholder="nama@gmail.com" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Role / Jabatan Otorisasi</label>
+                <select id="um_role" class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-indigo-500">
+                  <option value="Project Manager / Admin Utama">Project Manager / Admin Utama</option>
+                  <option value="Supervisor Mitra (Supervisor/Leader RGD)">Supervisor Mitra (Supervisor/Leader RGD)</option>
+                  <option value="Pekerja Lapangan - Refractory">Pekerja Lapangan - Refractory</option>
+                  <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
+                  <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
+                  <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Status Akun</label>
+                <select id="um_status" class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white">
+                  <option value="Aktif">Aktif (Dapat Login)</option>
+                  <option value="Nonaktif">Nonaktif (Diblokir)</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2">
+                <button type="button" onclick="saveUserAccount()" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow transition">
+                  Simpan User
+                </button>
+                <button type="button" onclick="resetUserMgmtForm()" class="py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition">
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DAFTAR USER SEMUA ROLE (8 KOLOM) -->
+          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5">
+              <div class="flex flex-wrap items-center gap-2 flex-1">
+                <input type="text" id="um_searchInput" oninput="renderUsersManagementTable()" placeholder="Cari nama, username, email Google..." class="flex-1 min-w-[180px] px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+                <select id="um_roleFilter" onchange="renderUsersManagementTable()" class="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-700">
+                  <option value="all">Semua Role / Jabatan</option>
+                  <option value="Admin Utama">Admin Utama</option>
+                  <option value="Supervisor Mitra">Supervisor Mitra (RGD)</option>
+                  <option value="Pekerja">Pekerja Lapangan</option>
+                  <option value="Site Engineer">Site Engineer / RGD</option>
+                  <option value="Supervisor">Supervisor / QC</option>
+                  <option value="Customer">Customer / Valmet</option>
+                </select>
+              </div>
+              <span id="um_totalBadge" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200">0 User</span>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar">
+              <table class="w-full text-xs border-collapse min-w-[680px]">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                    <th class="py-2.5 px-3 text-left font-bold">Nama &amp; Email Google</th>
+                    <th class="py-2.5 px-3 text-left font-bold">Username</th>
+                    <th class="py-2.5 px-3 text-left font-bold">Password</th>
+                    <th class="py-2.5 px-3 text-left font-bold">Role / Jabatan</th>
+                    <th class="py-2.5 px-3 text-center font-bold">Status</th>
+                    <th class="py-2.5 px-3 text-center font-bold">Aksi (Edit / Duplicate / Hapus)</th>
+                  </tr>
+                </thead>
+                <tbody id="um_tableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- MODULE 10: MENU PEKERJA UNTUK SUPERVISOR MITRA (RGD)       -->
+    <!-- ========================================================== -->
+    <section id="section-suppekerja" class="space-y-5 hidden no-print">
+      <div class="bg-[#0f172a] text-white rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-[#111c33] via-sky-950 to-[#111c33] px-5 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="p-2.5 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              <i data-lucide="hard-hat" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold">Menu Pekerja — Dashboard Supervisor Mitra (RGD)</h2>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">Supervisor / Leader RGD</span>
+              </div>
+              <p class="text-xs text-slate-300">Absensi Lapangan GPS (Auto-Kamera) &amp; Form Registrasi Data Pekerja yang terintegrasi ke Admin Utama</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-slate-700">
+            <button type="button" id="supSubBtn-absen" onclick="switchSupPekerjaSubTab('absen')" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>Absensi Lapangan (GPS)</span>
+            </button>
+            <button type="button" id="supSubBtn-form" onclick="switchSupPekerjaSubTab('form')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Input Data Pekerja</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 1: ABSENSI GPS AUTO-KAMERA SUPERVISOR -->
+        <div id="supPekerjaView-absen" class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="lg:col-span-5 mx-auto w-full max-w-[360px]">
+            <div class="bg-slate-950 rounded-[36px] p-3 border-4 border-slate-700 shadow-2xl">
+              <div class="bg-white rounded-[26px] overflow-hidden flex flex-col">
+                <div class="bg-[#111c33] text-white px-4 py-3 flex items-center justify-between">
+                  <span class="text-xs font-bold text-sky-300">RGD</span>
+                  <span class="text-sm font-extrabold">Absensi Proyek Refractory</span>
+                  <span class="w-5 h-5 rounded-full overflow-hidden border border-white/30 flex flex-col shrink-0">
+                    <span class="h-1/2 bg-red-600 block"></span>
+                    <span class="h-1/2 bg-white block"></span>
+                  </span>
+                </div>
+                <div class="relative bg-slate-900 aspect-[3/4] overflow-hidden flex items-center justify-center">
+                  <video id="supAbsenVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                  <img id="supAbsenPreview" src="" alt="Preview Selfie Supervisor" class="w-full h-full object-cover" />
+                  <div class="absolute bottom-3 inset-x-3 bg-slate-950/80 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                      <i data-lucide="map-pin" class="w-5 h-5 text-slate-900"></i>
+                    </div>
+                    <div class="text-[11px] leading-snug min-w-0">
+                      <p class="font-mono font-bold text-white truncate">GPS: <span id="supGpsText">-6.2383, 106.9756</span></p>
+                      <p class="font-semibold text-emerald-400">Akurasi: 4m (Dalam Area Proyek)</p>
+                      <p id="supTsText" class="text-slate-300 text-[10px]">19 Nov 2026, 08:10 WIB</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 bg-white text-slate-900 space-y-3">
+                  <div class="border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between gap-2 bg-slate-50">
+                    <div class="min-w-0">
+                      <p class="text-[10px] text-slate-500 font-medium">Lokasi Saat Ini</p>
+                      <p id="supLocName" class="text-xs font-extrabold text-slate-900 truncate">Area Proyek Refractory, Bekasi</p>
+                    </div>
+                    <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    </span>
+                  </div>
+                  <button type="button" onclick="submitSupervisorAbsen()" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-extrabold text-xs shadow-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Ambil Foto &amp; Absen Masuk</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-[#162033] rounded-2xl border border-slate-700 p-5 space-y-4">
+              <h3 class="text-sm font-extrabold text-white">Kontrol Absensi Tim &amp; Supervisor Lapangan</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Pilih Nama Pekerja / Supervisor</label>
+                  <select id="supWorkerSelect" onchange="onSupWorkerChange()" class="w-full px-3 py-2 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Jenis Absensi</label>
+                  <select id="supAbsenType" class="w-full px-3 py-2 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-700 text-white">
+                    <option value="Masuk">Absen Masuk (Check-In)</option>
+                    <option value="Pulang">Absen Pulang (Check-Out)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="startSupAbsenCamera(false)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5">
+                  <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                  <span>Aktifkan Kamera</span>
+                </button>
+                <button type="button" onclick="stopSupAbsenCamera()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center gap-1.5">
+                  <i data-lucide="video-off" class="w-3.5 h-3.5"></i>
+                  <span>Matikan Kamera</span>
+                </button>
+                <label class="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span>Upload Foto Selfie</span>
+                  <input type="file" accept="image/*" capture="user" class="hidden" onchange="uploadSupAbsenPhoto(event)" />
+                </label>
+              </div>
+            </div>
+
+            <div class="bg-[#162033] rounded-2xl border border-slate-700 p-5 space-y-2.5">
+              <h4 class="text-xs font-extrabold uppercase text-slate-300">Log Kehadiran Terbaru Hari Ini</h4>
+              <div id="supAbsenHistoryList" class="space-y-2 max-h-[240px] overflow-y-auto dark-scrollbar pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 2: FORM INPUT DATA PEKERJA (TERINTEGRASI KE ID CARD ADMIN) -->
+        <div id="supPekerjaView-form" class="hidden p-5">
+          <div class="max-w-3xl mx-auto bg-[#1e293b] rounded-2xl border border-slate-700 p-6 space-y-4">
+            <div>
+              <h3 class="text-base font-extrabold text-white">Form Registrasi Pekerja Lapangan (Supervisor Mitra)</h3>
+              <p class="text-xs text-slate-400">Data pekerja (termasuk No. Telepon &amp; Pas Foto 3x4) otomatis masuk ke Worker Directory &amp; Cetak ID Card Admin Utama.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
+                <input type="text" id="sp_name" placeholder="Nama Lengkap Pekerja" class="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">No. Telepon / WhatsApp (ID Card)</label>
+                <input type="tel" id="sp_phone" placeholder="0812-xxxx-xxxx" class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">NIK (16 Digit)</label>
+                <input type="text" id="sp_nik" maxlength="16" placeholder="16-digit numeric NIK" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Posisi Refractory</label>
+                <select id="sp_role" class="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white">
+                  <option value="">Pilih Posisi...</option>
+                  <option value="Bricklayer">Bricklayer Refractory</option>
+                  <option value="Castable Operator">Castable Operator</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Safety Inspector">Safety Inspector</option>
+                  <option value="Leader">Leader</option>
+                  <option value="Helper / Skilled">Helper / Skilled</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                <label class="block text-xs font-bold text-slate-300">Pas Foto 3x4 (Kamera Perangkat / Upload)</label>
+                <button type="button" onclick="openWorkerPhotoCameraModal('supForm')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
+                  <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                  <span>Ambil via Kamera</span>
+                </button>
+              </div>
+              <div class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 bg-slate-900/70">
+                <div class="w-16 h-20 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                  <img id="sp_photoPreview" src="" alt="Foto" class="w-full h-full object-cover hidden" />
+                  <i id="sp_photoIcon" data-lucide="user" class="w-7 h-7 text-slate-500"></i>
+                </div>
+                <div class="flex-1">
+                  <p id="sp_photoLabel" class="text-xs text-slate-300 mb-2">Ambil foto lewat kamera atau pilih file JPG/PNG</p>
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                    <span>Pilih File Foto</span>
+                    <input type="file" id="sp_photoInput" accept="image/*" class="hidden" onchange="handleSupWorkerPhotoUpload(event)" />
+                  </label>
+                  <input type="file" id="sp_photoCamFallback" accept="image/*" capture="user" class="hidden" onchange="handleSupWorkerPhotoUpload(event)" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Sertifikat K3 (PDF / Gambar)</label>
+              <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer">
+                <i data-lucide="file-text" class="w-6 h-6 text-red-400"></i>
+                <span id="sp_certLabel" class="text-xs text-slate-300">Klik untuk pilih Sertifikat K3 (PDF)</span>
+                <input type="file" accept=".pdf,image/*" class="hidden" onchange="handleSupWorkerCertUpload(event)" />
+              </label>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+              <button type="button" onclick="saveSupWorkerRegistration()" class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow">
+                Simpan Data Pekerja
+              </button>
+              <button type="button" onclick="resetSupWorkerForm()" class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs">
+                Batal
+              </button>
             </div>
           </div>
         </div>
@@ -2015,96 +2509,85 @@
       </section>
 
       <!-- ======================================================== -->
-      <!-- WORKER TAB 2: DATA PEKERJA (Seperti data pekerja 1.jpg)  -->
+      <!-- WORKER TAB 2: DATA PEKERJA (FORM REGISTRASI & KAMERA)    -->
       <!-- ======================================================== -->
       <section id="workerSection-pekerja" class="hidden space-y-5">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="text-xl font-extrabold text-white">Menu Pekerja</h2>
-            <p class="text-xs text-slate-400">Lengkapi registrasi data diri pekerja refractory, unggah pas foto 3x4 &amp; sertifikat K3, atau bagikan link formulir.</p>
-          </div>
-          <button type="button" onclick="switchWorkerDashboardTab('absensi')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-orange-300 border border-slate-700 flex items-center gap-1.5 transition">
-            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-            <span>Kembali ke Absensi</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- KIRI: Bagikan Link Formulir (Persis data pekerja 1.jpg) -->
-          <div class="lg:col-span-5 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 flex flex-col justify-between space-y-5">
-            <div class="space-y-4">
-              <div>
-                <h3 class="text-lg font-extrabold text-white">Bagikan Link Formulir</h3>
-                <p class="text-xs font-bold text-orange-400 mt-1">Generator Link &amp; QR Code</p>
-                <p class="text-xs text-slate-300 mt-1">Bagikan link ini kepada calon pekerja untuk mengisi data mandiri.</p>
-              </div>
-
-              <div class="space-y-2.5">
-                <input type="text" id="wPortalShareLinkInput" readonly class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-slate-200 select-all" />
-                <button type="button" onclick="copyWorkerPortalFormLink()" class="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-lg shadow-orange-600/25 transition flex items-center justify-center gap-2">
-                  <i data-lucide="copy" class="w-4 h-4"></i>
-                  <span>Salin Link Form</span>
-                </button>
-              </div>
-
-              <div class="pt-3 border-t border-slate-700/80 flex flex-col items-center text-center space-y-3">
-                <div class="bg-white p-3.5 rounded-2xl shadow-lg inline-flex items-center justify-center">
-                  <div id="wPortalQrContainer"></div>
-                </div>
-                <p class="text-xs text-slate-400">Atau scan QR Code ini</p>
-                <button type="button" onclick="downloadWorkerPortalQr()" class="w-full max-w-[200px] py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                  <span>Unduh QR</span>
-                </button>
-              </div>
+        <div class="max-w-3xl mx-auto space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xl font-extrabold text-white">Menu Pekerja</h2>
+              <p class="text-xs text-slate-400">Lengkapi registrasi data diri pekerja refractory, ambil pas foto 3x4 via kamera perangkat, dan unggah sertifikat K3.</p>
             </div>
+            <button type="button" onclick="switchWorkerDashboardTab('absensi')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-orange-300 border border-slate-700 flex items-center gap-1.5 transition">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>Kembali ke Absensi</span>
+            </button>
           </div>
 
-          <!-- KANAN: Form Registrasi Pekerja (Persis data pekerja 1.jpg) -->
-          <div class="lg:col-span-7 bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 space-y-4">
+          <!-- Form Registrasi Pekerja (Full Width Terpusat, Tanpa Bagikan Link/QR) -->
+          <div class="bg-[#1e293b] rounded-2xl border border-slate-700/80 p-6 space-y-4 shadow-xl">
             <div>
               <h3 class="text-lg font-extrabold text-white">Form Registrasi Pekerja</h3>
-              <p class="text-xs text-slate-400">Data yang Anda simpan langsung terdaftar ke Direktori Pekerja &amp; ID Card Admin Utama.</p>
+              <p class="text-xs text-slate-400">Data yang Anda simpan (termasuk No. Telepon &amp; Pas Foto) langsung terintegrasi ke Direktori &amp; Cetak ID Card Admin Utama.</p>
             </div>
 
-            <div class="space-y-3.5">
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
-                <input type="text" id="wp_name" placeholder="Nama Lengkap" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Nama Lengkap</label>
+                  <input type="text" id="wp_name" placeholder="Nama Lengkap" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">No. Telepon / WhatsApp (Tampil di ID Card)</label>
+                  <input type="tel" id="wp_phone" placeholder="Contoh: 0812-3456-7890" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                </div>
               </div>
 
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">NIK</label>
-                <input type="text" id="wp_nik" maxlength="16" placeholder="16-digit numeric NIK" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">NIK (16 Digit)</label>
+                  <input type="text" id="wp_nik" maxlength="16" placeholder="16-digit numeric NIK" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Posisi Refractory</label>
+                  <select id="wp_role" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white focus:ring-2 focus:ring-orange-500">
+                    <option value="">Pilih Posisi...</option>
+                    <option value="Bricklayer">Bricklayer Refractory</option>
+                    <option value="Castable Operator">Castable Operator</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Safety Inspector">Safety Inspector</option>
+                    <option value="Leader">Leader</option>
+                    <option value="Helper / Skilled">Helper / Skilled</option>
+                  </select>
+                </div>
               </div>
 
+              <!-- Upload Foto (Pas Foto 3x4) + Integrasi Kamera Perangkat -->
               <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Posisi Refractory</label>
-                <select id="wp_role" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-900 border border-slate-600 text-white focus:ring-2 focus:ring-orange-500">
-                  <option value="">Pilih Posisi...</option>
-                  <option value="Bricklayer">Bricklayer Refractory</option>
-                  <option value="Castable Operator">Castable Operator</option>
-                  <option value="Supervisor">Supervisor</option>
-                  <option value="Safety Inspector">Safety Inspector</option>
-                  <option value="Leader">Leader</option>
-                  <option value="Helper / Skilled">Helper / Skilled</option>
-                </select>
-              </div>
-
-              <!-- Upload Foto (Pas Foto 3x4) -->
-              <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1.5">Upload Foto (Pas Foto 3x4)</label>
-                <label class="flex items-center gap-4 p-3 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 cursor-pointer transition">
-                  <div class="w-14 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <label class="block text-xs font-bold text-slate-300">Upload Foto (Pas Foto 3x4) / Ambil via Kamera</label>
+                  <button type="button" onclick="openWorkerPhotoCameraModal('workerPortal')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
+                    <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                    <span>Ambil Foto via Kamera Perangkat</span>
+                  </button>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-xl border-2 border-dashed border-slate-600 hover:border-orange-500 bg-slate-900/70 transition">
+                  <div class="w-20 h-24 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                     <img id="wp_photoPreview" src="" alt="Pas Foto" class="w-full h-full object-cover hidden" />
-                    <i id="wp_photoIcon" data-lucide="user" class="w-7 h-7 text-slate-500"></i>
+                    <i id="wp_photoIcon" data-lucide="user" class="w-8 h-8 text-slate-500"></i>
                   </div>
-                  <div class="flex-1 text-center">
-                    <i data-lucide="upload" class="w-5 h-5 text-slate-400 mx-auto mb-1"></i>
-                    <p id="wp_photoLabel" class="text-xs font-semibold text-slate-300">Upload on drop / Klik pilih Pas Foto 3x4</p>
+                  <div class="flex-1 text-center sm:text-left space-y-2">
+                    <p id="wp_photoLabel" class="text-xs font-semibold text-slate-300">Ambil foto langsung lewat kamera perangkat atau unggah file Pas Foto 3x4 (JPG/PNG)</p>
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                      <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition">
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        <span>Pilih File Foto</span>
+                        <input type="file" id="wp_photoInput" accept="image/*" class="hidden" onchange="handleWorkerPortalPhotoUpload(event)" />
+                      </label>
+                      <input type="file" id="wp_photoCamFallback" accept="image/*" capture="user" class="hidden" onchange="handleWorkerPortalPhotoUpload(event)" />
+                    </div>
                   </div>
-                  <input type="file" id="wp_photoInput" accept="image/*" class="hidden" onchange="handleWorkerPortalPhotoUpload(event)" />
-                </label>
+                </div>
               </div>
 
               <!-- Upload Sertifikat K3 -->
@@ -2324,246 +2807,181 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- MODAL 4: PORTAL LOGIN ENTERPRISE & INTEGRASI GOOGLE PRO      -->
+  <!-- MODAL 4: PORTAL LOGIN USER & PASSWORD (TERINTEGRASI GOOGLE)  -->
   <!-- ============================================================ -->
-  <div id="googleAuthModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-6 overflow-y-auto no-print">
-    <div class="bg-slate-900 text-white rounded-3xl max-w-5xl w-full border border-slate-800 shadow-2xl overflow-hidden my-auto grid grid-cols-1 lg:grid-cols-12">
+  <div id="googleAuthModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-6 overflow-y-auto no-print">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-4xl w-full border border-slate-800 shadow-2xl overflow-hidden my-auto grid grid-cols-1 lg:grid-cols-12">
 
-      <!-- PANEL KIRI: ENTERPRISE BRANDING, LIVE SYSTEM STATUS & ACTIVE LOGOS -->
-      <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative overflow-hidden">
-        <div class="relative z-10 space-y-6">
-          <!-- Brand Header -->
-          <div class="flex items-center justify-between">
+      <!-- PANEL KIRI: FORM LOGIN USER & PASSWORD (MENGGANTIKAN LOGO MITRA PROYEK) -->
+      <div class="lg:col-span-7 bg-white text-slate-900 p-6 sm:p-8 flex flex-col justify-between">
+        <div class="space-y-5">
+          <div class="flex items-start justify-between gap-3">
             <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center font-extrabold text-lg shadow-lg shadow-orange-500/20">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center font-extrabold text-lg shadow-lg shadow-orange-500/20 shrink-0">
                 HP
               </div>
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-base font-extrabold tracking-tight text-white">HIDAYAT PROJECT</span>
-                  <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Enterprise</span>
-                </div>
-                <p class="text-[11px] text-slate-400">Refractory &amp; Insulation Digital System</p>
+                <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <i data-lucide="lock" class="w-3 h-3"></i>
+                  <span>Login Kredensial Admin • Terintegrasi Google</span>
+                </span>
+                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">Masuk ke Hidayat Project</h2>
               </div>
             </div>
-          </div>
-
-          <div class="space-y-2">
-            <h2 class="text-xl sm:text-2xl font-extrabold leading-tight text-white">
-              Sistem Manajemen &amp; Pelaporan Proyek Refractory Terpadu
-            </h2>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Akses terenkripsi dengan integrasi <strong>Google Workspace / Google Identity</strong> untuk otorisasi Daily Report, Resume Material, Installed Castable, dan Mixing Process.
-            </p>
-          </div>
-
-          <!-- Pratinjau Kedua Logo Perusahaan Aktif di Layar Login -->
-          <div class="bg-white/95 text-slate-900 rounded-2xl p-3.5 shadow-inner">
-            <div class="flex items-center justify-between text-[10px] font-bold uppercase text-slate-500 mb-2">
-              <span>Mitra Proyek Terdaftar</span>
-              <button type="button" onclick="closeGoogleAuthModal(); switchTab('settings');" class="text-purple-700 hover:underline flex items-center gap-1">
-                <span>Ubah Logo</span> →
-              </button>
-            </div>
-            <div class="grid grid-cols-2 gap-3 items-center py-1">
-              <div id="loginPortalLogoValmet" class="flex items-center justify-center p-1.5 border border-slate-200 rounded-xl bg-white h-14"></div>
-              <div id="loginPortalLogoRgd" class="flex items-center justify-center p-1.5 border border-slate-200 rounded-xl bg-white h-14"></div>
-            </div>
-          </div>
-
-          <!-- Indikator Modul & Keamanan Sistem -->
-          <div class="grid grid-cols-2 gap-2.5 text-[11px]">
-            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-slate-200 font-medium">Google OAuth 2.0 Ready</span>
-            </div>
-            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-              <span class="text-slate-200 font-medium">Cloud Drive JSON Sync</span>
-            </div>
-            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-              <span class="text-slate-200 font-medium">Digital Signature Pad</span>
-            </div>
-            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-2.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-              <span class="text-slate-200 font-medium">Tesseract OCR v5.0</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="relative z-10 pt-5 mt-5 border-t border-slate-800/90 flex items-center justify-between text-[11px] text-slate-400">
-          <span>© 2025–2026 Hidayat Project</span>
-          <span class="text-emerald-400 font-semibold">SSL / Local-First Encrypted</span>
-        </div>
-      </div>
-
-      <!-- PANEL KANAN: FORM LOGIN PROFESIONAL & GOOGLE ACCOUNT CHOOSER -->
-      <div class="lg:col-span-7 bg-white text-slate-900 p-6 sm:p-8 flex flex-col justify-between max-h-[88vh] overflow-y-auto custom-scrollbar">
-        <div class="space-y-5">
-          <!-- Top Bar Panel Kanan -->
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-                <span>Portal Autentikasi Pengguna</span>
-              </span>
-              <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">Masuk ke Dashboard Hidayat Project</h3>
-              <p class="text-xs text-slate-500">Gunakan akun Google resmi Anda untuk tanda tangan otomatis &amp; sinkronisasi laporan</p>
-            </div>
-            <button type="button" id="btnCloseLoginModalX" onclick="closeGoogleAuthModal()" class="hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tutup & Selesai &amp; Tutup">
+            <button type="button" id="btnCloseLoginModalX" onclick="closeGoogleAuthModal()" class="hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tutup & Kembali ke Dashboard">
               <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
 
-          <!-- Status Sesi Aktif -->
-          <div id="googleCurrentAccountCard" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3.5">
-              <div id="googleProfileAvatar" class="w-12 h-12 rounded-2xl bg-orange-600 text-white font-extrabold text-base flex items-center justify-center shadow-md ring-2 ring-white/20">
-                DH
+          <!-- Status Sesi Aktif (Tampil Saat Sudah Login) -->
+          <div id="googleCurrentAccountCard" class="hidden bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 shadow-md space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div id="googleProfileAvatar" class="w-12 h-12 rounded-2xl bg-orange-600 text-white font-extrabold text-base flex items-center justify-center shadow-md ring-2 ring-white/20">
+                  DH
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p id="googleProfileName" class="text-sm font-extrabold text-white">Deni Hidayat</p>
+                    <span id="googleProfileBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Admin Utama</span>
+                  </div>
+                  <p id="googleProfileEmail" class="text-xs text-slate-300 mt-0.5">deni.hidayat@gmail.com</p>
+                </div>
               </div>
-              <div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <p id="googleProfileName" class="text-sm font-extrabold text-white">Deni Hidayat</p>
-                  <span id="googleProfileBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Project Manager</span>
-                </div>
-                <p id="googleProfileEmail" class="text-xs text-slate-300 mt-0.5">deni.hidayat@gmail.com</p>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="applyGoogleUserToReports()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition">
+                  Terapkan ke 4 Form
+                </button>
+                <button type="button" id="btnGoogleLogout" onclick="logoutGoogleAccount()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30 transition">
+                  Logout
+                </button>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="applyGoogleUserToReports()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition" title="Isi nama akun ini ke kolom Pelapor/Prepared By">
-                Terapkan ke 4 Form
-              </button>
-              <button type="button" id="btnGoogleLogout" onclick="logoutGoogleAccount()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30 transition">
-                Logout
-              </button>
-            </div>
           </div>
 
-          <!-- TOMBOL UTAMA: SIGN IN WITH GOOGLE (ONE-TAP & POPUP CHOOSER) -->
-          <div class="space-y-2.5">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Single Sign-On (Google Identity Services):</label>
-              <span id="googleOauthLoadingBadge" class="hidden text-[11px] font-semibold text-blue-600 animate-pulse">Memverifikasi Token Google OAuth...</span>
-            </div>
+          <!-- FORM LOGIN USERNAME & PASSWORD (DARI PENGATURAN USER ADMIN) -->
+          <div id="loginOtherAccountsSection" class="space-y-4">
+            <p class="text-xs text-slate-500">Masukkan <strong>Username</strong> dan <strong>Password</strong> yang telah dibuat oleh Admin Utama. Akun Anda tetap terintegrasi otomatis dengan Email Google &amp; Google Drive Sync.</p>
 
-            <button type="button" onclick="triggerGoogleOneTapAnimation()" class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs sm:text-sm border-2 border-slate-200 hover:border-blue-500 google-btn-shadow flex items-center justify-center gap-3 transition group">
-              <svg class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-                <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-                <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5L1.6 17c1.9 3.9 5.8 7 10.4 7z"/>
-              </svg>
-              <span>Lanjutkan dengan Akun Google (Google One-Tap SSO)</span>
-              <span class="ml-auto text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">Terintegrasi</span>
-            </button>
-
-            <!-- Daftar Akun Google Terdaftar di Perangkat -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
-              <button type="button" onclick="loginWithGooglePreset('Deni Hidayat', 'deni.hidayat@gmail.com', 'Project Manager / Admin Utama', '#ea580c')" class="p-2.5 rounded-xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/60 flex items-center gap-2.5 transition text-left">
-                <div class="w-8 h-8 rounded-full bg-orange-600 text-white font-bold text-xs flex items-center justify-center shrink-0">DH</div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 truncate">Deni Hidayat</p>
-                  <p class="text-[10px] text-slate-500 truncate">deni.hidayat@gmail.com</p>
-                </div>
-              </button>
-
-              <button type="button" onclick="loginWithGooglePreset('Aris Kurniawan', 'aris.pekerja@gmail.com', 'Pekerja Lapangan - Refractory', '#d97706')" class="p-2.5 rounded-xl border-2 border-amber-300 bg-amber-50/50 hover:border-orange-500 hover:bg-amber-50 flex items-center gap-2.5 transition text-left">
-                <div class="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shrink-0">AK</div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 truncate">Aris Kurniawan</p>
-                  <p class="text-[10px] font-bold text-amber-700 truncate">Role Pekerja</p>
-                </div>
-              </button>
-
-              <button type="button" onclick="loginWithGooglePreset('Ardenata Dwi Prakoso', 'ardenata.rgd@gmail.com', 'Site Leader / Pelapor RGD', '#2563eb')" class="p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center gap-2.5 transition text-left">
-                <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">AD</div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 truncate">Ardenata D.P.</p>
-                  <p class="text-[10px] text-slate-500 truncate">ardenata.rgd@gmail.com</p>
-                </div>
-              </button>
-
-              <button type="button" onclick="loginWithGooglePreset('Ryan', 'ryan.valmet@gmail.com', 'QC Supervisor / Reviewer', '#059669')" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 flex items-center gap-2.5 transition text-left">
-                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">RY</div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 truncate">Ryan (Valmet)</p>
-                  <p class="text-[10px] text-slate-500 truncate">ryan.valmet@gmail.com</p>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <!-- Divider -->
-          <div class="relative flex py-1 items-center">
-            <div class="flex-grow border-t border-slate-200"></div>
-            <span class="flex-shrink mx-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Atau Login Akun Google / Kredensial Proyek</span>
-            <div class="flex-grow border-t border-slate-200"></div>
-          </div>
-
-          <!-- Form Login Kredensial & Akun Google Baru -->
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <form id="credentialLoginForm" onsubmit="handleCredentialLoginSubmit(event)" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Lengkap Pengguna</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Username atau Email Google Terdaftar</label>
                 <div class="relative">
-                  <input type="text" id="customGoogleName" placeholder="Contoh: Deni Hidayat" class="w-full pl-3 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
+                  <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                  <input type="text" id="loginUsernameInput" autocomplete="username" placeholder="Masukkan username (misal: admin atau aris)" class="w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
                 </div>
               </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Email Google (@gmail.com / Korporat)</label>
-                <input type="email" id="customGoogleEmail" placeholder="nama@gmail.com" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Jabatan / Role Otorisasi</label>
-                <select id="customGoogleRole" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-medium">
-                  <option value="Project Manager / Admin Utama">Project Manager / Admin Utama</option>
-                  <option value="Pekerja Lapangan (Refractory)">Pekerja Lapangan (Absensi &amp; Data Pekerja)</option>
-                  <option value="Site Engineer / Pelapor (RGD)">Site Engineer / Pelapor (RGD)</option>
-                  <option value="Supervisor / QC Reviewer">Supervisor / QC Reviewer</option>
-                  <option value="Perwakilan Customer (PT. Valmet)">Perwakilan Customer (PT. Valmet)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">PIN / Kode Akses Proyek (Opsional)</label>
-                <input type="password" id="customGooglePin" value="123456" placeholder="••••••" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500" />
-              </div>
-            </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-              <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                <input type="checkbox" checked class="rounded border-slate-300 text-blue-600" />
-                <span>Ingat sesi Google &amp; tanda tangan saya di perangkat ini</span>
-              </label>
-              <button type="button" onclick="loginWithCustomGoogleAccount()" class="py-2.5 px-5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md transition flex items-center gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
+                <div class="relative">
+                  <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                  <input type="password" id="loginPasswordInput" autocomplete="current-password" placeholder="Masukkan password Anda" class="w-full pl-10 pr-11 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500" />
+                  <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1" title="Lihat/Sembunyikan Password">
+                    <i id="loginEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div id="loginErrorAlert" class="hidden px-3.5 py-2.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                <span id="loginErrorText">Username atau password tidak sesuai.</span>
+              </div>
+
+              <button type="submit" class="w-full py-3 px-5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white shadow-lg shadow-orange-600/25 transition flex items-center justify-center gap-2">
                 <i data-lucide="log-in" class="w-4 h-4"></i>
-                <span>Login Akun Google Ini</span>
+                <span>Masuk ke Dashboard</span>
               </button>
+            </form>
+
+            <!-- Info Kredensial Default untuk Pengujian Awal -->
+            <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3 text-[11px] text-indigo-900 space-y-1">
+              <p class="font-bold flex items-center gap-1.5">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-600"></i>
+                <span>Akun Default Terdaftar (Dapat diubah di Menu 9. Pengaturan User):</span>
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 font-mono text-[10px] pt-0.5">
+                <div>• Admin Utama: <strong>admin</strong> / <strong>admin123</strong></div>
+                <div>• Supervisor Mitra: <strong>supervisor</strong> / <strong>rgd123</strong></div>
+                <div>• Pekerja: <strong>aris</strong> / <strong>pekerja123</strong></div>
+                <div>• QC Reviewer: <strong>ryan</strong> / <strong>valmet123</strong></div>
+              </div>
             </div>
           </div>
 
-          <!-- Sinkronisasi Cloud Google Drive & OAuth Client ID -->
-          <div class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
+          <!-- Sinkronisasi Cloud Google Drive (Tetap Terintegrasi dengan Google) -->
+          <div id="googleCloudSyncBox" class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
                 <i data-lucide="cloud-cog" class="w-4 h-4 text-emerald-600"></i>
-                <span>Integrasi Cloud Google Drive (Apps Script Web App /exec)</span>
+                <span>Integrasi Google Drive Cloud (Apps Script /exec)</span>
               </span>
               <button type="button" onclick="syncToGoogleDriveCloud()" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition">
-                Sync ke Google Drive
+                Sync Google Drive
               </button>
             </div>
-            <input type="url" id="googleGasUrlInput" oninput="updateGoogleGasUrl(this.value)" placeholder="https://script.google.com/macros/s/.../exec (Opsional untuk Auto-Backup Cloud)" class="w-full px-3 py-1.5 text-xs rounded-xl border border-emerald-300 bg-white font-mono" />
+            <input type="url" id="googleGasUrlInput" oninput="updateGoogleGasUrl(this.value)" placeholder="https://script.google.com/macros/s/.../exec (Auto-Backup Google Drive)" class="w-full px-3 py-1.5 text-xs rounded-xl border border-emerald-300 bg-white font-mono" />
           </div>
         </div>
 
         <div class="pt-4 mt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <span id="loginFooterHintText" class="text-[11px] text-slate-500">Silakan pilih akun <strong>Admin Utama</strong> atau login Google untuk membuka Dashboard.</span>
+          <span id="loginFooterHintText" class="text-[11px] text-slate-500">Masukkan Username &amp; Password dari Admin untuk membuka Dashboard.</span>
           <button type="button" id="btnCloseLoginModalFooter" onclick="closeGoogleAuthModal()" class="hidden px-5 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow transition">
             Selesai &amp; Tutup
           </button>
         </div>
       </div>
+
+      <!-- PANEL KANAN: INFO SISTEM & KEAMANAN (TANPA LOGO MITRA PROYEK) -->
+      <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 p-6 sm:p-8 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-slate-800">
+        <div class="space-y-6">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">Refractory Pro v2.5</span>
+            <h3 class="text-xl font-extrabold text-white mt-3 leading-snug">Sistem Pelaporan, Absensi Geofence &amp; Manajemen Pekerja</h3>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              Autentikasi dikelola langsung oleh <strong>Admin Utama</strong> dengan kontrol akses berbasis jabatan serta sinkronisasi otomatis ke akun <strong>Google Workspace &amp; Google Drive</strong>.
+            </p>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-3 flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <p class="font-bold text-white">Manajemen User Multi-Role</p>
+                <p class="text-[11px] text-slate-400">Admin Utama, Pekerja, Site Leader, QC &amp; Customer</p>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-3 flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <p class="font-bold text-white">Auto-Kamera &amp; GPS Geofence</p>
+                <p class="text-[11px] text-slate-400">Absensi pekerja otomatis mengaktifkan kamera selfie</p>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/70 border border-slate-700/80 rounded-xl p-3 flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                <i data-lucide="cloud" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <p class="font-bold text-white">Integrasi Google Drive &amp; Auto-Lock</p>
+                <p class="text-[11px] text-slate-400">Tetap aktif saat F5 &amp; kunci otomatis jika idle 2 menit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-5 mt-5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+          <span>© 2025–2026 Hidayat Project</span>
+          <span class="text-emerald-400 font-semibold">Google Sync Ready</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2643,6 +3061,36 @@
         </button>
       </div>
       <div id="absensiPhotoDetailBody" class="p-5 space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 8: KAMERA PERANGKAT UNTUK PAS FOTO PEKERJA (3x4)       -->
+  <!-- ============================================================ -->
+  <div id="workerPhotoCameraModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-slate-900 text-white rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold">Ambil Pas Foto Pekerja (Kamera Perangkat)</h3>
+        </div>
+        <button type="button" onclick="closeWorkerPhotoCameraModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="bg-black rounded-2xl overflow-hidden aspect-[3/4] max-h-[360px] mx-auto relative flex items-center justify-center border border-slate-700">
+          <video id="workerPhotoCamVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+          <div class="absolute inset-0 pointer-events-none border-2 border-dashed border-orange-400/50 m-6 rounded-xl"></div>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <button type="button" onclick="closeWorkerPhotoCameraModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300">Batal</button>
+          <button type="button" onclick="captureWorkerPhotoFromCamera()" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center justify-center gap-2">
+            <i data-lucide="aperture" class="w-4 h-4"></i>
+            <span>Jepret &amp; Gunakan Pas Foto Ini</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2740,18 +3188,29 @@
       return role.includes('admin utama') || role.includes('owner');
     }
 
+    function isSupervisorMitraRole() {
+      const role = (appState.googleAuth?.role || '').toLowerCase();
+      return role.includes('supervisor mitra') || role.includes('leader rgd');
+    }
+
     function applyRoleBasedNavigation() {
       const isAdmin = isAdminUtamaRole();
+      const isSupMitra = isSupervisorMitraRole();
       const adminBadge = document.getElementById('headerAdminRoleBadge');
-      if (adminBadge) {
-        if (isAdmin) adminBadge.classList.remove('hidden');
-        else adminBadge.classList.add('hidden');
-      }
+      const supBadge = document.getElementById('headerSupervisorRoleBadge');
+      if (adminBadge) adminBadge.classList.toggle('hidden', !isAdmin);
+      if (supBadge) supBadge.classList.toggle('hidden', !isSupMitra);
+
       document.querySelectorAll('[data-admin-only="true"]').forEach(el => {
-        if (isAdmin) el.classList.remove('hidden');
-        else el.classList.add('hidden');
+        el.classList.toggle('hidden', !isAdmin);
       });
-      if (!isAdmin && (activeTab === 'absensi' || activeTab === 'pekerja')) {
+      document.querySelectorAll('[data-supervisor-only="true"]').forEach(el => {
+        el.classList.toggle('hidden', !isSupMitra);
+      });
+      if (!isAdmin && (activeTab === 'absensi' || activeTab === 'pekerja' || activeTab === 'settings' || activeTab === 'users')) {
+        switchTab('daily');
+      }
+      if (!isSupMitra && activeTab === 'suppekerja') {
         switchTab('daily');
       }
     }
@@ -2767,23 +3226,91 @@
       return role.includes('pekerja');
     }
 
-    function completeLoginSession() {
+    const SESSION_STORAGE_KEY = 'HIDAYAT_PROJECT_ACTIVE_SESSION_V1';
+    const IDLE_TIMEOUT_MS = 2 * 60 * 1000; // 2 menit
+    let idleCheckInterval = null;
+    let lastActivityWriteTs = 0;
+
+    function readStoredSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeStoredSession(patch) {
+      try {
+        const cur = readStoredSession() || {};
+        const next = Object.assign({
+          authenticated: sessionAuthenticated,
+          lastActivityAt: Date.now(),
+          adminTab: activeTab || 'daily',
+          workerTab: 'absensi'
+        }, cur, patch || {});
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {}
+    }
+
+    function clearStoredSession() {
+      try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch (e) {}
+    }
+
+    function persistActiveSessionTab(mode, tabName) {
+      if (!sessionAuthenticated) return;
+      if (mode === 'worker') writeStoredSession({ authenticated: true, workerTab: tabName, lastActivityAt: Date.now() });
+      else writeStoredSession({ authenticated: true, adminTab: tabName, lastActivityAt: Date.now() });
+    }
+
+    function recordUserActivity() {
+      if (!sessionAuthenticated) return;
+      const now = Date.now();
+      if (now - lastActivityWriteTs < 3000) return;
+      lastActivityWriteTs = now;
+      writeStoredSession({ authenticated: true, lastActivityAt: now });
+    }
+
+    function startIdleSessionMonitor() {
+      if (idleCheckInterval) clearInterval(idleCheckInterval);
+      idleCheckInterval = setInterval(() => {
+        if (!sessionAuthenticated) return;
+        const sess = readStoredSession();
+        const lastTs = sess?.lastActivityAt || lastActivityWriteTs || Date.now();
+        if (Date.now() - lastTs >= IDLE_TIMEOUT_MS) {
+          logoutGoogleAccount(true);
+        }
+      }, 5000);
+    }
+
+    function completeLoginSession(restoreTab) {
       sessionAuthenticated = true;
+      lastActivityWriteTs = Date.now();
       const adminShell = document.getElementById('appDashboardShell');
       const workerShell = document.getElementById('workerDashboardShell');
       if (isPekerjaRole()) {
+        const targetWorkerTab = restoreTab || 'absensi';
+        writeStoredSession({ authenticated: true, lastActivityAt: Date.now(), workerTab: targetWorkerTab });
         if (adminShell) { adminShell.classList.add('hidden'); adminShell.classList.remove('flex'); }
         if (workerShell) { workerShell.classList.remove('hidden'); workerShell.classList.add('flex'); }
         closeGoogleAuthModal();
         renderWorkerDashboard();
-        switchWorkerDashboardTab('absensi');
+        switchWorkerDashboardTab(targetWorkerTab);
       } else {
+        const targetAdminTab = restoreTab || activeTab || 'daily';
+        writeStoredSession({ authenticated: true, lastActivityAt: Date.now(), adminTab: targetAdminTab });
         if (workerShell) { workerShell.classList.add('hidden'); workerShell.classList.remove('flex'); }
         if (adminShell) { adminShell.classList.remove('hidden'); adminShell.classList.add('flex'); }
         applyRoleBasedNavigation();
         closeGoogleAuthModal();
         renderAllModules();
+        if (targetAdminTab && targetAdminTab !== 'daily') {
+          switchTab(targetAdminTab);
+        }
       }
+      startIdleSessionMonitor();
     }
 
     function getDefaultState() {
@@ -2937,6 +3464,7 @@
             id: 'REF-401',
             name: 'Aris Kurniawan',
             nik: '3216021405910004',
+            phone: '0812-8841-2091',
             role: 'Bricklayer',
             project: 'Furnace 3 Rebuild',
             status: 'Active',
@@ -2948,6 +3476,7 @@
             id: 'REF-012',
             name: 'Budi Santoso',
             nik: '3216082209880002',
+            phone: '0813-9022-4410',
             role: 'Supervisor',
             project: 'Kiln 2 Relining',
             status: 'Active',
@@ -2959,6 +3488,7 @@
             id: 'REF-218',
             name: 'Hendra Wijaya',
             nik: '3275041103900009',
+            phone: '0856-7712-3309',
             role: 'Safety Inspector',
             project: 'Furnace 3 Rebuild',
             status: 'Active',
@@ -2970,6 +3500,7 @@
             id: 'REF-105',
             name: 'Slamet Raharjo',
             nik: '3216050911870001',
+            phone: '0819-4421-8850',
             role: 'Bricklayer',
             project: 'Ladle Prep',
             status: 'On Leave',
@@ -2981,6 +3512,7 @@
             id: 'REF-309',
             name: 'Ahmad Fauzi',
             nik: '3216011807930005',
+            phone: '0821-5509-1182',
             role: 'Castable Operator',
             project: 'Boiler Unit 2',
             status: 'Active',
@@ -2992,6 +3524,7 @@
             id: 'REF-315',
             name: 'Dedi Kurniawan',
             nik: '3216092504920007',
+            phone: '0852-6618-9940',
             role: 'Castable Operator',
             project: 'Boiler Unit 2',
             status: 'Active',
@@ -3093,8 +3626,61 @@
           }
         ],
 
+        users: [
+          {
+            id: 'usr_1',
+            username: 'admin',
+            password: 'admin123',
+            name: 'Deni Hidayat',
+            email: 'deni.hidayat@gmail.com',
+            role: 'Project Manager / Admin Utama',
+            status: 'Aktif',
+            avatarColor: '#ea580c'
+          },
+          {
+            id: 'usr_2',
+            username: 'aris',
+            password: 'pekerja123',
+            name: 'Aris Kurniawan',
+            email: 'aris.pekerja@gmail.com',
+            role: 'Pekerja Lapangan - Refractory',
+            status: 'Aktif',
+            avatarColor: '#d97706'
+          },
+          {
+            id: 'usr_3',
+            username: 'ardenata',
+            password: 'rgd123',
+            name: 'Ardenata Dwi Prakoso',
+            email: 'ardenata.rgd@gmail.com',
+            role: 'Site Engineer / Pelapor (RGD)',
+            status: 'Aktif',
+            avatarColor: '#2563eb'
+          },
+          {
+            id: 'usr_4',
+            username: 'ryan',
+            password: 'valmet123',
+            name: 'Ryan',
+            email: 'ryan.valmet@gmail.com',
+            role: 'Supervisor / QC Reviewer',
+            status: 'Aktif',
+            avatarColor: '#059669'
+          },
+          {
+            id: 'usr_5',
+            username: 'supervisor',
+            password: 'rgd123',
+            name: 'Budi Santoso (Supervisor Mitra)',
+            email: 'budi.rgd@gmail.com',
+            role: 'Supervisor Mitra (Supervisor/Leader RGD)',
+            status: 'Aktif',
+            avatarColor: '#0284c7'
+          }
+        ],
         googleAuth: {
-          isLoggedIn: true,
+          isLoggedIn: false,
+          username: '',
           name: 'Deni Hidayat',
           email: 'deni.hidayat@gmail.com',
           role: 'Project Manager / Admin Utama',
@@ -3132,6 +3718,9 @@
     }
 
     function saveAllToStorage(showNotification) {
+      if (typeof syncAllActiveReportsToFormArrays === 'function') {
+        syncAllActiveReportsToFormArrays();
+      }
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
       } catch (err) {
@@ -3161,12 +3750,13 @@
     // NAVIGATION & KPI UPDATES
     // ============================================================
     function switchTab(tabId) {
-      if ((tabId === 'absensi' || tabId === 'pekerja') && !isAdminUtamaRole()) {
+      if ((tabId === 'absensi' || tabId === 'pekerja' || tabId === 'settings' || tabId === 'users') && !isAdminUtamaRole()) {
         showToast('Menu ini khusus untuk Role Admin Utama!', 'error');
         return;
       }
+      persistActiveSessionTab('admin', tabId);
       activeTab = tabId;
-      const tabs = ['daily', 'material', 'castable', 'mixing', 'preview', 'settings', 'absensi', 'pekerja'];
+      const tabs = ['suppekerja', 'daily', 'material', 'castable', 'mixing', 'preview', 'settings', 'absensi', 'pekerja', 'users'];
       tabs.forEach(t => {
         const sec = document.getElementById(`section-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
@@ -3176,7 +3766,8 @@
         }
         if (btn) {
           const isAdminBtn = btn.getAttribute('data-admin-only') === 'true';
-          const hiddenClass = (isAdminBtn && !isAdminUtamaRole()) ? ' hidden' : '';
+          const isSupBtn = btn.getAttribute('data-supervisor-only') === 'true';
+          const hiddenClass = ((isAdminBtn && !isAdminUtamaRole()) || (isSupBtn && !isSupervisorMitraRole())) ? ' hidden' : '';
           if (t === tabId) {
             btn.className = 'tab-nav-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-orange-600 text-white shadow' + hiddenClass;
           } else {
@@ -3200,10 +3791,24 @@
       if (tabId === 'pekerja') {
         renderPekerjaModule();
       }
+      if (tabId === 'users') {
+        renderUsersManagementTable();
+      }
+      if (tabId === 'suppekerja') {
+        renderSupPekerjaModule();
+      } else {
+        stopSupAbsenCamera();
+      }
       if (window.lucide) window.lucide.createIcons();
     }
 
-    function openPreviewFor(docType, mode = 'filled') {
+    function openPreviewFor(docType, mode = 'filled', keepMultiFlag = false) {
+      if (!keepMultiFlag) {
+        printAllDailyFormsMode = false;
+        printAllMaterialFormsMode = false;
+        printAllCastableFormsMode = false;
+        printAllMixingFormsMode = false;
+      }
       activePreviewDoc = docType;
       pdfPrintMode = mode;
       switchTab('preview');
@@ -3288,6 +3893,8 @@
     }
 
     function renderDailyReportForm() {
+      ensureAllReportFormCollections();
+      renderDailyFormsManagerUI();
       const dr = appState.dailyReport;
       document.getElementById('dr_no').value = dr.no || '';
       document.getElementById('dr_projectName').value = dr.projectName || '';
@@ -3666,6 +4273,8 @@
     // MODULE 2: DAILY REPORT MATERIAL LOGIC
     // ============================================================
     function renderMaterialReportForm() {
+      ensureAllReportFormCollections();
+      renderMaterialFormsManagerUI();
       const mr = appState.materialReport;
       document.getElementById('mr_projectTitle').value = mr.projectTitle || '';
       document.getElementById('mr_customerTitle').value = mr.customerTitle || '';
@@ -3832,6 +4441,8 @@
     // MODULE 3: REPORT INSTALLED CASTABLE & SKETCH CANVAS
     // ============================================================
     function renderCastableReportForm() {
+      ensureAllReportFormCollections();
+      renderCastableFormsManagerUI();
       const ic = appState.castableReport;
       document.getElementById('ic_reportNo').value = ic.reportNo || '';
       document.getElementById('ic_pageNo').value = ic.pageNo || '1';
@@ -4220,6 +4831,8 @@
     // MODULE 4: MIXING REPORT LOGIC
     // ============================================================
     function renderMixingReportForm() {
+      ensureMixingFormsCollection();
+      renderMixingFormsManagerUI();
       const mx = appState.mixingReport;
       document.getElementById('mx_preparedBy').value = mx.preparedBy || '';
       document.getElementById('mx_reviewedBy').value = mx.reviewedBy || '';
@@ -4260,6 +4873,7 @@
 
     function updateMixingMeta(key, val) {
       appState.mixingReport[key] = val;
+      syncActiveMixingReportToFormsArray();
       saveAllToStorage(false);
     }
 
@@ -4276,6 +4890,7 @@
         const pctCell = document.getElementById(`mx_pctCell_${idx}`);
         if (pctCell) pctCell.textContent = `${row.waterPercent.toFixed(2)}%`;
       }
+      syncActiveMixingReportToFormsArray();
       saveAllToStorage(false);
     }
 
@@ -4828,9 +5443,6 @@
       const liveL = document.getElementById('livePreviewLogoLeft');
       const liveR = document.getElementById('livePreviewLogoRight');
       const liveSub = document.getElementById('livePreviewSubTitle');
-      const portalVal = document.getElementById('loginPortalLogoValmet');
-      const portalRgd = document.getElementById('loginPortalLogoRgd');
-
       const valHtml = getValmetLogoSvg();
       const rgdHtml = getRgdLogoSvg();
 
@@ -4839,8 +5451,6 @@
       if (liveL) liveL.innerHTML = valHtml;
       if (liveR) liveR.innerHTML = rgdHtml;
       if (liveSub) liveSub.textContent = b.contractorCompanyName || 'PT. REFRACTORINDO GRAHA DINAMIKA';
-      if (portalVal) portalVal.innerHTML = valHtml;
-      if (portalRgd) portalRgd.innerHTML = rgdHtml;
     }
 
     function updateBrandingField(key, val) {
@@ -4914,28 +5524,85 @@
       const closeX = document.getElementById('btnCloseLoginModalX');
       const closeFooter = document.getElementById('btnCloseLoginModalFooter');
       const hint = document.getElementById('loginFooterHintText');
+      const currentCard = document.getElementById('googleCurrentAccountCard');
+      const otherSection = document.getElementById('loginOtherAccountsSection');
+      const errAlert = document.getElementById('loginErrorAlert');
+      const pwInput = document.getElementById('loginPasswordInput');
       const canClose = sessionAuthenticated && !isMandatoryGate;
+
       if (closeX) closeX.classList.toggle('hidden', !canClose);
       if (closeFooter) closeFooter.classList.toggle('hidden', !canClose);
+      if (currentCard) currentCard.classList.toggle('hidden', !canClose);
+      if (otherSection) otherSection.classList.toggle('hidden', canClose);
+      if (errAlert) errAlert.classList.add('hidden');
+      if (pwInput && !canClose) pwInput.value = '';
+
       if (hint) {
         hint.innerHTML = canClose
-          ? 'Anda sedang login sebagai <strong>' + escapeHtml(appState.googleAuth?.name || '') + '</strong> (' + escapeHtml(appState.googleAuth?.role || '') + ').'
-          : 'Pertama buka aplikasi: silakan login sebagai <strong>Admin Utama</strong> atau akun Google lainnya untuk membuka Dashboard.';
+          ? 'Sesi aktif: <strong>' + escapeHtml(appState.googleAuth?.name || '') + '</strong> (' + escapeHtml(appState.googleAuth?.role || '') + '). Klik <strong>Logout</strong> untuk ganti user.'
+          : 'Masukkan <strong>Username</strong> &amp; <strong>Password</strong> dari Admin untuk membuka Dashboard.';
       }
       openGoogleAuthModal();
     }
 
-    function triggerGoogleOneTapAnimation() {
-      const badge = document.getElementById('googleOauthLoadingBadge');
-      if (badge) badge.classList.remove('hidden');
-      setTimeout(() => {
-        if (badge) badge.classList.add('hidden');
-        const currentName = appState.googleAuth?.name || 'Deni Hidayat';
-        const currentEmail = appState.googleAuth?.email || 'deni.hidayat@gmail.com';
-        const currentRole = appState.googleAuth?.role || 'Project Manager / Admin Utama';
-        loginWithGooglePreset(currentName, currentEmail, currentRole, '#ea580c');
-      }, 450);
+    function toggleLoginPasswordVisibility() {
+      const inp = document.getElementById('loginPasswordInput');
+      const ico = document.getElementById('loginEyeIcon');
+      if (!inp) return;
+      const isPwd = inp.type === 'password';
+      inp.type = isPwd ? 'text' : 'password';
+      if (ico) ico.setAttribute('data-lucide', isPwd ? 'eye-off' : 'eye');
+      if (window.lucide) window.lucide.createIcons();
     }
+
+    function handleCredentialLoginSubmit(event) {
+      if (event) event.preventDefault();
+      ensureAdminCollections();
+      const rawUser = (document.getElementById('loginUsernameInput')?.value || '').trim().toLowerCase();
+      const rawPass = (document.getElementById('loginPasswordInput')?.value || '').trim();
+      const errAlert = document.getElementById('loginErrorAlert');
+      const errText = document.getElementById('loginErrorText');
+
+      if (!rawUser || !rawPass) {
+        if (errText) errText.textContent = 'Username dan Password wajib diisi.';
+        if (errAlert) errAlert.classList.remove('hidden');
+        return;
+      }
+
+      const found = appState.users.find(u =>
+        (u.username.toLowerCase() === rawUser || (u.email || '').toLowerCase() === rawUser) &&
+        u.password === rawPass
+      );
+
+      if (!found) {
+        if (errText) errText.textContent = 'Username / Email atau Password salah. Hubungi Admin Utama.';
+        if (errAlert) errAlert.classList.remove('hidden');
+        return;
+      }
+
+      if (found.status === 'Nonaktif') {
+        if (errText) errText.textContent = 'Akun Anda sedang dinonaktifkan oleh Admin Utama.';
+        if (errAlert) errAlert.classList.remove('hidden');
+        return;
+      }
+
+      if (errAlert) errAlert.classList.add('hidden');
+      appState.googleAuth = {
+        ...appState.googleAuth,
+        isLoggedIn: true,
+        username: found.username,
+        name: found.name,
+        email: found.email || `${found.username}@gmail.com`,
+        role: found.role,
+        avatarColor: found.avatarColor || '#ea580c'
+      };
+      renderGoogleAuthUI();
+      saveAllToStorage(false);
+      completeLoginSession();
+      showToast(`Selamat datang, ${found.name} (${found.role})!`, 'success');
+    }
+
+
 
     function setPreviewDoc(docKey) {
       activePreviewDoc = docKey;
@@ -5056,37 +5723,15 @@
       showToast(`Selamat datang, ${name} (${role})!`, 'success');
     }
 
-    function loginWithCustomGoogleAccount() {
-      const name = (document.getElementById('customGoogleName')?.value || '').trim();
-      let email = (document.getElementById('customGoogleEmail')?.value || '').trim();
-      const role = document.getElementById('customGoogleRole')?.value || 'Project Manager / Admin Utama';
-      if (!name) {
-        showToast('Masukkan nama lengkap akun Google Anda terlebih dahulu!', 'error');
-        return;
-      }
-      if (!email) {
-        email = name.toLowerCase().replace(/[^a-z0-9]/g, '.') + '@gmail.com';
-      } else if (!email.includes('@')) {
-        email = email + '@gmail.com';
-      }
-      appState.googleAuth = {
-        ...appState.googleAuth,
-        isLoggedIn: true,
-        name: name,
-        email: email,
-        role: role,
-        avatarColor: '#2563eb'
-      };
-      renderGoogleAuthUI();
-      saveAllToStorage(false);
-      completeLoginSession();
-      showToast(`Berhasil login sebagai ${name} (${role})!`, 'success');
-    }
 
-    function logoutGoogleAccount() {
+
+    function logoutGoogleAccount(isAutoTimeout = false) {
       stopWorkerPortalCamera();
       stopAbsensiSelfieCamera();
+      stopSupAbsenCamera();
+      closeWorkerPhotoCameraModal();
       sessionAuthenticated = false;
+      clearStoredSession();
       appState.googleAuth.isLoggedIn = false;
       const shell = document.getElementById('appDashboardShell');
       const workerShell = document.getElementById('workerDashboardShell');
@@ -5101,7 +5746,11 @@
       renderGoogleAuthUI();
       saveAllToStorage(false);
       openEnterpriseLoginScreen(true);
-      showToast('Anda telah keluar (Logout). Silakan login kembali.', 'info');
+      if (isAutoTimeout === true) {
+        showToast('Sesi berakhir otomatis karena tidak ada aktivitas selama 2 menit. Silakan login kembali.', 'error');
+      } else {
+        showToast('Anda telah keluar (Logout). Silakan login kembali.', 'info');
+      }
     }
 
     function applyGoogleUserToReports() {
@@ -5153,7 +5802,14 @@
     }
 
     // 1. HTML REPLICA OF Daily Report.pdf (Mendukung Mode Terisi & Mode Blangko Kosong Manual)
-    function buildDailyReportPdfHtml() {
+    let printAllDailyFormsMode = false;
+    let printAllMaterialFormsMode = false;
+    let printAllCastableFormsMode = false;
+
+    function buildDailyReportPdfHtml(overrideDrObj) {
+      if (!overrideDrObj && pdfPrintMode === 'filled' && printAllDailyFormsMode && Array.isArray(appState.dailyForms) && appState.dailyForms.length > 0) {
+        return appState.dailyForms.map((f, idx) => `<div class="${idx > 0 ? 'page-break-before mt-6' : ''}">${buildDailyReportPdfHtml(f.data)}</div>`).join('');
+      }
       if (pdfPrintMode === 'blank') {
         const blankRoles = ['Project Manajer', 'Leader', 'Admin', 'Safetyman', 'Skilled'];
         const blankPersonnelHtml = blankRoles.map(role => `
@@ -5272,7 +5928,7 @@
           </div>
         `;
       }
-      const dr = appState.dailyReport;
+      const dr = overrideDrObj || appState.dailyReport;
       const totalMp = dr.personnel.reduce((a, b) => a + (Number(b.count) || 0), 0);
       const personnelRowsHtml = dr.personnel.map(p => `
         <tr>
@@ -5428,8 +6084,11 @@
     }
 
     // 2. HTML REPLICA OF Daily Report Material.pdf
-    function buildMaterialReportPdfHtml() {
-      const mr = appState.materialReport;
+    function buildMaterialReportPdfHtml(overrideMrObj) {
+      if (!overrideMrObj && pdfPrintMode === 'filled' && printAllMaterialFormsMode && Array.isArray(appState.materialForms) && appState.materialForms.length > 0) {
+        return appState.materialForms.map((f, idx) => `<div class="${idx > 0 ? 'page-break-before mt-6' : ''}">${buildMaterialReportPdfHtml(f.data)}</div>`).join('');
+      }
+      const mr = overrideMrObj || appState.materialReport;
       if (pdfPrintMode === 'blank') {
         const dayHeaders = Array.from({ length: 8 }, (_, i) => `<th>Day ${i + 1}</th>`).join('');
         const dateHeaders = Array.from({ length: 8 }, () => `<th class="h-5 font-normal text-[9px] text-slate-400">..../..../20....</th>`).join('');
@@ -5562,8 +6221,11 @@
     }
 
     // 3. HTML REPLICA OF Report Installed CAstable.pdf (Page 1 + Page 2)
-    function buildCastableReportPdfHtml() {
-      const ic = appState.castableReport;
+    function buildCastableReportPdfHtml(overrideIcObj) {
+      if (!overrideIcObj && pdfPrintMode === 'filled' && printAllCastableFormsMode && Array.isArray(appState.castableForms) && appState.castableForms.length > 0) {
+        return appState.castableForms.map((f, idx) => `<div class="${idx > 0 ? 'page-break-before mt-6' : ''}">${buildCastableReportPdfHtml(f.data)}</div>`).join('');
+      }
+      const ic = overrideIcObj || appState.castableReport;
       if (pdfPrintMode === 'blank') {
         let blankBatchRows = '';
         for (let i = 0; i < 14; i++) {
@@ -5839,7 +6501,102 @@
     }
 
     // 4. HTML REPLICA OF mixing report.pdf
+    let printAllMixingFormsMode = false;
+
+    function buildSingleMixingSheetHtml(mxObj, formMeta) {
+      const totalRows = Math.max(22, (mxObj.rows || []).length);
+      let rowsHtml = '';
+      for (let i = 0; i < totalRows; i++) {
+        const r = mxObj.rows[i];
+        rowsHtml += `
+          <tr class="h-6">
+            <td class="text-center">${r ? escapeHtml(r.date) : ''}</td>
+            <td class="text-center">${r ? escapeHtml(r.time) : ''}</td>
+            <td>${r ? escapeHtml(r.materialName) : ''}</td>
+            <td class="text-center">${r ? r.dryMixTime : ''}</td>
+            <td class="text-center">${r ? r.wetMixTime : ''}</td>
+            <td class="text-center font-semibold">${r ? r.castableQty : ''}</td>
+            <td class="text-center">${r ? escapeHtml(r.castableUnit || 'Kg') : ''}</td>
+            <td class="text-center font-semibold">${r ? r.waterLitre : ''}</td>
+            <td class="text-center">${r ? Number(r.waterPercent || 0).toFixed(1) + '%' : ''}</td>
+            <td class="text-center">${r ? r.waterPh : ''}</td>
+            <td class="text-center">${r ? r.tempWater : ''}</td>
+            <td class="text-center">${r ? r.tempAmbient : ''}</td>
+          </tr>
+        `;
+      }
+      const b = appState.branding || {};
+      const compName = b.contractorCompanyName || 'PT. REFRACTORINDO GRAHA DINAMIKA';
+      const compTag = b.contractorTagline || 'REFRACTORY & INSULATION SERVICES';
+      const metaRibbon = formMeta
+        ? `<div class="flex items-center justify-between text-[10px] text-slate-600 mb-1.5"><span><strong>Form:</strong> ${escapeHtml(formMeta.formNo || '')} — ${escapeHtml(formMeta.title || '')}</span><span>${escapeHtml(formMeta.date || '')} | ${escapeHtml(formMeta.shift || '')}</span></div>`
+        : '';
+
+      return `
+        <div class="report-sheet max-w-[920px] mx-auto p-6 border border-slate-300 page-break-before">
+          ${metaRibbon}
+          <div class="flex items-center gap-3 mb-3">
+            ${getRgdLogoSvg()}
+            <div>
+              <div class="text-sm font-extrabold text-indigo-950 tracking-wide border-b-2 border-indigo-950 pb-0.5">${escapeHtml(compName)}</div>
+              <div class="text-[10px] font-semibold text-slate-600 tracking-wider mt-0.5">${escapeHtml(compTag)}</div>
+            </div>
+          </div>
+          <div class="border-2 border-black">
+            <div class="text-center font-extrabold text-sm py-2 border-b border-black">MIXING PROCESS</div>
+            <table class="pdf-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="w-24">Date</th>
+                  <th rowspan="2" class="w-16">Time</th>
+                  <th rowspan="2">Name Material</th>
+                  <th rowspan="2" class="w-20">Dry Mix Time<br/>(Minute)</th>
+                  <th rowspan="2" class="w-20">Wet Mix Time<br/>(Minute)</th>
+                  <th colspan="2">Castable</th>
+                  <th colspan="3">Water</th>
+                  <th colspan="2">Temp. ( °C )</th>
+                </tr>
+                <tr>
+                  <th class="w-16">Qty</th>
+                  <th class="w-14">Unit</th>
+                  <th class="w-16">Litre</th>
+                  <th class="w-16">%</th>
+                  <th class="w-14">PH</th>
+                  <th class="w-16">Water</th>
+                  <th class="w-16">Ambient</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+          <div class="grid grid-cols-2 gap-12 mt-6 px-10 text-xs">
+            <div class="text-center">
+              <div class="font-semibold">Prepared,by</div>
+              <div class="h-20 flex items-center justify-center">
+                ${appState.signatures.mixing_prepared ? `<img src="${appState.signatures.mixing_prepared}" class="max-h-16 object-contain" alt="TTD" />` : ''}
+              </div>
+              <div class="border-t border-dotted border-black pt-1 font-bold">${escapeHtml(mxObj.preparedBy || '')}</div>
+            </div>
+            <div class="text-center">
+              <div class="font-semibold">Review,by</div>
+              <div class="h-20 flex items-center justify-center">
+                ${appState.signatures.mixing_reviewed ? `<img src="${appState.signatures.mixing_reviewed}" class="max-h-16 object-contain" alt="TTD" />` : ''}
+              </div>
+              <div class="border-t border-dotted border-black pt-1 font-bold">${escapeHtml(mxObj.reviewedBy || '')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function buildMixingReportPdfHtml() {
+      if (pdfPrintMode === 'filled' && printAllMixingFormsMode && Array.isArray(appState.mixingForms) && appState.mixingForms.length > 0) {
+        return appState.mixingForms.map(f => buildSingleMixingSheetHtml({
+          preparedBy: f.preparedBy,
+          reviewedBy: f.reviewedBy,
+          rows: f.rows
+        }, f)).join('');
+      }
       const mx = appState.mixingReport;
       if (pdfPrintMode === 'blank') {
         let blankMixRows = '';
@@ -6093,8 +6850,24 @@
     function ensureAdminCollections() {
       const def = getDefaultState();
       if (!appState.geofence) appState.geofence = def.geofence;
-      if (!Array.isArray(appState.workers) || appState.workers.length === 0) appState.workers = def.workers;
+      if (!Array.isArray(appState.workers) || appState.workers.length === 0) {
+        appState.workers = def.workers;
+      } else {
+        appState.workers.forEach((w, idx) => {
+          if (!w.phone) {
+            const matchDef = def.workers.find(d => d.id === w.id);
+            w.phone = matchDef ? matchDef.phone : ('0812-8800-10' + String(idx + 10));
+          }
+        });
+      }
       if (!Array.isArray(appState.attendanceLogs) || appState.attendanceLogs.length === 0) appState.attendanceLogs = def.attendanceLogs;
+      if (!Array.isArray(appState.users) || appState.users.length === 0) {
+        appState.users = def.users;
+      } else if (!appState.users.some(u => u.username === 'supervisor')) {
+        const supDef = def.users.find(u => u.username === 'supervisor');
+        if (supDef) appState.users.push(supDef);
+      }
+      ensureMixingFormsCollection();
     }
 
     function updateAbsensiLiveClock() {
@@ -6671,6 +7444,7 @@
           <td class="py-2.5 px-3">
             <p class="font-bold text-slate-900">${escapeHtml(w.name)}</p>
             <p class="text-[10px] text-slate-400 font-mono">NIK: ${escapeHtml(w.nik || '-')}</p>
+            <p class="text-[10px] text-emerald-700 font-mono font-semibold">Telp: ${escapeHtml(w.phone || '-')}</p>
           </td>
           <td class="py-2.5 px-3 font-mono font-bold text-slate-700">${escapeHtml(w.id)}</td>
           <td class="py-2.5 px-3 font-medium text-slate-700">${escapeHtml(w.role)}</td>
@@ -6738,6 +7512,7 @@
           <p class="${isCompact ? 'text-[8px]' : 'text-[11px]'} font-bold uppercase text-orange-300 truncate">${escapeHtml(w.role)}</p>
           <p class="${isCompact ? 'text-[8px]' : 'text-[10px]'} text-slate-300 font-mono mt-1">ID: ${escapeHtml(w.id)}</p>
           <p class="${isCompact ? 'text-[8px]' : 'text-[10px]'} text-slate-300 truncate">PROJ: ${escapeHtml(w.project)}</p>
+          <p class="${isCompact ? 'text-[8px]' : 'text-[10px]'} text-amber-300 font-mono font-semibold truncate">TELP: ${escapeHtml(w.phone || '-')}</p>
         </div>
         <div class="mt-2.5 pt-2 border-t border-white/20 flex items-end justify-between gap-1">
           <div class="bg-white p-1 rounded-md shadow-sm">
@@ -6787,7 +7562,7 @@
           if (qrTarget && window.QRCode) {
             qrTarget.innerHTML = '';
             new window.QRCode(qrTarget, {
-              text: `${w.id}|${w.name}|${w.role}|NIK:${w.nik}|${w.project}`,
+              text: `${w.id}|${w.name}|${w.role}|TELP:${w.phone || '-'}|NIK:${w.nik}|${w.project}`,
               width: 66,
               height: 66,
               colorDark: '#0f172a',
@@ -6924,6 +7699,7 @@
     function saveWorkerRegistration() {
       const editId = document.getElementById('wf_editId')?.value || '';
       const name = (document.getElementById('wf_name')?.value || '').trim();
+      const phone = (document.getElementById('wf_phone')?.value || '').trim();
       const nik = (document.getElementById('wf_nik')?.value || '').trim();
       const role = document.getElementById('wf_role')?.value || '';
       const project = (document.getElementById('wf_project')?.value || 'Boiler Unit 2').trim();
@@ -6944,6 +7720,7 @@
           appState.workers[idx] = {
             ...appState.workers[idx],
             name,
+            phone: phone || appState.workers[idx].phone || '-',
             nik: nik || appState.workers[idx].nik,
             role,
             project,
@@ -6959,6 +7736,7 @@
         appState.workers.unshift({
           id: newId,
           name,
+          phone: phone || '-',
           nik: nik || '3216000000000000',
           role,
           project,
@@ -6983,6 +7761,7 @@
       if (!w) return;
       document.getElementById('wf_editId').value = w.id;
       document.getElementById('wf_name').value = w.name;
+      if (document.getElementById('wf_phone')) document.getElementById('wf_phone').value = w.phone || '';
       document.getElementById('wf_nik').value = w.nik || '';
       document.getElementById('wf_role').value = w.role;
       document.getElementById('wf_project').value = w.project || 'Boiler Unit 2';
@@ -7012,6 +7791,7 @@
     function resetWorkerRegistrationForm(backToDir) {
       document.getElementById('wf_editId').value = '';
       document.getElementById('wf_name').value = '';
+      if (document.getElementById('wf_phone')) document.getElementById('wf_phone').value = '';
       document.getElementById('wf_nik').value = '';
       document.getElementById('wf_role').value = '';
       document.getElementById('wf_project').value = 'Boiler Unit 2';
@@ -7054,7 +7834,6 @@
       onWorkerPortalSelectChange();
       updateWorkerPortalClock();
       renderWorkerPortalHistory();
-      renderWorkerPortalQr();
       if (window.lucide) window.lucide.createIcons();
     }
 
@@ -7067,6 +7846,7 @@
     }
 
     function switchWorkerDashboardTab(tabKey) {
+      persistActiveSessionTab('worker', tabKey);
       const secAbs = document.getElementById('workerSection-absensi');
       const secPek = document.getElementById('workerSection-pekerja');
       const btnAbs = document.getElementById('wTabBtn-absensi');
@@ -7086,10 +7866,12 @@
       }
       if (tabKey === 'pekerja') {
         stopWorkerPortalCamera();
-        renderWorkerPortalQr();
       } else {
         updateWorkerPortalClock();
         renderWorkerPortalHistory();
+        // Auto aktifkan kamera & GPS saat login / menu Absensi pekerja dibuka
+        startWorkerPortalCamera(true);
+        detectWorkerPortalGps(true);
       }
       if (window.lucide) window.lucide.createIcons();
     }
@@ -7110,21 +7892,32 @@
       if (lbl) lbl.textContent = t === 'Pulang' ? 'Ambil Foto & Absen Pulang' : 'Ambil Foto & Absen Masuk';
     }
 
-    async function startWorkerPortalCamera() {
+    async function startWorkerPortalCamera(isSilentAuto = false) {
+      if (workerPortalStream) return;
       const video = document.getElementById('wPortalVideo');
       const img = document.getElementById('wPortalSelfiePreview');
       const btnStart = document.getElementById('wBtnStartCam');
       const btnStop = document.getElementById('wBtnStopCam');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (!isSilentAuto) showToast('Kamera perangkat tidak didukung browser ini. Gunakan Upload Foto Selfie.', 'info');
+        return;
+      }
       try {
         workerPortalStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-        video.srcObject = workerPortalStream;
-        video.classList.remove('hidden');
-        img.classList.add('hidden');
-        btnStart.classList.add('hidden');
-        btnStop.classList.remove('hidden');
-        showToast('Kamera selfie aktif! Silakan klik Ambil Foto & Absen Masuk.', 'success');
+        if (video) {
+          video.srcObject = workerPortalStream;
+          video.classList.remove('hidden');
+        }
+        if (img) img.classList.add('hidden');
+        if (btnStart) btnStart.classList.add('hidden');
+        if (btnStop) btnStop.classList.remove('hidden');
+        if (!isSilentAuto) {
+          showToast('Kamera selfie aktif! Silakan klik Ambil Foto & Absen Masuk.', 'success');
+        }
       } catch (err) {
-        showToast('Kamera langsung tidak tersedia di pratinjau. Gunakan Upload Foto Selfie atau langsung klik Ambil Foto & Absen Masuk.', 'info');
+        if (!isSilentAuto) {
+          showToast('Kamera langsung tidak diizinkan. Gunakan Upload Foto Selfie atau langsung klik Ambil Foto & Absen Masuk.', 'info');
+        }
       }
     }
 
@@ -7156,11 +7949,11 @@
       event.target.value = '';
     }
 
-    function detectWorkerPortalGps() {
+    function detectWorkerPortalGps(isSilentAuto = false) {
       const gpsText = document.getElementById('wPortalGpsText');
       const accText = document.getElementById('wPortalAccText');
       if (!navigator.geolocation) {
-        showToast('Menggunakan koordinat area proyek Bekasi.', 'info');
+        if (!isSilentAuto) showToast('Menggunakan koordinat area proyek Bekasi.', 'info');
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -7172,7 +7965,7 @@
           };
           if (gpsText) gpsText.textContent = `${workerPortalCoords.lat.toFixed(4)}, ${workerPortalCoords.lng.toFixed(4)}`;
           if (accText) accText.textContent = `${workerPortalCoords.accuracy}m (Dalam Area Proyek)`;
-          showToast('Koordinat GPS Anda berhasil diperbarui!', 'success');
+          if (!isSilentAuto) showToast('Koordinat GPS Anda berhasil diperbarui!', 'success');
         },
         () => {
           const jLat = (appState.geofence?.lat || -6.2383) + (Math.random() - 0.5) * 0.001;
@@ -7180,7 +7973,7 @@
           workerPortalCoords = { lat: jLat, lng: jLng, accuracy: 4 };
           if (gpsText) gpsText.textContent = `${jLat.toFixed(4)}, ${jLng.toFixed(4)}`;
           if (accText) accText.textContent = '4m (Dalam Area Proyek)';
-          showToast('Lokasi GPS terverifikasi di dalam area proyek Bekasi.', 'success');
+          if (!isSilentAuto) showToast('Lokasi GPS terverifikasi di dalam area proyek Bekasi.', 'success');
         },
         { enableHighAccuracy: true, timeout: 4000 }
       );
@@ -7270,49 +8063,6 @@
       `).join('');
     }
 
-    function renderWorkerPortalQr() {
-      const inp = document.getElementById('wPortalShareLinkInput');
-      const qrBox = document.getElementById('wPortalQrContainer');
-      const url = getWorkerShareLinkUrl();
-      if (inp) inp.value = url;
-      if (qrBox && window.QRCode) {
-        qrBox.innerHTML = '';
-        new window.QRCode(qrBox, {
-          text: url,
-          width: 170,
-          height: 170,
-          colorDark: '#0f172a',
-          colorLight: '#ffffff'
-        });
-      }
-    }
-
-    function copyWorkerPortalFormLink() {
-      const inp = document.getElementById('wPortalShareLinkInput');
-      if (!inp) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(inp.value).then(() => {
-          showToast('Link Formulir Pekerja berhasil disalin!', 'success');
-        }).catch(() => fallbackCopyText(inp));
-      } else {
-        fallbackCopyText(inp);
-      }
-    }
-
-    function downloadWorkerPortalQr() {
-      const qrBox = document.getElementById('wPortalQrContainer');
-      if (!qrBox) return;
-      const canvas = qrBox.querySelector('canvas');
-      const img = qrBox.querySelector('img');
-      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
-      if (!dataUrl) return;
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = 'QR_Form_Pekerja_Hidayat_Project.png';
-      a.click();
-      showToast('QR Code Formulir Pekerja berhasil diunduh!', 'success');
-    }
-
     function handleWorkerPortalPhotoUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
@@ -7338,12 +8088,103 @@
       event.target.value = '';
     }
 
+    let workerPhotoCamStream = null;
+    let workerPhotoCamTarget = 'workerPortal';
+
+    async function openWorkerPhotoCameraModal(targetMode) {
+      workerPhotoCamTarget = targetMode || 'workerPortal';
+      const modal = document.getElementById('workerPhotoCameraModal');
+      const video = document.getElementById('workerPhotoCamVideo');
+      try {
+        workerPhotoCamStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        });
+        video.srcObject = workerPhotoCamStream;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (window.lucide) window.lucide.createIcons();
+      } catch (err) {
+        const fbId = workerPhotoCamTarget === 'adminForm' ? 'wf_photoCamFallback' : (workerPhotoCamTarget === 'supForm' ? 'sp_photoCamFallback' : 'wp_photoCamFallback');
+        const fb = document.getElementById(fbId);
+        if (fb) fb.click();
+        else showToast('Kamera perangkat tidak diizinkan. Silakan pilih file foto dari galeri.', 'info');
+      }
+    }
+
+    function closeWorkerPhotoCameraModal() {
+      if (workerPhotoCamStream) {
+        workerPhotoCamStream.getTracks().forEach(t => t.stop());
+        workerPhotoCamStream = null;
+      }
+      const modal = document.getElementById('workerPhotoCameraModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function captureWorkerPhotoFromCamera() {
+      const video = document.getElementById('workerPhotoCamVideo');
+      if (!video) return;
+      const c = document.createElement('canvas');
+      c.width = 450;
+      c.height = 600;
+      const ctx = c.getContext('2d');
+      const vw = video.videoWidth || 450;
+      const vh = video.videoHeight || 600;
+      const targetRatio = 3 / 4;
+      let sx = 0, sy = 0, sw = vw, sh = vh;
+      if (vw / vh > targetRatio) {
+        sw = vh * targetRatio;
+        sx = (vw - sw) / 2;
+      } else {
+        sh = vw / targetRatio;
+        sy = (vh - sh) / 2;
+      }
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, 450, 600);
+      const dataUrl = c.toDataURL('image/jpeg', 0.88);
+      closeWorkerPhotoCameraModal();
+
+      if (workerPhotoCamTarget === 'adminForm') {
+        workerFormTempPhotoUrl = dataUrl;
+        const prev = document.getElementById('wf_photoPreview');
+        const icon = document.getElementById('wf_photoPlaceholderIcon');
+        const lbl = document.getElementById('wf_photoLabel');
+        if (prev) { prev.src = dataUrl; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = 'Pas Foto 3x4 berhasil diambil dari kamera!';
+      } else if (workerPhotoCamTarget === 'supForm') {
+        supWorkerTempPhoto = dataUrl;
+        const prev = document.getElementById('sp_photoPreview');
+        const icon = document.getElementById('sp_photoIcon');
+        const lbl = document.getElementById('sp_photoLabel');
+        if (prev) { prev.src = dataUrl; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = 'Pas Foto 3x4 berhasil diambil dari kamera!';
+      } else {
+        workerPortalTempPhoto = dataUrl;
+        const prev = document.getElementById('wp_photoPreview');
+        const icon = document.getElementById('wp_photoIcon');
+        const lbl = document.getElementById('wp_photoLabel');
+        if (prev) { prev.src = dataUrl; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = 'Pas Foto 3x4 berhasil diambil dari kamera perangkat!';
+      }
+      showToast('Pas Foto 3x4 berhasil diambil dari kamera!', 'success');
+    }
+
     function saveWorkerPortalRegistration() {
       const name = (document.getElementById('wp_name')?.value || '').trim();
+      const phone = (document.getElementById('wp_phone')?.value || '').trim();
       const nik = (document.getElementById('wp_nik')?.value || '').trim();
       const role = document.getElementById('wp_role')?.value || '';
       if (!name) {
         showToast('Nama Lengkap wajib diisi!', 'error');
+        return;
+      }
+      if (!phone) {
+        showToast('No. Telepon / WhatsApp wajib diisi agar tampil di ID Card!', 'error');
         return;
       }
       if (!role) {
@@ -7355,6 +8196,7 @@
       appState.workers.unshift({
         id: newId,
         name,
+        phone,
         nik: nik || '3216000000000000',
         role,
         project: 'Boiler Unit 2',
@@ -7366,11 +8208,12 @@
       saveAllToStorage(false);
       resetWorkerPortalForm();
       renderWorkerDashboard();
-      showToast(`Data pekerja ${name} (${newId}) berhasil disimpan & langsung tampil di Admin Utama!`, 'success');
+      showToast(`Data pekerja ${name} (${newId} • ${phone}) tersimpan & terintegrasi ke ID Card Admin!`, 'success');
     }
 
     function resetWorkerPortalForm() {
       document.getElementById('wp_name').value = '';
+      if (document.getElementById('wp_phone')) document.getElementById('wp_phone').value = '';
       document.getElementById('wp_nik').value = '';
       document.getElementById('wp_role').value = '';
       workerPortalTempPhoto = '';
@@ -7379,8 +8222,981 @@
       const icon = document.getElementById('wp_photoIcon');
       if (prev) { prev.src = ''; prev.classList.add('hidden'); }
       if (icon) icon.classList.remove('hidden');
-      document.getElementById('wp_photoLabel').textContent = 'Upload on drop / Klik pilih Pas Foto 3x4';
+      document.getElementById('wp_photoLabel').textContent = 'Ambil foto langsung lewat kamera perangkat atau unggah file Pas Foto 3x4 (JPG/PNG)';
       document.getElementById('wp_certLabel').textContent = 'Upload on drop / Klik pilih Sertifikat K3 (PDF)';
+    }
+
+    // ============================================================
+    // MODULE 9 JS: PENGATURAN USER (TAMBAH, EDIT, DUPLICATE, HAPUS)
+    // ============================================================
+    function getRoleColorHex(roleStr) {
+      const r = (roleStr || '').toLowerCase();
+      if (r.includes('admin')) return '#ea580c';
+      if (r.includes('pekerja')) return '#d97706';
+      if (r.includes('supervisor') || r.includes('qc')) return '#059669';
+      if (r.includes('customer') || r.includes('valmet')) return '#7c3aed';
+      return '#2563eb';
+    }
+
+    function renderUsersManagementTable() {
+      ensureAdminCollections();
+      const tbody = document.getElementById('um_tableBody');
+      const badge = document.getElementById('um_totalBadge');
+      if (!tbody) return;
+
+      const q = (document.getElementById('um_searchInput')?.value || '').toLowerCase().trim();
+      const roleF = (document.getElementById('um_roleFilter')?.value || 'all').toLowerCase();
+
+      const filtered = appState.users.filter(u => {
+        const mText = !q || u.name.toLowerCase().includes(q) || u.username.toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
+        const mRole = roleF === 'all' || u.role.toLowerCase().includes(roleF);
+        return mText && mRole;
+      });
+
+      if (badge) badge.textContent = `${filtered.length} User`;
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-400">Tidak ada user yang cocok.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(u => {
+        const initials = (u.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const isAktif = u.status !== 'Nonaktif';
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg text-white font-extrabold text-xs flex items-center justify-center shrink-0" style="background:${escapeHtml(u.avatarColor || getRoleColorHex(u.role))}">${escapeHtml(initials)}</div>
+              <div class="min-w-0">
+                <p class="font-bold text-slate-900 truncate">${escapeHtml(u.name)}</p>
+                <p class="text-[10px] text-slate-500 truncate">${escapeHtml(u.email || '-')}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-2.5 px-3 font-mono font-bold text-slate-800">${escapeHtml(u.username)}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-600">${escapeHtml(u.password)}</td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">${escapeHtml(u.role)}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isAktif ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${escapeHtml(u.status || 'Aktif')}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <button type="button" onclick="editUserAccount('${escapeHtml(u.id)}')" class="p-1.5 rounded-lg text-slate-600 hover:bg-amber-50 hover:text-amber-600" title="Edit User">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="duplicateUserAccount('${escapeHtml(u.id)}')" class="p-1.5 rounded-lg text-slate-600 hover:bg-indigo-50 hover:text-indigo-600" title="Duplicate User">
+                <i data-lucide="copy-plus" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="deleteUserAccount('${escapeHtml(u.id)}')" class="p-1.5 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600" title="Hapus User">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function saveUserAccount() {
+      ensureAdminCollections();
+      const editId = document.getElementById('um_editId')?.value || '';
+      const name = (document.getElementById('um_name')?.value || '').trim();
+      const username = (document.getElementById('um_username')?.value || '').trim().toLowerCase();
+      const password = (document.getElementById('um_password')?.value || '').trim();
+      let email = (document.getElementById('um_email')?.value || '').trim();
+      const role = document.getElementById('um_role')?.value || 'Pekerja Lapangan - Refractory';
+      const status = document.getElementById('um_status')?.value || 'Aktif';
+
+      if (!name || !username || !password) {
+        showToast('Nama Lengkap, Username, dan Password wajib diisi!', 'error');
+        return;
+      }
+      if (password.length < 4) {
+        showToast('Password minimal 4 karakter!', 'error');
+        return;
+      }
+      if (!email) email = `${username}@gmail.com`;
+
+      const duplicateCheck = appState.users.find(u => u.username.toLowerCase() === username && u.id !== editId);
+      if (duplicateCheck) {
+        showToast(`Username "${username}" sudah digunakan! Gunakan username lain.`, 'error');
+        return;
+      }
+
+      if (editId) {
+        const idx = appState.users.findIndex(u => u.id === editId);
+        if (idx >= 0) {
+          appState.users[idx] = {
+            ...appState.users[idx],
+            name,
+            username,
+            password,
+            email,
+            role,
+            status,
+            avatarColor: getRoleColorHex(role)
+          };
+        }
+        showToast(`Data user "${name}" berhasil diperbarui!`, 'success');
+      } else {
+        appState.users.push({
+          id: 'usr_' + Date.now(),
+          name,
+          username,
+          password,
+          email,
+          role,
+          status,
+          avatarColor: getRoleColorHex(role)
+        });
+        showToast(`User baru "${name}" (${username}) berhasil ditambahkan!`, 'success');
+      }
+
+      saveAllToStorage(false);
+      resetUserMgmtForm();
+      renderUsersManagementTable();
+    }
+
+    function editUserAccount(userId) {
+      const u = appState.users.find(x => x.id === userId);
+      if (!u) return;
+      document.getElementById('um_editId').value = u.id;
+      document.getElementById('um_name').value = u.name;
+      document.getElementById('um_username').value = u.username;
+      document.getElementById('um_password').value = u.password;
+      document.getElementById('um_email').value = u.email || '';
+      document.getElementById('um_role').value = u.role;
+      document.getElementById('um_status').value = u.status || 'Aktif';
+      document.getElementById('umFormTitle').textContent = `Edit User (${u.username})`;
+      document.getElementById('umEditBadge').classList.remove('hidden');
+      document.getElementById('um_name')?.focus();
+    }
+
+    function duplicateUserAccount(userId) {
+      const u = appState.users.find(x => x.id === userId);
+      if (!u) return;
+      let suffix = 2;
+      let newUsername = `${u.username}_${suffix}`;
+      while (appState.users.some(x => x.username.toLowerCase() === newUsername.toLowerCase())) {
+        suffix++;
+        newUsername = `${u.username}_${suffix}`;
+      }
+      const copyUser = {
+        ...u,
+        id: 'usr_' + Date.now(),
+        username: newUsername,
+        name: `${u.name} (Copy ${suffix})`,
+        email: `${newUsername}@gmail.com`
+      };
+      appState.users.push(copyUser);
+      saveAllToStorage(false);
+      renderUsersManagementTable();
+      showToast(`User berhasil diduplikasi sebagai "${copyUser.username}"!`, 'success');
+    }
+
+    function deleteUserAccount(userId) {
+      const u = appState.users.find(x => x.id === userId);
+      if (!u) return;
+      const activeAdmins = appState.users.filter(x => x.role.toLowerCase().includes('admin utama') && x.status !== 'Nonaktif');
+      if (u.role.toLowerCase().includes('admin utama') && activeAdmins.length <= 1) {
+        showToast('Tidak dapat menghapus satu-satunya akun Admin Utama aktif!', 'error');
+        return;
+      }
+      appState.users = appState.users.filter(x => x.id !== userId);
+      saveAllToStorage(false);
+      renderUsersManagementTable();
+      showToast(`User "${u.name}" (${u.username}) telah dihapus.`, 'info');
+    }
+
+    function resetUserMgmtForm() {
+      if (document.getElementById('um_editId')) document.getElementById('um_editId').value = '';
+      if (document.getElementById('um_name')) document.getElementById('um_name').value = '';
+      if (document.getElementById('um_username')) document.getElementById('um_username').value = '';
+      if (document.getElementById('um_password')) document.getElementById('um_password').value = '';
+      if (document.getElementById('um_email')) document.getElementById('um_email').value = '';
+      if (document.getElementById('um_role')) document.getElementById('um_role').value = 'Pekerja Lapangan - Refractory';
+      if (document.getElementById('um_status')) document.getElementById('um_status').value = 'Aktif';
+      if (document.getElementById('umFormTitle')) document.getElementById('umFormTitle').textContent = 'Tambah User Baru';
+      if (document.getElementById('umEditBadge')) document.getElementById('umEditBadge').classList.add('hidden');
+    }
+
+    // ============================================================
+    // MULTI-FORM DAILY MIXING REPORT JS (TAMBAH, EDIT, DUPLICATE, HAPUS)
+    // ============================================================
+    function ensureMixingFormsCollection() {
+      if (!Array.isArray(appState.mixingForms) || appState.mixingForms.length === 0) {
+        const baseRows = JSON.parse(JSON.stringify(appState.mixingReport?.rows || []));
+        appState.mixingForms = [
+          {
+            id: 'mxf_1',
+            formNo: 'MX-01/RGD/11/2026',
+            title: 'Boiler Unit 2 — Floor Furnace (Form #1)',
+            date: new Date().toISOString().slice(0, 10),
+            shift: 'Shift 1 (Pagi)',
+            preparedBy: appState.mixingReport?.preparedBy || 'Ardenata Dwi Prakoso',
+            reviewedBy: appState.mixingReport?.reviewedBy || 'Ryan',
+            rows: baseRows
+          }
+        ];
+        appState.activeMixingFormId = 'mxf_1';
+      }
+      if (!appState.activeMixingFormId || !appState.mixingForms.some(f => f.id === appState.activeMixingFormId)) {
+        appState.activeMixingFormId = appState.mixingForms[0].id;
+      }
+    }
+
+    function getActiveMixingFormObj() {
+      ensureMixingFormsCollection();
+      return appState.mixingForms.find(f => f.id === appState.activeMixingFormId) || appState.mixingForms[0];
+    }
+
+    function syncActiveMixingReportToFormsArray() {
+      const f = getActiveMixingFormObj();
+      if (!f) return;
+      f.preparedBy = appState.mixingReport.preparedBy;
+      f.reviewedBy = appState.mixingReport.reviewedBy;
+      f.rows = JSON.parse(JSON.stringify(appState.mixingReport.rows || []));
+      renderMixingFormsManagerUI();
+    }
+
+    function renderMixingFormsManagerUI() {
+      ensureMixingFormsCollection();
+      const grid = document.getElementById('mxFormsListGrid');
+      const countBadge = document.getElementById('mxFormsCountBadge');
+      const activeForm = getActiveMixingFormObj();
+      if (countBadge) countBadge.textContent = `${appState.mixingForms.length} Form`;
+
+      if (activeForm) {
+        if (document.getElementById('mxf_formNo')) document.getElementById('mxf_formNo').value = activeForm.formNo || '';
+        if (document.getElementById('mxf_title')) document.getElementById('mxf_title').value = activeForm.title || '';
+        if (document.getElementById('mxf_date')) document.getElementById('mxf_date').value = activeForm.date || '';
+        if (document.getElementById('mxf_shift')) document.getElementById('mxf_shift').value = activeForm.shift || 'Shift 1 (Pagi)';
+      }
+
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      appState.mixingForms.forEach((f, idx) => {
+        const isActive = f.id === appState.activeMixingFormId;
+        const totalKg = (f.rows || []).reduce((acc, r) => acc + (Number(r.castableQty) || 0), 0);
+        const card = document.createElement('div');
+        card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2 ${isActive ? 'bg-emerald-950/70 border-emerald-500 ring-1 ring-emerald-400' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}`;
+        card.innerHTML = `
+          <div class="cursor-pointer" onclick="selectMixingForm('${escapeHtml(f.id)}')">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] font-mono font-bold ${isActive ? 'text-emerald-300' : 'text-slate-400'}">${escapeHtml(f.formNo || ('Form #' + (idx+1)))}</span>
+              ${isActive ? '<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-600 text-white">Aktif</span>' : ''}
+            </div>
+            <p class="text-xs font-extrabold text-white truncate mt-0.5">${escapeHtml(f.title || 'Mixing Form')}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(f.date || '-')} • ${escapeHtml(f.shift || '')}</p>
+            <p class="text-[10px] text-emerald-300 font-semibold mt-0.5">${(f.rows || []).length} baris • ${totalKg} Kg</p>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-2 border-t border-white/10">
+            <button type="button" onclick="selectMixingForm('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-700 hover:bg-slate-600 text-white" title="Edit Form">Edit</button>
+            <button type="button" onclick="duplicateMixingFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600/80 hover:bg-indigo-500 text-white" title="Duplicate Form">Duplicate</button>
+            <button type="button" onclick="previewSingleMixingFormPdf('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600/80 hover:bg-blue-500 text-white" title="Lihat PDF Form Ini">PDF</button>
+            <button type="button" onclick="deleteMixingFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white" title="Hapus Form">Hapus</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function selectMixingForm(formId) {
+      ensureMixingFormsCollection();
+      const target = appState.mixingForms.find(f => f.id === formId);
+      if (!target) return;
+      appState.activeMixingFormId = target.id;
+      appState.mixingReport = {
+        preparedBy: target.preparedBy || appState.googleAuth?.name || 'Ardenata Dwi Prakoso',
+        reviewedBy: target.reviewedBy || 'Ryan',
+        rows: JSON.parse(JSON.stringify(target.rows || []))
+      };
+      printAllMixingFormsMode = false;
+      saveAllToStorage(false);
+      renderMixingReportForm();
+    }
+
+    function updateActiveMixingFormMeta(key, val) {
+      const f = getActiveMixingFormObj();
+      if (!f) return;
+      f[key] = val;
+      saveAllToStorage(false);
+      renderMixingFormsManagerUI();
+    }
+
+    function createNewMixingForm() {
+      ensureMixingFormsCollection();
+      const nextNum = appState.mixingForms.length + 1;
+      const today = new Date().toISOString().slice(0, 10);
+      const newForm = {
+        id: 'mxf_' + Date.now(),
+        formNo: `MX-${String(nextNum).padStart(2, '0')}/RGD/11/2026`,
+        title: `Boiler Unit 2 — Mixing Form #${nextNum}`,
+        date: today,
+        shift: nextNum % 2 === 0 ? 'Shift 1 (Siang)' : 'Shift 1 (Pagi)',
+        preparedBy: appState.googleAuth?.name || appState.mixingReport?.preparedBy || 'Supervisor RGD',
+        reviewedBy: appState.mixingReport?.reviewedBy || 'Ryan',
+        rows: [
+          {
+            id: 'mx_' + Date.now(),
+            date: today,
+            time: new Date().toTimeString().slice(0, 5),
+            materialName: 'SR FLO Type R',
+            dryMixTime: 3,
+            wetMixTime: 5,
+            castableQty: 1500,
+            castableUnit: 'Kg',
+            waterLitre: 165,
+            waterPercent: 11.0,
+            waterPh: 7.1,
+            tempWater: 26,
+            tempAmbient: 31
+          }
+        ]
+      };
+      appState.mixingForms.push(newForm);
+      selectMixingForm(newForm.id);
+      showToast(`Form Mixing baru (${newForm.formNo}) berhasil dibuat!`, 'success');
+    }
+
+    function duplicateActiveMixingForm() {
+      duplicateMixingFormById(appState.activeMixingFormId);
+    }
+
+    function duplicateMixingFormById(formId) {
+      ensureMixingFormsCollection();
+      const src = appState.mixingForms.find(f => f.id === formId);
+      if (!src) return;
+      const nextNum = appState.mixingForms.length + 1;
+      const copy = JSON.parse(JSON.stringify(src));
+      copy.id = 'mxf_' + Date.now();
+      copy.formNo = `MX-${String(nextNum).padStart(2, '0')}/RGD/11/2026`;
+      copy.title = `${src.title.replace(/\s*\(Copy.*\)$/i, '')} (Copy #${nextNum})`;
+      copy.rows = (copy.rows || []).map((r, i) => ({ ...r, id: 'mx_cp_' + Date.now() + '_' + i }));
+      appState.mixingForms.push(copy);
+      selectMixingForm(copy.id);
+      showToast(`Form berhasil diduplikasi menjadi ${copy.formNo}!`, 'success');
+    }
+
+    function deleteMixingFormById(formId) {
+      ensureMixingFormsCollection();
+      if (appState.mixingForms.length <= 1) {
+        showToast('Minimal harus ada 1 Form Daily Mixing Report!', 'error');
+        return;
+      }
+      appState.mixingForms = appState.mixingForms.filter(f => f.id !== formId);
+      if (appState.activeMixingFormId === formId) {
+        selectMixingForm(appState.mixingForms[0].id);
+      } else {
+        saveAllToStorage(false);
+        renderMixingFormsManagerUI();
+      }
+      showToast('Form Mixing Report berhasil dihapus.', 'info');
+    }
+
+    function previewSingleMixingFormPdf(formId) {
+      selectMixingForm(formId);
+      printAllMixingFormsMode = false;
+      openPreviewFor('mixing', 'filled');
+    }
+
+    function previewAllMixingFormsPdf() {
+      syncActiveMixingReportToFormsArray();
+      printAllMixingFormsMode = true;
+      openPreviewFor('mixing', 'filled', true);
+      showToast(`Menampilkan seluruh ${appState.mixingForms.length} Form Mixing Report siap cetak PDF!`, 'success');
+    }
+
+    // ============================================================
+    // MODULE 10 JS: MENU PEKERJA UNTUK SUPERVISOR MITRA (RGD)
+    // ============================================================
+    let supAbsenStream = null;
+    let supAbsenUploadedUrl = '';
+    let supWorkerTempPhoto = '';
+    let supWorkerTempCert = '';
+
+    function renderSupPekerjaModule() {
+      ensureAdminCollections();
+      const sel = document.getElementById('supWorkerSelect');
+      if (sel) {
+        sel.innerHTML = appState.workers.map(w => `<option value="${escapeHtml(w.id)}">${escapeHtml(w.name)} (${escapeHtml(w.id)} — ${escapeHtml(w.role)})</option>`).join('');
+      }
+      const locEl = document.getElementById('supLocName');
+      if (locEl) locEl.textContent = appState.geofence?.areaName || 'Area Proyek Refractory, Bekasi';
+      const now = new Date();
+      const tsEl = document.getElementById('supTsText');
+      if (tsEl) tsEl.textContent = `${now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })} WIB`;
+      onSupWorkerChange();
+      renderSupAbsenHistory();
+      startSupAbsenCamera(true);
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function switchSupPekerjaSubTab(subKey) {
+      const vAbs = document.getElementById('supPekerjaView-absen');
+      const vFrm = document.getElementById('supPekerjaView-form');
+      const bAbs = document.getElementById('supSubBtn-absen');
+      const bFrm = document.getElementById('supSubBtn-form');
+      if (vAbs) vAbs.classList.toggle('hidden', subKey !== 'absen');
+      if (vFrm) vFrm.classList.toggle('hidden', subKey !== 'form');
+      if (bAbs) {
+        bAbs.className = subKey === 'absen'
+          ? 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+          : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
+      if (bFrm) {
+        bFrm.className = subKey === 'form'
+          ? 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow flex items-center gap-1.5 transition'
+          : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
+      if (subKey === 'absen') startSupAbsenCamera(true);
+      else stopSupAbsenCamera();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function onSupWorkerChange() {
+      const sel = document.getElementById('supWorkerSelect');
+      const img = document.getElementById('supAbsenPreview');
+      const w = appState.workers.find(x => x.id === sel?.value) || appState.workers[0];
+      if (img && w && !supAbsenUploadedUrl) img.src = w.photoUrl;
+    }
+
+    async function startSupAbsenCamera(isSilent = false) {
+      if (supAbsenStream) return;
+      const video = document.getElementById('supAbsenVideo');
+      const img = document.getElementById('supAbsenPreview');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      try {
+        supAbsenStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        if (video) { video.srcObject = supAbsenStream; video.classList.remove('hidden'); }
+        if (img) img.classList.add('hidden');
+        if (!isSilent) showToast('Kamera absensi aktif!', 'success');
+      } catch (err) {
+        if (!isSilent) showToast('Kamera tidak tersedia di pratinjau. Gunakan Upload Foto Selfie.', 'info');
+      }
+    }
+
+    function stopSupAbsenCamera() {
+      if (supAbsenStream) {
+        supAbsenStream.getTracks().forEach(t => t.stop());
+        supAbsenStream = null;
+      }
+      const video = document.getElementById('supAbsenVideo');
+      const img = document.getElementById('supAbsenPreview');
+      if (video) video.classList.add('hidden');
+      if (img) img.classList.remove('hidden');
+    }
+
+    function uploadSupAbsenPhoto(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      stopSupAbsenCamera();
+      compressImageDataUrl(file, (url) => {
+        supAbsenUploadedUrl = url;
+        const img = document.getElementById('supAbsenPreview');
+        if (img) img.src = url;
+        showToast('Foto selfie siap untuk absensi!', 'success');
+      });
+      event.target.value = '';
+    }
+
+    function submitSupervisorAbsen() {
+      const sel = document.getElementById('supWorkerSelect');
+      const w = appState.workers.find(x => x.id === sel?.value) || appState.workers[0];
+      if (!w) return;
+      const type = document.getElementById('supAbsenType')?.value || 'Masuk';
+      const video = document.getElementById('supAbsenVideo');
+      let finalPhoto = supAbsenUploadedUrl || w.photoUrl;
+      if (supAbsenStream && video && !video.classList.contains('hidden')) {
+        const c = document.createElement('canvas');
+        c.width = video.videoWidth || 480;
+        c.height = video.videoHeight || 640;
+        c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+        finalPhoto = c.toDataURL('image/jpeg', 0.85);
+      }
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' WIB';
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const entry = {
+        id: 'att_' + Date.now(),
+        workerId: w.id,
+        name: w.name,
+        role: w.role,
+        time: type === 'Pulang' ? `${timeStr} (Pulang)` : timeStr,
+        date: dateStr,
+        lat: (appState.geofence?.lat || -6.2383) + (Math.random() - 0.5) * 0.0008,
+        lng: (appState.geofence?.lng || 106.9756) + (Math.random() - 0.5) * 0.0008,
+        accuracy: 4,
+        status: 'Hadir',
+        verifiedGps: true,
+        photoMatch: true,
+        photoUrl: finalPhoto
+      };
+      const idx = appState.attendanceLogs.findIndex(l => l.workerId === w.id);
+      if (idx >= 0) appState.attendanceLogs[idx] = entry;
+      else appState.attendanceLogs.unshift(entry);
+      supAbsenUploadedUrl = '';
+      saveAllToStorage(false);
+      renderSupAbsenHistory();
+      showToast(`Absensi ${type} untuk ${w.name} berhasil dicatat!`, 'success');
+    }
+
+    function renderSupAbsenHistory() {
+      const box = document.getElementById('supAbsenHistoryList');
+      if (!box) return;
+      box.innerHTML = appState.attendanceLogs.slice(0, 6).map(l => `
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img src="${l.photoUrl}" alt="${escapeHtml(l.name)}" class="w-9 h-9 rounded-lg object-cover shrink-0" />
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-white truncate">${escapeHtml(l.name)}</p>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(l.role)}</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-[11px] font-bold text-slate-200">${escapeHtml(l.time)}</p>
+            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${l.status === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-amber-500/20 text-amber-300'}">${escapeHtml(l.status)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleSupWorkerPhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      compressImageDataUrl(file, (url) => {
+        supWorkerTempPhoto = url;
+        const prev = document.getElementById('sp_photoPreview');
+        const icon = document.getElementById('sp_photoIcon');
+        const lbl = document.getElementById('sp_photoLabel');
+        if (prev) { prev.src = url; prev.classList.remove('hidden'); }
+        if (icon) icon.classList.add('hidden');
+        if (lbl) lbl.textContent = `Foto dipilih: ${file.name}`;
+      });
+      event.target.value = '';
+    }
+
+    function handleSupWorkerCertUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      supWorkerTempCert = file.name;
+      const lbl = document.getElementById('sp_certLabel');
+      if (lbl) lbl.textContent = `Sertifikat K3 terlampir: ${file.name}`;
+      showToast(`Sertifikat "${file.name}" berhasil dilampirkan!`, 'success');
+      event.target.value = '';
+    }
+
+    function saveSupWorkerRegistration() {
+      const name = (document.getElementById('sp_name')?.value || '').trim();
+      const phone = (document.getElementById('sp_phone')?.value || '').trim();
+      const nik = (document.getElementById('sp_nik')?.value || '').trim();
+      const role = document.getElementById('sp_role')?.value || '';
+      if (!name || !phone || !role) {
+        showToast('Nama Lengkap, No. Telepon, dan Posisi Refractory wajib diisi!', 'error');
+        return;
+      }
+      const newId = `REF-${402 + appState.workers.length}`;
+      appState.workers.unshift({
+        id: newId,
+        name,
+        phone,
+        nik: nik || '3216000000000000',
+        role,
+        project: 'Boiler Unit 2',
+        status: 'Active',
+        validThru: 'Dec 2027',
+        certName: supWorkerTempCert || 'Sertifikat_K3_Terlampir.pdf',
+        photoUrl: supWorkerTempPhoto || createWorkerAvatarSvg(name, '#0284c7', '#facc15')
+      });
+      saveAllToStorage(false);
+      resetSupWorkerForm();
+      renderSupPekerjaModule();
+      showToast(`Pekerja ${name} (${newId} • ${phone}) tersimpan & terintegrasi ke ID Card Admin!`, 'success');
+    }
+
+    function resetSupWorkerForm() {
+      ['sp_name', 'sp_phone', 'sp_nik', 'sp_role'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      supWorkerTempPhoto = '';
+      supWorkerTempCert = '';
+      const prev = document.getElementById('sp_photoPreview');
+      const icon = document.getElementById('sp_photoIcon');
+      if (prev) { prev.src = ''; prev.classList.add('hidden'); }
+      if (icon) icon.classList.remove('hidden');
+      if (document.getElementById('sp_photoLabel')) document.getElementById('sp_photoLabel').textContent = 'Ambil foto lewat kamera atau pilih file JPG/PNG';
+      if (document.getElementById('sp_certLabel')) document.getElementById('sp_certLabel').textContent = 'Klik untuk pilih Sertifikat K3 (PDF)';
+    }
+
+    // ============================================================
+    // MULTI-FORM MANAGER JS: DAILY REPORT, MATERIAL & CASTABLE
+    // ============================================================
+    let isSwitchingFormLock = false;
+
+    function ensureAllReportFormCollections() {
+      if (!Array.isArray(appState.dailyForms) || appState.dailyForms.length === 0) {
+        appState.dailyForms = [{
+          id: 'drf_1',
+          data: JSON.parse(JSON.stringify(appState.dailyReport))
+        }];
+        appState.activeDailyFormId = 'drf_1';
+      }
+      if (!appState.activeDailyFormId || !appState.dailyForms.some(f => f.id === appState.activeDailyFormId)) {
+        appState.activeDailyFormId = appState.dailyForms[0].id;
+      }
+
+      if (!Array.isArray(appState.materialForms) || appState.materialForms.length === 0) {
+        appState.materialForms = [{
+          id: 'mrf_1',
+          data: JSON.parse(JSON.stringify(appState.materialReport))
+        }];
+        appState.activeMaterialFormId = 'mrf_1';
+      }
+      if (!appState.activeMaterialFormId || !appState.materialForms.some(f => f.id === appState.activeMaterialFormId)) {
+        appState.activeMaterialFormId = appState.materialForms[0].id;
+      }
+
+      if (!Array.isArray(appState.castableForms) || appState.castableForms.length === 0) {
+        appState.castableForms = [{
+          id: 'icf_1',
+          data: JSON.parse(JSON.stringify(appState.castableReport))
+        }];
+        appState.activeCastableFormId = 'icf_1';
+      }
+      if (!appState.activeCastableFormId || !appState.castableForms.some(f => f.id === appState.activeCastableFormId)) {
+        appState.activeCastableFormId = appState.castableForms[0].id;
+      }
+    }
+
+    function syncAllActiveReportsToFormArrays() {
+      if (isSwitchingFormLock) return;
+      ensureAllReportFormCollections();
+      const drF = appState.dailyForms.find(f => f.id === appState.activeDailyFormId);
+      if (drF) drF.data = JSON.parse(JSON.stringify(appState.dailyReport));
+
+      const mrF = appState.materialForms.find(f => f.id === appState.activeMaterialFormId);
+      if (mrF) mrF.data = JSON.parse(JSON.stringify(appState.materialReport));
+
+      const icF = appState.castableForms.find(f => f.id === appState.activeCastableFormId);
+      if (icF) icF.data = JSON.parse(JSON.stringify(appState.castableReport));
+
+      if (typeof renderDailyFormsManagerUI === 'function' && activeTab === 'daily') renderDailyFormsManagerUI();
+      if (typeof renderMaterialFormsManagerUI === 'function' && activeTab === 'material') renderMaterialFormsManagerUI();
+      if (typeof renderCastableFormsManagerUI === 'function' && activeTab === 'castable') renderCastableFormsManagerUI();
+    }
+
+    // --- 1. DAILY REPORT HARIAN MULTI-FORM ---
+    function renderDailyFormsManagerUI() {
+      ensureAllReportFormCollections();
+      const grid = document.getElementById('drFormsListGrid');
+      const badge = document.getElementById('drFormsCountBadge');
+      if (badge) badge.textContent = `${appState.dailyForms.length} Form`;
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      appState.dailyForms.forEach((f, idx) => {
+        const d = f.data || {};
+        const isActive = f.id === appState.activeDailyFormId;
+        const mp = (d.personnel || []).reduce((a, b) => a + (Number(b.count) || 0), 0);
+        const card = document.createElement('div');
+        card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2 ${isActive ? 'bg-orange-950/60 border-orange-500 ring-1 ring-orange-400' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}`;
+        card.innerHTML = `
+          <div class="cursor-pointer" onclick="selectDailyForm('${escapeHtml(f.id)}')">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] font-mono font-bold ${isActive ? 'text-orange-300' : 'text-slate-400'}">${escapeHtml(d.no || ('Form #' + (idx+1)))}</span>
+              ${isActive ? '<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-orange-600 text-white">Aktif</span>' : ''}
+            </div>
+            <p class="text-xs font-extrabold text-white truncate mt-0.5">${escapeHtml(d.projectName || 'Daily Report')}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(d.date || '-')} • Shift ${escapeHtml(d.shift || '1')}</p>
+            <p class="text-[10px] text-orange-300 font-semibold mt-0.5">${mp} MP • ${(d.activities || []).length} Aktivitas</p>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-2 border-t border-white/10">
+            <button type="button" onclick="selectDailyForm('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-700 hover:bg-slate-600 text-white">Edit</button>
+            <button type="button" onclick="duplicateDailyFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600/80 hover:bg-indigo-500 text-white">Duplicate</button>
+            <button type="button" onclick="previewSingleDailyFormPdf('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600/80 hover:bg-blue-500 text-white">PDF</button>
+            <button type="button" onclick="deleteDailyFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white">Hapus</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectDailyForm(formId) {
+      ensureAllReportFormCollections();
+      const target = appState.dailyForms.find(f => f.id === formId);
+      if (!target) return;
+      isSwitchingFormLock = true;
+      appState.activeDailyFormId = target.id;
+      appState.dailyReport = JSON.parse(JSON.stringify(target.data));
+      printAllDailyFormsMode = false;
+      isSwitchingFormLock = false;
+      saveAllToStorage(false);
+      renderDailyReportForm();
+    }
+
+    function createNewDailyForm() {
+      ensureAllReportFormCollections();
+      const n = appState.dailyForms.length + 1;
+      const today = new Date().toISOString().slice(0, 10);
+      const base = getDefaultState().dailyReport;
+      base.no = `${String(n).padStart(2, '0')}/RGD/11/2026`;
+      base.date = today;
+      base.dateFormatted = formatEnglishDate(today);
+      base.reportedBy = appState.googleAuth?.name || base.reportedBy;
+      base.activities = [{ id: 'a_' + Date.now(), description: 'Toolbox Meeting & Persiapan Area Kerja', percentage: 100, unit: '%' }];
+      const newForm = { id: 'drf_' + Date.now(), data: base };
+      appState.dailyForms.push(newForm);
+      selectDailyForm(newForm.id);
+      showToast(`Form Daily Report baru (${base.no}) berhasil dibuat!`, 'success');
+    }
+
+    function duplicateActiveDailyForm() { duplicateDailyFormById(appState.activeDailyFormId); }
+
+    function duplicateDailyFormById(formId) {
+      ensureAllReportFormCollections();
+      const src = appState.dailyForms.find(f => f.id === formId);
+      if (!src) return;
+      const n = appState.dailyForms.length + 1;
+      const copyData = JSON.parse(JSON.stringify(src.data));
+      copyData.no = `${String(n).padStart(2, '0')}/RGD/11/2026`;
+      const newForm = { id: 'drf_' + Date.now(), data: copyData };
+      appState.dailyForms.push(newForm);
+      selectDailyForm(newForm.id);
+      showToast(`Daily Report diduplikasi menjadi ${copyData.no}!`, 'success');
+    }
+
+    function deleteDailyFormById(formId) {
+      ensureAllReportFormCollections();
+      if (appState.dailyForms.length <= 1) {
+        showToast('Minimal harus ada 1 Form Daily Report Harian!', 'error');
+        return;
+      }
+      appState.dailyForms = appState.dailyForms.filter(f => f.id !== formId);
+      if (appState.activeDailyFormId === formId) selectDailyForm(appState.dailyForms[0].id);
+      else { saveAllToStorage(false); renderDailyFormsManagerUI(); }
+      showToast('Form Daily Report berhasil dihapus.', 'info');
+    }
+
+    function previewSingleDailyFormPdf(formId) {
+      selectDailyForm(formId);
+      openPreviewFor('daily', 'filled', false);
+    }
+
+    function previewAllDailyFormsPdf() {
+      syncAllActiveReportsToFormArrays();
+      printAllDailyFormsMode = true;
+      openPreviewFor('daily', 'filled', true);
+      showToast(`Menampilkan semua ${appState.dailyForms.length} Form Daily Report siap cetak PDF!`, 'success');
+    }
+
+    // --- 2. DAILY REPORT MATERIAL MULTI-FORM ---
+    function renderMaterialFormsManagerUI() {
+      ensureAllReportFormCollections();
+      const grid = document.getElementById('mrFormsListGrid');
+      const badge = document.getElementById('mrFormsCountBadge');
+      if (badge) badge.textContent = `${appState.materialForms.length} Form`;
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      appState.materialForms.forEach((f, idx) => {
+        const d = f.data || {};
+        const isActive = f.id === appState.activeMaterialFormId;
+        const card = document.createElement('div');
+        card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2 ${isActive ? 'bg-sky-950/70 border-sky-500 ring-1 ring-sky-400' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}`;
+        card.innerHTML = `
+          <div class="cursor-pointer" onclick="selectMaterialForm('${escapeHtml(f.id)}')">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] font-mono font-bold ${isActive ? 'text-sky-300' : 'text-slate-400'}">MAT-${String(idx+1).padStart(2,'0')}</span>
+              ${isActive ? '<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-600 text-white">Aktif</span>' : ''}
+            </div>
+            <p class="text-xs font-extrabold text-white truncate mt-0.5">${escapeHtml(d.projectTitle || 'Resume Material')}</p>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">${escapeHtml(d.customerTitle || '-')}</p>
+            <p class="text-[10px] text-sky-300 font-semibold mt-0.5">${(d.items || []).length} Material • ${escapeHtml(d.verifyDate || '-')}</p>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-2 border-t border-white/10">
+            <button type="button" onclick="selectMaterialForm('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-700 hover:bg-slate-600 text-white">Edit</button>
+            <button type="button" onclick="duplicateMaterialFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600/80 hover:bg-indigo-500 text-white">Duplicate</button>
+            <button type="button" onclick="previewSingleMaterialFormPdf('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600/80 hover:bg-blue-500 text-white">PDF</button>
+            <button type="button" onclick="deleteMaterialFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white">Hapus</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectMaterialForm(formId) {
+      ensureAllReportFormCollections();
+      const target = appState.materialForms.find(f => f.id === formId);
+      if (!target) return;
+      isSwitchingFormLock = true;
+      appState.activeMaterialFormId = target.id;
+      appState.materialReport = JSON.parse(JSON.stringify(target.data));
+      printAllMaterialFormsMode = false;
+      isSwitchingFormLock = false;
+      saveAllToStorage(false);
+      renderMaterialReportForm();
+    }
+
+    function createNewMaterialForm() {
+      ensureAllReportFormCollections();
+      const n = appState.materialForms.length + 1;
+      const base = getDefaultState().materialReport;
+      base.projectTitle = `PERBAIKAN REFRACTORY (FORM #${n})`;
+      base.verifyDate = new Date().toISOString().slice(0, 10);
+      base.items = base.items.slice(0, 5).map(it => ({ ...it, days: [0,0,0,0,0,0,0,0] }));
+      const newForm = { id: 'mrf_' + Date.now(), data: base };
+      appState.materialForms.push(newForm);
+      selectMaterialForm(newForm.id);
+      showToast(`Form Daily Report Material baru (MAT-${String(n).padStart(2,'0')}) berhasil dibuat!`, 'success');
+    }
+
+    function duplicateActiveMaterialForm() { duplicateMaterialFormById(appState.activeMaterialFormId); }
+
+    function duplicateMaterialFormById(formId) {
+      ensureAllReportFormCollections();
+      const src = appState.materialForms.find(f => f.id === formId);
+      if (!src) return;
+      const n = appState.materialForms.length + 1;
+      const copyData = JSON.parse(JSON.stringify(src.data));
+      copyData.projectTitle = `${copyData.projectTitle.replace(/\s*\(Copy.*\)$/i, '')} (Copy #${n})`;
+      const newForm = { id: 'mrf_' + Date.now(), data: copyData };
+      appState.materialForms.push(newForm);
+      selectMaterialForm(newForm.id);
+      showToast(`Daily Report Material diduplikasi menjadi MAT-${String(n).padStart(2,'0')}!`, 'success');
+    }
+
+    function deleteMaterialFormById(formId) {
+      ensureAllReportFormCollections();
+      if (appState.materialForms.length <= 1) {
+        showToast('Minimal harus ada 1 Form Daily Report Material!', 'error');
+        return;
+      }
+      appState.materialForms = appState.materialForms.filter(f => f.id !== formId);
+      if (appState.activeMaterialFormId === formId) selectMaterialForm(appState.materialForms[0].id);
+      else { saveAllToStorage(false); renderMaterialFormsManagerUI(); }
+      showToast('Form Daily Report Material berhasil dihapus.', 'info');
+    }
+
+    function previewSingleMaterialFormPdf(formId) {
+      selectMaterialForm(formId);
+      openPreviewFor('material', 'filled', false);
+    }
+
+    function previewAllMaterialFormsPdf() {
+      syncAllActiveReportsToFormArrays();
+      printAllMaterialFormsMode = true;
+      openPreviewFor('material', 'filled', true);
+      showToast(`Menampilkan semua ${appState.materialForms.length} Form Material Report siap cetak PDF!`, 'success');
+    }
+
+    // --- 3. REPORT INSTALLED CASTABLE MULTI-FORM ---
+    function renderCastableFormsManagerUI() {
+      ensureAllReportFormCollections();
+      const grid = document.getElementById('icFormsListGrid');
+      const badge = document.getElementById('icFormsCountBadge');
+      if (badge) badge.textContent = `${appState.castableForms.length} Form`;
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      appState.castableForms.forEach((f, idx) => {
+        const d = f.data || {};
+        const isActive = f.id === appState.activeCastableFormId;
+        const card = document.createElement('div');
+        card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2 ${isActive ? 'bg-purple-950/70 border-purple-500 ring-1 ring-purple-400' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}`;
+        card.innerHTML = `
+          <div class="cursor-pointer" onclick="selectCastableForm('${escapeHtml(f.id)}')">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] font-mono font-bold ${isActive ? 'text-purple-300' : 'text-slate-400'}">${escapeHtml(d.reportNo || ('CAS-' + (idx+1)))}</span>
+              ${isActive ? '<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-purple-600 text-white">Aktif</span>' : ''}
+            </div>
+            <p class="text-xs font-extrabold text-white truncate mt-0.5">${escapeHtml(d.projectDesc || 'Installed Castable')}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(d.date || '-')} • ${escapeHtml(d.shift || '')} • ${escapeHtml(d.applicationMethod || '')}</p>
+            <p class="text-[10px] text-purple-300 font-semibold mt-0.5">${(d.batches || []).length} Batch • ${escapeHtml(d.location || '-')}</p>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-2 border-t border-white/10">
+            <button type="button" onclick="selectCastableForm('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-700 hover:bg-slate-600 text-white">Edit</button>
+            <button type="button" onclick="duplicateCastableFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600/80 hover:bg-indigo-500 text-white">Duplicate</button>
+            <button type="button" onclick="previewSingleCastableFormPdf('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600/80 hover:bg-blue-500 text-white">PDF</button>
+            <button type="button" onclick="deleteCastableFormById('${escapeHtml(f.id)}')" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white">Hapus</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectCastableForm(formId) {
+      ensureAllReportFormCollections();
+      const target = appState.castableForms.find(f => f.id === formId);
+      if (!target) return;
+      isSwitchingFormLock = true;
+      appState.activeCastableFormId = target.id;
+      appState.castableReport = JSON.parse(JSON.stringify(target.data));
+      printAllCastableFormsMode = false;
+      isSwitchingFormLock = false;
+      saveAllToStorage(false);
+      renderCastableReportForm();
+    }
+
+    function createNewCastableForm() {
+      ensureAllReportFormCollections();
+      const n = appState.castableForms.length + 1;
+      const base = getDefaultState().castableReport;
+      base.reportNo = `REF/L/2120/CAS/${String(n).padStart(4, '0')}`;
+      base.date = new Date().toISOString().slice(0, 10);
+      base.preparedBy = (appState.googleAuth?.name || base.preparedBy).toUpperCase();
+      base.batches = base.batches.slice(0, 2);
+      const newForm = { id: 'icf_' + Date.now(), data: base };
+      appState.castableForms.push(newForm);
+      selectCastableForm(newForm.id);
+      showToast(`Form Installed Castable baru (${base.reportNo}) berhasil dibuat!`, 'success');
+    }
+
+    function duplicateActiveCastableForm() { duplicateCastableFormById(appState.activeCastableFormId); }
+
+    function duplicateCastableFormById(formId) {
+      ensureAllReportFormCollections();
+      const src = appState.castableForms.find(f => f.id === formId);
+      if (!src) return;
+      const n = appState.castableForms.length + 1;
+      const copyData = JSON.parse(JSON.stringify(src.data));
+      copyData.reportNo = `REF/L/2120/CAS/${String(n).padStart(4, '0')}`;
+      const newForm = { id: 'icf_' + Date.now(), data: copyData };
+      appState.castableForms.push(newForm);
+      selectCastableForm(newForm.id);
+      showToast(`Installed Castable diduplikasi menjadi ${copyData.reportNo}!`, 'success');
+    }
+
+    function deleteCastableFormById(formId) {
+      ensureAllReportFormCollections();
+      if (appState.castableForms.length <= 1) {
+        showToast('Minimal harus ada 1 Form Report Installed Castable!', 'error');
+        return;
+      }
+      appState.castableForms = appState.castableForms.filter(f => f.id !== formId);
+      if (appState.activeCastableFormId === formId) selectCastableForm(appState.castableForms[0].id);
+      else { saveAllToStorage(false); renderCastableFormsManagerUI(); }
+      showToast('Form Installed Castable berhasil dihapus.', 'info');
+    }
+
+    function previewSingleCastableFormPdf(formId) {
+      selectCastableForm(formId);
+      openPreviewFor('castable', 'filled', false);
+    }
+
+    function previewAllCastableFormsPdf() {
+      syncAllActiveReportsToFormArrays();
+      printAllCastableFormsMode = true;
+      openPreviewFor('castable', 'filled', true);
+      showToast(`Menampilkan semua ${appState.castableForms.length} Form Installed Castable siap cetak PDF!`, 'success');
     }
 
     function renderAllModules() {
@@ -7397,18 +9213,40 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evtName => {
+      window.addEventListener(evtName, recordUserActivity, { passive: true });
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       loadFromStorage();
       ensureAdminCollections();
       renderAllModules();
-      // Pertama buka aplikasi: selalu tampilkan Menu Login terlebih dahulu, bukan Dashboard
-      sessionAuthenticated = false;
-      const shell = document.getElementById('appDashboardShell');
-      if (shell) {
-        shell.classList.add('hidden');
-        shell.classList.remove('flex');
+
+      const storedSession = readStoredSession();
+      const isSessionValid = Boolean(
+        storedSession &&
+        storedSession.authenticated &&
+        appState.googleAuth &&
+        appState.googleAuth.isLoggedIn &&
+        (Date.now() - (storedSession.lastActivityAt || 0) < IDLE_TIMEOUT_MS)
+      );
+
+      if (isSessionValid) {
+        // Refresh (F5) tetap aktif di menu/tab terakhir selama belum idle 2 menit
+        const restoreTab = isPekerjaRole()
+          ? (storedSession.workerTab || 'absensi')
+          : (storedSession.adminTab || 'daily');
+        completeLoginSession(restoreTab);
+      } else {
+        // Pertama buka aplikasi atau sesi sudah idle >= 2 menit: tampilkan Menu Login
+        sessionAuthenticated = false;
+        clearStoredSession();
+        const shell = document.getElementById('appDashboardShell');
+        const workerShell = document.getElementById('workerDashboardShell');
+        if (shell) { shell.classList.add('hidden'); shell.classList.remove('flex'); }
+        if (workerShell) { workerShell.classList.add('hidden'); workerShell.classList.remove('flex'); }
+        openEnterpriseLoginScreen(true);
       }
-      openEnterpriseLoginScreen(true);
     });
   </script>
 </body>
